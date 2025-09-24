@@ -1,9 +1,9 @@
 <h1 align="center">
   <img src="./Stay_Awake_icon.png" width="256" alt="Stay Awake icon">
-  <br>Stay_Awake
+  <br>Stay_Awake_2
 </h1>
 
-A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Built with Python + tkinter; distributed as PyInstaller **onefile** and **onedir** builds.
+A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Built with C# in Visual Studio Community.
 
 ## What it does
 
@@ -243,3 +243,4 @@ powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -Sta -NonInteractive -Comm
 ```
 
 > The official CI workflow under `.github/workflows/` automates all of this on creating a new Release.
+
