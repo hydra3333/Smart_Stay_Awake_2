@@ -1,0 +1,25 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build outputs
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+TestResults/
+*.nupkg
+
+# Publish outputs
+dist/
+artifacts/
+
+# Rider / VS Code
+.idea/
+.vscode/
+
+# Others
+*.cache
+*.pdb
+*.snupkg
