@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36511.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stay_Awake_2", "src\Stay_Awake_2.csproj", "{0758E005-8285-6027-64AC-96BE441301CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0758E005-8285-6027-64AC-96BE441301CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0758E005-8285-6027-64AC-96BE441301CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0758E005-8285-6027-64AC-96BE441301CA}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{0758E005-8285-6027-64AC-96BE441301CA}.Release|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {51398D0A-8382-433E-BAE3-5DC565B59BED}
+	EndGlobalSection
+EndGlobal
