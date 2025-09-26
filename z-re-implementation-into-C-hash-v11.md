@@ -1951,3 +1951,25 @@ if (logSetupFailed && SHOW_LOG_FAILURE_MESSAGEBOX)
 **Step-by-step guidance will be provided during Iteration 1 implementation.**
 
 ---
+
+# Appending E - Prerequisite `.NET 8 Windows Desktop Runtime (x64)`
+
+## E.1 Overview
+
+Because this Application is framework-dependent, if the .NET Desktop Runtime is missing then
+the application won’t launch and this code won’t run.
+
+## E.1 Prerequisite 
+
+Prerequisite for a `framework-dependent build`:
+
+This application **requires** the `.NET 8 Windows Desktop Runtime (x64)` to be installed
+on the target system.
+
+If the runtime is missing, Windows will show the `.NET host error` and the application will not start.
+
+To install the `.NET 8 Windows Desktop Runtime (x64)` search for 
+`.NET 8 Desktop Runtime x64` 
+on Microsoft’s website and install the latest 8.x.y or later version.
+
+---
