@@ -46,6 +46,11 @@ namespace Stay_Awake_2
         public static CliOptions Parse(string[] args)
         {
             Trace.WriteLine("Stay_Awake_2: CliParser: Entered CliParser.Parse ...");
+            // Raw, unparsed command line (includes exe path)
+            string rawCommandLine = Environment.CommandLine ?? string.Empty;
+            Trace.WriteLine("Stay_Awake_2: CliParser: Raw command line  : " + rawCommandLine);
+            Trace.WriteLine("Stay_Awake_2: CliParser: Raw arguments only: " + GetRawArgsOnly());
+            //
             try
             {
                 if (args == null) args = Array.Empty<string>();
@@ -300,6 +305,34 @@ namespace Stay_Awake_2
             if (DateTime.TryParse(compressed, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out dt))
                 return dt;
             throw new CliParseException($"Stay_Awake_2: CliParser: --until value '{raw}' could not be parsed as a local 24-hour timestamp (yyyy-M-d H:m:s).");
+        }
+        private static string GetRawArgsOnly()
+        {
+            string raw = Environment.CommandLine ?? string.Empty;
+            raw = raw.Trim();
+
+            if (string.IsNullOrEmpty(raw)) return string.Empty;
+
+            // If exe path is quoted: "C:\path\app.exe" <args>
+            if (raw.StartsWith("\""))
+            {
+                int close = raw.IndexOf('"', 1);
+                if (close >= 0)
+                {
+                    // Skip closing quote and any following whitespace
+                    int start = close + 1;
+                    while (start < raw.Length && char.IsWhiteSpace(raw[start])) start++;
+                    return raw.Substring(start);
+                }
+                return string.Empty; // no closing quote found → no args we can safely extract
+            }
+
+            // Unquoted exe path case: C:\path\app.exe <args>
+            int firstSpace = raw.IndexOf(' ');
+            if (firstSpace < 0) return string.Empty; // no args
+            int begin = firstSpace + 1;
+            while (begin < raw.Length && char.IsWhiteSpace(raw[begin])) begin++;
+            return raw.Substring(begin);
         }
     }
 }
