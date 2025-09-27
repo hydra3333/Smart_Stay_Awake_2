@@ -2,7 +2,6 @@
 // Purpose: Entry point. Initialize WinForms defaults, parse CLI, help, configure tracing, build AppState, run MainForm.
 // NOTE: No single-instance/mutex in v11 plan.
 
-using Microsoft.VisualBasic.Logging;
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -10,7 +9,6 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 
 namespace Stay_Awake_2
 {
