@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Stay_Awake_2": {
+      "commandName": "Project",
+      "commandLineArgs": "--verbose --for 90m --until \"2030-1-2 3:4:5\""
+    }
+  }
+}
