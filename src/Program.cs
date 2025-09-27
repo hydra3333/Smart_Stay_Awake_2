@@ -7,6 +7,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
@@ -119,9 +120,9 @@ namespace Stay_Awake_2
                 // 3) Create AppState (collects version, options, trace flags) (currently unused)
                 AppState mainApplicationState = AppState.Create(opts, enableTrace, logFullPath);
 
-                // 4) Run the MainForm
+                // 4) Run the MainForm (inject application state)
                 Trace.WriteLine("Stay_Awake_2: Main: Starting UI.MainForm ...");
-                Application.Run(new UI.MainForm());
+                Application.Run(new UI.MainForm(mainApplicationState));
                 Trace.WriteLine("Stay_Awake_2: Main: UI.MainForm exited normally.");
                 Trace.WriteLine("Stay_Awake_2: Main: Exiting Program.Main (success).");
             }
