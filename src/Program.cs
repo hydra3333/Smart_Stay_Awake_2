@@ -2,14 +2,14 @@
 // Purpose: Entry point. Initialize WinForms defaults, parse CLI, help, configure tracing, build AppState, run MainForm.
 // NOTE: No single-instance/mutex in v11 plan.
 
+using Microsoft.VisualBasic.Logging;
 using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using System.Reflection;
-using System.Security.Policy;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 
 namespace Stay_Awake_2
 {
@@ -58,7 +58,7 @@ namespace Stay_Awake_2
                 string? logFullPath = null;
 
                 // When Tracing enabled, setup Listeners 
-                Trace.WriteLine("Stay_Awake_2: Main: Start of racing config TRY");
+                Trace.WriteLine("Stay_Awake_2: Main: Start of tracing config TRY");
                 try
                 {
                     Trace.Listeners.Clear(); // always clear first; avoid OutputDebugString noise
@@ -93,7 +93,7 @@ namespace Stay_Awake_2
                         Trace.Listeners.Add(new TextWriterTraceListener(logFullPath));
                         Trace.AutoFlush = true;
                         Trace.WriteLine("==================================================");
-                        Trace.WriteLine($"[Init] {AppConfig.APP_INTERNAL_NAME} start {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                        Trace.WriteLine($"[Init] {AppConfig.APP_INTERNAL_NAME} start {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)}");
                         // Grab version like AppState.Create(...) would
                         var asm = System.Reflection.Assembly.GetEntryAssembly();
                         var ver = asm?.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()?.InformationalVersion
@@ -116,8 +116,8 @@ namespace Stay_Awake_2
                 }
                 Trace.WriteLine("Stay_Awake_2: Main: End of   tracing config TRY");
 
-                // 3) Create AppState (collects version, options, trace flags)
-                AppState state = AppState.Create(opts, enableTrace, logFullPath);
+                // 3) Create AppState (collects version, options, trace flags) (currently unused)
+                AppState _ = AppState.Create(opts, enableTrace, logFullPath);
 
                 // 4) Run the MainForm
                 Trace.WriteLine("Stay_Awake_2: Main: Starting UI.MainForm ...");
@@ -139,11 +139,11 @@ namespace Stay_Awake_2
             }
         }
 
-        private static void ShowHelpAndExit()
         /// <summary>
         /// Prints concise usage/help to Console (if visible) AND shows a MessageBox (for double-clicked runs).
         /// Exits the process with code 0.
         /// </summary>
+        private static void ShowHelpAndExit()
         {
             var sb = new StringBuilder();
             sb.AppendLine("Usage:");
@@ -155,7 +155,8 @@ namespace Stay_Awake_2
             sb.AppendLine();
             sb.AppendLine("  --verbose");
             sb.AppendLine("      Enable detailed trace logging to a file.");
-            sb.AppendLine("      Log file created/overwritten alongside \"Stay_Awake_2.exe\" if that directory is writable.");
+            sb.AppendLine("      Log file created/overwritten alongside \"Stay_Awake_2.exe\" if that directory is writable,");
+            sb.AppendLine("               otherwise in: \"%LocalAppData%\\Stay_Awake_2\\Logs\"");
             sb.AppendLine();
             sb.AppendLine("  --icon PATH");
             sb.AppendLine("      Use a specific image file for the window/tray icon.");
