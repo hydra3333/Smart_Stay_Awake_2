@@ -2,7 +2,18 @@
   "profiles": {
     "Stay_Awake_2": {
       "commandName": "Project",
-      "commandLineArgs": "--verbose --for 90m --until \"2030-1-2 3:4:5\""
+      // "commandLineArgs": "--help"
+      //
+      "commandLineArgs": "--verbose --for 367d"
+      // "commandLineArgs": "--verbose --until \"2030-1-2 3:4:5\""
+      // "commandLineArgs": "--verbose --for 367d --until \"2030-1-2 3:4:5\""
+      // "commandLineArgs": "--icon"
+      //
+      // "commandLineArgs": "--verbose --for 3m"
+      // "commandLineArgs": "--verbose --until \"2025-09-30 0:0:1\""
+      // "commandLineArgs": "--verbose --for 90m --until \"2025-09-30 0:0:2\""
+      //
+      // "commandLineArgs": "--icon \"Stay_Awake_2.png\""
     }
   }
 }
