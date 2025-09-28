@@ -1,15 +1,17 @@
-﻿using System;
+﻿using Stay_Awake_2.Imaging;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
-using Stay_Awake_2.Imaging;
+using static System.Windows.Forms.LinkLabel;
 
 namespace Stay_Awake_2.UI
 {
@@ -85,7 +87,7 @@ namespace Stay_Awake_2.UI
 
         /// <summary>
         /// Full imaging pipeline with very verbose tracing:
-        /// 1) Source selection (priority): CLI --icon → embedded base64 → EXE neighbor → checkerboard fallback
+        /// 1) Source selection (priority): CLI --icon -> embedded base64 -> EXE neighbor -> checkerboard fallback
         /// 2) Square by edge replication (no solid bars), then ensure even pixels (replicate right/bottom if odd)
         /// 3) Window bitmap: ≤512 stays as-is; >512 downscales to 512 (high quality)
         /// 4) Multi-size PNG ICO (16..256): apply to Form and Tray
@@ -97,106 +99,138 @@ namespace Stay_Awake_2.UI
 
             Bitmap? src = null;
             Bitmap? squared = null;
-            Bitmap? evenSquare = null;
             Bitmap? display = null;
             Icon? multiIcon = null;
             MemoryStream? icoStream = null;
 
             try
             {
-                // --------- 1) Source selection (spec v11 order) --------------------
-                // Priority: CLI --icon → embedded base64 → Stay_Awake_icon.* next to EXE → checkerboard
-                Trace.WriteLine("UI.MainForm: Source selection start.");
+                // ------------------------------------------------------------
+                // SOURCE PRIORITY (Spec v11):
+                //   1) CLI --icon PATH
+                //   2) Embedded base64 (if non-empty)
+                //   3) File 'Stay_Awake_icon.*' next to EXE (supported: png/jpg/jpeg/bmp/gif/ico)
+                //   4) Self-generated checkerboard “eye” fallback
+                // ------------------------------------------------------------
+                // Note: we validate extension for disk files against AppConfig.ALLOWED_ICON_EXTENSIONS
+                // ------------------------------------------------------------
 
-                // (1) CLI --icon PATH
+                // 1) CLI --icon PATH
                 if (!string.IsNullOrWhiteSpace(_state.Options?.IconPath))
                 {
-                    Trace.WriteLine($"UI.MainForm: Trying CLI --icon file: {_state.Options.IconPath}");
-                    src = ImageLoader.LoadBitmapFromPath(_state.Options.IconPath);
+                    string path = _state.Options.IconPath!;
+                    string ext = Path.GetExtension(path) ?? string.Empty;
+                    Trace.WriteLine($"UI.MainForm: Candidate source (1/CLI): {path} (ext='{ext}')");
+
+                    if (!AppConfig.ALLOWED_ICON_EXTENSIONS.Contains(ext))
+                        throw new InvalidOperationException(
+                            $"Unsupported --icon extension '{ext}'. Allowed: {string.Join(" ", AppConfig.ALLOWED_ICON_EXTENSIONS)}");
+
+                    src = ImageLoader.LoadBitmapFromPath(path);
+                    Trace.WriteLine($"UI.MainForm: Using CLI image. Size={src.Width}x{src.Height}");
                 }
-                // (2) Embedded base64
+                // 2) Embedded base64
                 else if (Base64ImageLoader.HasEmbeddedImage())
                 {
-                    Trace.WriteLine("UI.MainForm: Using embedded base64 image.");
+                    Trace.WriteLine("UI.MainForm: Using embedded base64 image (2/embedded).");
                     src = Base64ImageLoader.LoadEmbeddedBitmap();
+                    Trace.WriteLine($"UI.MainForm: Embedded image. Size={src.Width}x{src.Height}");
                 }
-                // (3) File named Stay_Awake_icon.* next to EXE (Assets folder)
+                // 3) Next-to-EXE file (Assets optional)
                 else
                 {
+                    Trace.WriteLine("UI.MainForm: Checking EXE-neighbor image (3/next-to-EXE).");
                     string exeDir = AppContext.BaseDirectory;
-                    Trace.WriteLine("UI.MainForm: Searching EXE neighbor 'Assets/Stay_Awake_icon.*' files.");
-                    string[] candidates =
-                    {
-                        Path.Combine(exeDir, "Assets", "Stay_Awake_icon.png"),
-                        Path.Combine(exeDir, "Assets", "Stay_Awake_icon.jpg"),
-                        Path.Combine(exeDir, "Assets", "Stay_Awake_icon.jpeg"),
-                        Path.Combine(exeDir, "Assets", "Stay_Awake_icon.bmp"),
-                        Path.Combine(exeDir, "Assets", "Stay_Awake_icon.gif"),
-                        Path.Combine(exeDir, "Assets", "Stay_Awake_icon.ico"),
-                    };
-                    foreach (var c in candidates)
-                    {
-                        if (File.Exists(c))
-                        {
-                            Trace.WriteLine("UI.MainForm: Found EXE-neighbor asset: " + c);
-                            src = ImageLoader.LoadBitmapFromPath(c);
-                            break;
-                        }
-                    }
 
-                    // (4) Synthetic checkerboard if nothing else
-                    if (src == null)
+                    // Prefer next-to-EXE (root) first, then ./Assets as a courtesy
+                    var probeList = new List<string>();
+                    foreach (var ext in AppConfig.ALLOWED_ICON_EXTENSIONS)
+                        probeList.Add(Path.Combine(exeDir, $"Stay_Awake_icon{ext}"));
+                    foreach (var ext in AppConfig.ALLOWED_ICON_EXTENSIONS)
+                        probeList.Add(Path.Combine(exeDir, "Assets", $"Stay_Awake_icon{ext}"));
+
+                    string? found = probeList.FirstOrDefault(File.Exists);
+                    if (found != null)
                     {
-                        Trace.WriteLine("UI.MainForm: No CLI/embedded/asset image found; using synthetic checkerboard fallback.");
-                        src = ImageLoader.CreateFallbackBitmap(160);
+                        string ext = Path.GetExtension(found) ?? string.Empty;
+                        Trace.WriteLine($"UI.MainForm: Found EXE-neighbor: {found} (ext='{ext}')");
+                        if (!AppConfig.ALLOWED_ICON_EXTENSIONS.Contains(ext))
+                            throw new InvalidOperationException(
+                                $"Neighbor image extension '{ext}' not allowed. Allowed: {string.Join(" ", AppConfig.ALLOWED_ICON_EXTENSIONS)}");
+
+                        src = ImageLoader.LoadBitmapFromPath(found);
+                        Trace.WriteLine($"UI.MainForm: Using EXE-neighbor image. Size={src.Width}x{src.Height}");
+                    }
+                    else
+                    {
+                        // 4) Self-generated checkerboard “eye” fallback
+                        Trace.WriteLine("UI.MainForm: No disk/embedded image found; using synthetic fallback (4/checkerboard).");
+                        src = FallbackImageFactory.CreateEyeOfHorusBitmap(256);
+                        Trace.WriteLine($"UI.MainForm: Fallback synthetic. Size={src.Width}x{src.Height}");
                     }
                 }
 
-                Trace.WriteLine($"UI.MainForm: Source image: {src.Width}x{src.Height}");
-
-                // --------- 2) Square (edge replication) + enforce even pixels -------
+                // --------- Squaring (edge replication) -----------------------------
+                Trace.WriteLine($"UI.MainForm: Source BEFORE square: {src.Width}x{src.Height}");
                 squared = ImageSquareReplicator.MakeSquareByEdgeReplication(src);
-                Trace.WriteLine($"UI.MainForm: After square (replication): {squared.Width}x{squared.Height}");
+                Trace.WriteLine($"UI.MainForm: AFTER square:        {squared.Width}x{squared.Height}");
 
-                // If odd, replicate one right column and one bottom row to make it even-sized
+                // --------- Ensure even dimensions (spec requirement) ---------------
+                // If odd, replicate one more row/col (right/bottom) to make even
                 if ((squared.Width % 2) != 0 || (squared.Height % 2) != 0)
                 {
-                    Trace.WriteLine("UI.MainForm: Even-enforcement needed (odd dimension). Replicating right & bottom edges by +1px.");
-                    evenSquare = AddRightAndBottomReplication(squared);
-                    Trace.WriteLine($"UI.MainForm: After even-enforcement: {evenSquare.Width}x{evenSquare.Height}");
-                }
-                else
-                {
-                    evenSquare = new Bitmap(squared);
-                    Trace.WriteLine("UI.MainForm: Already even-sized; cloned squared image.");
+                    Trace.WriteLine("UI.MainForm: Squared image has odd dimension; applying +1 replicate to make even.");
+                    using var tmp = squared;
+                    int newSize = Math.Max(squared.Width, squared.Height);
+                    var even = new Bitmap(newSize + (newSize % 2 == 0 ? 0 : 1), newSize + (newSize % 2 == 0 ? 0 : 1));
+                    using (var g = Graphics.FromImage(even))
+                    {
+                        g.Clear(Color.Transparent);
+                        g.DrawImage(tmp, 0, 0);
+                    }
+                    // replicate rightmost column if needed
+                    if ((even.Width % 2) != 0)
+                    {
+                        for (int y = 0; y < even.Height; y++)
+                            even.SetPixel(even.Width - 1, y, even.GetPixel(even.Width - 2, y));
+                    }
+                    // replicate bottom row if needed
+                    if ((even.Height % 2) != 0)
+                    {
+                        for (int x = 0; x < even.Width; x++)
+                            even.SetPixel(x, even.Height - 1, even.GetPixel(x, even.Height - 2));
+                    }
+                    squared = even;
+                    Trace.WriteLine($"UI.MainForm: AFTER even-fix:      {squared.Width}x{squared.Height}");
                 }
 
-                // --------- 3) Window image (≤512 keep, >512 downscale to 512) ------
-                const int MAX_EDGE = 512; // spec knob (could be AppConfig.WINDOW_MAX_IMAGE_EDGE_PX)
-                if (evenSquare.Width > MAX_EDGE) // (square, so width==height)
-                {
-                    Trace.WriteLine($"UI.MainForm: Window image too large ({evenSquare.Width}); downscaling to {MAX_EDGE}.");
-                    display = ImageSquareReplicator.ResizeSquare(evenSquare, MAX_EDGE);
-                }
-                else
-                {
-                    display = new Bitmap(evenSquare);
-                    Trace.WriteLine($"UI.MainForm: Window image kept as-is: {display.Width}x{display.Height} (<= {MAX_EDGE}).");
-                }
+                // --------- Window display (max edge) -------------------------------
+                int targetEdge = AppConfig.WINDOW_MAX_IMAGE_EDGE_PX; // e.g., 512
+                int maxEdge = Math.Max(squared.Width, squared.Height);
+                int finalEdge = (maxEdge > targetEdge) ? targetEdge : maxEdge; // shrink if > target; leave as-is if <= target
+                Trace.WriteLine($"UI.MainForm: Display target edge={targetEdge}, chosen final={finalEdge}");
 
-                // Assign to PictureBox (clone again to detach from our disposal scope)
+                display = (finalEdge == maxEdge)
+                    ? new Bitmap(squared) // copy as-is
+                    : ImageSquareReplicator.ResizeSquare(squared, finalEdge);
+
+                // Push to PictureBox
                 if (_picture != null)
                 {
+                    // Ensure old image is released (avoid GDI handle leaks while editing live)
+                    var old = _picture.Image;
                     _picture.Image = new Bitmap(display);
-                    Trace.WriteLine("UI.MainForm: PictureBox image assigned.");
+                    old?.Dispose();
+
+                    Trace.WriteLine($"UI.MainForm: PictureBox.Image set. Final={display.Width}x{display.Height}");
                 }
 
-                // Resize form client area to exactly fit the display image (for now).
-                // Later we'll add reserved height for labels/buttons.
-                ResizeClientToBitmap(display);
+                // Adjust window client size to exactly fit image for now (later we’ll add bottom controls)
+                this.ClientSize = new Size(display.Width, display.Height);
+                Trace.WriteLine($"UI.MainForm: ClientSize set to {this.ClientSize.Width}x{this.ClientSize.Height}");
 
-                // --------- 4) Multi-size ICO (16..256), apply to form & tray -------
-                var (icon, stream) = IcoBuilder.BuildMultiSizePngIco(evenSquare, AppConfig.TRAY_ICON_SIZES);
+                // --------- Multi-size ICON (16..256, all-PNG) ----------------------
+                var (icon, stream) = IcoBuilder.BuildMultiSizePngIco(squared, AppConfig.TRAY_ICON_SIZES);
                 multiIcon = icon;
                 icoStream = stream;
 
@@ -205,12 +239,10 @@ namespace Stay_Awake_2.UI
 
                 // Apply to Tray
                 _tray?.SetIcon(multiIcon, icoStream);
-                // Optional: _tray?.Show();
 
                 Trace.WriteLine("UI.MainForm: Exiting TryLoadPrepareAndApplyImageAndIcon (success).");
-
                 // NOTE: Do NOT dispose multiIcon or icoStream here; TrayManager holds refs.
-                // The Form will also use this.Icon. They are disposed when the form closes.
+                // The Form will also use this.Icon. Dispose them on FormClosed via TrayManager.
             }
             catch (Exception ex)
             {
@@ -218,16 +250,15 @@ namespace Stay_Awake_2.UI
                 MessageBox.Show("Failed to load/prepare image/icon.\n" + ex.Message,
                     _state.AppDisplayName + " — Image Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                // If we failed before passing icon/stream to tray, we can clean them now.
-                try { multiIcon?.Dispose(); } catch { /* ignore */ }
-                try { icoStream?.Dispose(); } catch { /* ignore */ }
+                // If tray/icon not held yet, clean locals
+                try { if (multiIcon != null && (_tray == null)) multiIcon.Dispose(); } catch { }
+                try { if (icoStream != null && (_tray == null)) icoStream.Dispose(); } catch { }
             }
             finally
             {
-                // We cloned into the PictureBox, so these locals can be safely disposed.
+                // We copied 'display' into PictureBox, safe to dispose local
                 try { display?.Dispose(); } catch { }
-                try { evenSquare?.Dispose(); } catch { }
+                // 'squared' and 'src' are no longer needed
                 try { squared?.Dispose(); } catch { }
                 try { src?.Dispose(); } catch { }
             }
@@ -289,7 +320,7 @@ namespace Stay_Awake_2.UI
                 }
             }
 
-            Trace.WriteLine($"UI.MainForm: AddRightAndBottomReplication → {dst.Width}x{dst.Height}");
+            Trace.WriteLine($"UI.MainForm: AddRightAndBottomReplication -> {dst.Width}x{dst.Height}");
             return dst;
         }
 

@@ -42,31 +42,6 @@ namespace Stay_Awake_2.Imaging
             }
         }
 
-        /// <summary>
-        /// TEMP fallback: synthesize a tiny checkerboard bitmap.
-        /// Later we’ll load an embedded PNG or an app-neighbor file.
-        /// </summary>
-        public static Bitmap CreateFallbackBitmap(int size = 128)
-        {
-            Trace.WriteLine("ImageLoader: Entered CreateFallbackBitmap ...");
-            int s = Math.Max(16, Math.Min(1024, size));
-            var bmp = new Bitmap(s, s);
-            using var g = Graphics.FromImage(bmp);
-            g.Clear(Color.DimGray);
-            var tile = s / 8;
-            for (int y = 0; y < s; y += tile)
-            {
-                for (int x = 0; x < s; x += tile)
-                {
-                    bool dark = ((x / tile) + (y / tile)) % 2 == 0;
-                    using var brush = new SolidBrush(dark ? Color.Gray : Color.LightGray);
-                    g.FillRectangle(brush, x, y, tile, tile);
-                }
-            }
-            Trace.WriteLine("ImageLoader: Exiting CreateFallbackBitmap (success).");
-            return bmp;
-        }
-
         // Neighbor search helper
         public static bool TryLoadNeighborIconBesideExe(out Bitmap? bmp, out string? chosenPath)
         {
