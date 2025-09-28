@@ -1,12 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// File: src/Stay_Awake_2/Imaging/ImageLoader.cs
+// Purpose: Load a Bitmap from a chosen source (CLI path now; fallback next).
+// Notes:
+//   * System.Drawing on .NET 8 is supported on Windows. We dispose streams promptly.
+//   * We return a *new Bitmap* to decouple from any underlying file handles (avoids file locks).
+
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
 
 namespace Stay_Awake_2.Imaging
 {
-    internal class ImageLoader
+    internal static class ImageLoader
     {
+        /// <summary>
+        /// Attempts to load a Bitmap from an absolute path. Throws on failure with a friendly message.
+        /// Returns a *decoupled* Bitmap (not tied to file stream).
+        /// Caller owns Bitmap disposal.
+        /// </summary>
+        public static Bitmap LoadBitmapFromPath(string fullPath)
+        {
+            Trace.WriteLine("ImageLoader: Entered LoadBitmapFromPath ...");
+            if (string.IsNullOrWhiteSpace(fullPath))
+                throw new ArgumentException("fullPath is null/empty", nameof(fullPath));
+
+            try
+            {
+                // Using Image.FromFile keeps the file locked. Instead, open a FileStream and .FromStream,
+                // then clone to a new Bitmap so we can close the stream immediately.
+                using var fs = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var temp = Image.FromStream(fs, useEmbeddedColorManagement: true, validateImageData: true);
+                var bmp = new Bitmap(temp); // decouple from stream
+                Trace.WriteLine($"ImageLoader: Loaded image: {fullPath}, size={bmp.Width}x{bmp.Height}");
+                Trace.WriteLine("ImageLoader: Exiting LoadBitmapFromPath (success).");
+                return bmp;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine("ImageLoader: LoadBitmapFromPath error: " + ex);
+                throw new InvalidOperationException("Failed to load image file: " + fullPath + "\n" + ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// TEMP fallback: synthesize a tiny checkerboard bitmap.
+        /// Later we’ll load an embedded PNG or an app-neighbor file.
+        /// </summary>
+        public static Bitmap CreateFallbackBitmap(int size = 128)
+        {
+            Trace.WriteLine("ImageLoader: Entered CreateFallbackBitmap ...");
+            int s = Math.Max(16, Math.Min(1024, size));
+            var bmp = new Bitmap(s, s);
+            using var g = Graphics.FromImage(bmp);
+            g.Clear(Color.DimGray);
+            var tile = s / 8;
+            for (int y = 0; y < s; y += tile)
+            {
+                for (int x = 0; x < s; x += tile)
+                {
+                    bool dark = ((x / tile) + (y / tile)) % 2 == 0;
+                    using var brush = new SolidBrush(dark ? Color.Gray : Color.LightGray);
+                    g.FillRectangle(brush, x, y, tile, tile);
+                }
+            }
+            Trace.WriteLine("ImageLoader: Exiting CreateFallbackBitmap (success).");
+            return bmp;
+        }
     }
 }

@@ -1,10 +1,8 @@
 ﻿// File: src/Stay_Awake_2/UI/TrayManager.cs
-// Purpose: Minimal system-tray coordinator. No real logic yet—just structure & trace.
-// Later this will own the NotifyIcon, ContextMenuStrip, and handlers.
-
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;            // <-- needed for MemoryStream
 using System.Windows.Forms;
 
 namespace Stay_Awake_2.UI
@@ -17,6 +15,12 @@ namespace Stay_Awake_2.UI
         private NotifyIcon? _tray;
         private ContextMenuStrip? _menu;
         private bool _initialized;
+
+        // Owned icon resources: we dispose them in Dispose()
+        private Icon? _icon;
+        private MemoryStream? _iconStream;
+
+        private bool _disposed; // simple guard
 
         public TrayManager(AppState state, Form ownerForm)
         {
@@ -32,6 +36,7 @@ namespace Stay_Awake_2.UI
         public void Initialize()
         {
             Trace.WriteLine("Stay_Awake_2: TrayManager: Initialize: Entered ...");
+            if (_disposed) throw new ObjectDisposedException(nameof(TrayManager));
             if (_initialized)
             {
                 Trace.WriteLine("Stay_Awake_2: TrayManager: Initialize: Already initialized; exiting.");
@@ -47,9 +52,9 @@ namespace Stay_Awake_2.UI
 
             _tray = new NotifyIcon
             {
-                Visible = false,                 // we’ll call Show() when ready
+                Visible = false, // we’ll call Show() when ready
                 ContextMenuStrip = _menu,
-                Text = _state.AppDisplayName,    // tooltip text (keep short)
+                Text = _state.AppDisplayName,
                 // Icon: we’ll assign a real Icon later from imaging pipeline.
                 // For now, use the app’s default icon if available.
                 Icon = _ownerForm.Icon ?? SystemIcons.Application
@@ -60,11 +65,33 @@ namespace Stay_Awake_2.UI
         }
 
         /// <summary>
+        /// Assign a new tray icon built from a multi-image ICO stream.
+        /// Ownership: TrayManager disposes <paramref name="icon"/> and <paramref name="backingStream"/> in Dispose().
+        /// </summary>
+        public void SetIcon(Icon icon, MemoryStream backingStream)
+        {
+            Trace.WriteLine("Stay_Awake_2: TrayManager: SetIcon ...");
+            if (_disposed) throw new ObjectDisposedException(nameof(TrayManager));
+            if (!_initialized) Initialize();
+
+            // Detach & dispose previous icon/stream first
+            try { if (_tray != null) _tray.Icon = null; } catch { /* ignore */ }
+            try { _icon?.Dispose(); } catch { /* ignore */ }
+            try { _iconStream?.Dispose(); } catch { /* ignore */ }
+
+            _icon = icon ?? throw new ArgumentNullException(nameof(icon));
+            _iconStream = backingStream ?? throw new ArgumentNullException(nameof(backingStream));
+
+            if (_tray != null) _tray.Icon = _icon;
+        }
+
+        /// <summary>
         /// Make the tray icon visible.
         /// </summary>
         public void Show()
         {
             Trace.WriteLine("Stay_Awake_2: TrayManager: Show: Entered ...");
+            if (_disposed) throw new ObjectDisposedException(nameof(TrayManager));
             if (!_initialized) Initialize();
             if (_tray != null) _tray.Visible = true;
             Trace.WriteLine("Stay_Awake_2: TrayManager: Show: Exiting.");
@@ -82,20 +109,21 @@ namespace Stay_Awake_2.UI
 
         public void Dispose()
         {
+            if (_disposed) return;
             Trace.WriteLine("Stay_Awake_2: TrayManager: Dispose: Entered ...");
+
             try
             {
-                if (_tray != null)
-                {
-                    _tray.Visible = false;
-                    _tray.Dispose();
-                    _tray = null;
-                }
-                if (_menu != null)
-                {
-                    _menu.Dispose();
-                    _menu = null;
-                }
+                // Always hide first to avoid “ghost” tray icons.
+                try { if (_tray != null) _tray.Visible = false; } catch { /* ignore */ }
+
+                // Dispose managed UI objects
+                try { _tray?.Dispose(); } catch { /* ignore */ } finally { _tray = null; }
+                try { _menu?.Dispose(); } catch { /* ignore */ } finally { _menu = null; }
+
+                // Dispose our icon resources
+                try { _icon?.Dispose(); } catch { /* ignore */ } finally { _icon = null; }
+                try { _iconStream?.Dispose(); } catch { /* ignore */ } finally { _iconStream = null; }
             }
             catch (Exception ex)
             {
@@ -103,6 +131,7 @@ namespace Stay_Awake_2.UI
             }
             finally
             {
+                _disposed = true;
                 Trace.WriteLine("Stay_Awake_2: TrayManager: Dispose: Exiting.");
             }
         }
