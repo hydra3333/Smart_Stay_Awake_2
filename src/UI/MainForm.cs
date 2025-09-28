@@ -156,6 +156,7 @@ namespace Stay_Awake_2.UI
                         probeList.Add(Path.Combine(exeDir, "Assets", $"Stay_Awake_icon{ext}"));
 
                     string? found = probeList.FirstOrDefault(File.Exists);
+                    //found = null; // TEMP: disable EXE-neighbor for now
                     if (found != null)
                     {
                         string ext = Path.GetExtension(found) ?? string.Empty;
@@ -163,7 +164,6 @@ namespace Stay_Awake_2.UI
                         if (!AppConfig.ALLOWED_ICON_EXTENSIONS.Contains(ext))
                             throw new InvalidOperationException(
                                 $"Neighbor image extension '{ext}' not allowed. Allowed: {string.Join(" ", AppConfig.ALLOWED_ICON_EXTENSIONS)}");
-
                         src = ImageLoader.LoadBitmapFromPath(found);
                         Trace.WriteLine($"UI.MainForm: Using EXE-neighbor image. Size={src.Width}x{src.Height}");
                     }

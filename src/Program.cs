@@ -90,6 +90,10 @@ namespace Stay_Awake_2
                         // using (File.Create(logFullPath)) { /* truncate/close */ }
                         // Add listener and write a small session header
                         Trace.Listeners.Add(new TextWriterTraceListener(logFullPath));
+#if DEBUG
+                        // Mirror to VS Output window while debugging
+                        Trace.Listeners.Add(new DefaultTraceListener());
+#endif
                         Trace.AutoFlush = true;
                         Trace.WriteLine("==================================================");
                         Trace.WriteLine($"[Init] {AppConfig.APP_INTERNAL_NAME} start {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)}");
@@ -101,6 +105,10 @@ namespace Stay_Awake_2
                         Trace.WriteLine("[Init] Args: " + string.Join(" ", args));
                         Trace.WriteLine("[Init] Tracing enabled.");
                         Trace.WriteLine("[Init] Log file: " + logFullPath);
+#if DEBUG
+                        try { System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + logFullPath + "\""); } catch { }
+#endif
+
                     }
                 }
                 catch (Exception ex)
