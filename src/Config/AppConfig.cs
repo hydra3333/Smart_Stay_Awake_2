@@ -31,7 +31,7 @@ namespace Stay_Awake_2
             new(StringComparer.OrdinalIgnoreCase)
             { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".ico" };
 
-        // ---- Imaging knobs ---------------------------------------------------------
+        // ---- Icon imaging knobs ---------------------------------------------------------
         public const int WINDOW_MAX_IMAGE_EDGE_PX = 512;
         public static readonly int[] TRAY_ICON_SIZES = new[] { 16, 20, 24, 32, 40, 48, 64, 128, 256 };
     }
