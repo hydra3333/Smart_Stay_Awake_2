@@ -212,7 +212,7 @@ namespace Stay_Awake_2.UI
 
                 display = (finalEdge == maxEdge)
                     ? new Bitmap(squared) // copy as-is
-                    : ImageSquareReplicator.ResizeSquare(squared, finalEdge);
+                    : ImageSquareReplicator.ResizeSquareMax(squared, finalEdge);
 
                 // Push to PictureBox
                 if (_picture != null)

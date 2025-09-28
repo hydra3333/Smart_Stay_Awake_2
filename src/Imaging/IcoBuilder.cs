@@ -31,7 +31,7 @@ namespace Stay_Awake_2.Imaging
             var frames = new List<(int Size, byte[] Bytes)>();
             foreach (int s in sizes)
             {
-                using var resized = ImageSquareReplicator.ResizeSquare(square, s);
+                using var resized = ImageSquareReplicator.ResizeSquareExact(square, s);
                 using var ms = new MemoryStream();
                 resized.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
                 var bytes = ms.ToArray();

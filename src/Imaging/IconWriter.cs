@@ -22,7 +22,7 @@ namespace Stay_Awake_2.Imaging
             if (bmpSquare is null) throw new ArgumentNullException(nameof(bmpSquare));
 
             // Ensure 32x32
-            Bitmap use = bmpSquare.Width == 32 ? bmpSquare : ImageSquareReplicator.ResizeSquare(bmpSquare, 32);
+            Bitmap use = bmpSquare.Width == 32 ? bmpSquare : ImageSquareReplicator.ResizeSquareExact(bmpSquare, 32);
 
             IntPtr hIcon = use.GetHicon();
             try

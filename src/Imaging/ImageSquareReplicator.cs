@@ -168,5 +168,31 @@ namespace Stay_Awake_2.Imaging
             Trace.WriteLine("ImageSquareReplicator: Exiting ResizeSquareMax (success).");
             return dst;
         }
+
+        /// <summary>
+        /// Resize a square bitmap to an exact size (e.g., 16, 32, 256). Needed for ICO frames, returns a copy.
+        /// </summary>
+        public static Bitmap ResizeSquareExact(Bitmap srcSquare, int targetSize)
+        {
+            Trace.WriteLine($"ImageSquareReplicator: Entered ResizeSquareExact to {targetSize} ...");
+            if (srcSquare is null) throw new ArgumentNullException(nameof(srcSquare));
+            if (srcSquare.Width != srcSquare.Height)
+                throw new ArgumentException("ResizeSquareExact expects a square image.", nameof(srcSquare));
+
+            int s = Math.Max(8, Math.Min(4096, targetSize));
+            var dst = new Bitmap(s, s);
+            using var g = Graphics.FromImage(dst);
+            g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+            g.DrawImage(srcSquare, 0, 0, s, s);
+            Trace.WriteLine("ImageSquareReplicator: Exiting ResizeSquareExact (success).");
+            return dst;
+        }
+
+        // Optional shim so older calls still compile:
+        // public static Bitmap ResizeSquare(Bitmap srcSquare, int targetSize) => ResizeSquareExact(srcSquare, targetSize);
+
     }
 }
