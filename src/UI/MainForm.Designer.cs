@@ -1,6 +1,6 @@
 ﻿namespace Stay_Awake_2.UI
 {
-    partial class MainForm
+    internal partial class MainForm
     {
         /// <summary>
         /// Required designer variable.

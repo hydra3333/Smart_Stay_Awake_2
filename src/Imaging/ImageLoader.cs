@@ -66,5 +66,38 @@ namespace Stay_Awake_2.Imaging
             Trace.WriteLine("ImageLoader: Exiting CreateFallbackBitmap (success).");
             return bmp;
         }
+
+        // Neighbor search helper
+        public static bool TryLoadNeighborIconBesideExe(out Bitmap? bmp, out string? chosenPath)
+        {
+            Trace.WriteLine("ImageLoader: Entered TryLoadNeighborIconBesideExe ...");
+            bmp = null; chosenPath = null;
+
+            try
+            {
+                string exeDir = AppContext.BaseDirectory;
+                string baseName = "Stay_Awake_icon";
+                foreach (var ext in AppConfig.ALLOWED_ICON_EXTENSIONS)
+                {
+                    string candidate = Path.Combine(exeDir, baseName + ext);
+                    if (File.Exists(candidate))
+                    {
+                        Trace.WriteLine($"ImageLoader: Neighbor candidate exists: {candidate}");
+                        bmp = LoadBitmapFromPath(candidate);
+                        chosenPath = candidate;
+                        Trace.WriteLine("ImageLoader: Exiting TryLoadNeighborIconBesideExe (success).");
+                        return true;
+                    }
+                }
+                Trace.WriteLine("ImageLoader: No neighbor icon found next to EXE.");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine("ImageLoader: TryLoadNeighborIconBesideExe error: " + ex);
+                return false;
+            }
+        }
+
     }
 }

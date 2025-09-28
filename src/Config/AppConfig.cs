@@ -33,6 +33,7 @@ namespace Stay_Awake_2
 
         // ---- Icon imaging knobs ---------------------------------------------------------
         public const int WINDOW_MAX_IMAGE_EDGE_PX = 512;
+        // We’ll use TRAY_ICON_SIZES in the next sub-iteration when we switch to multi-size ICO:
         public static readonly int[] TRAY_ICON_SIZES = new[] { 16, 20, 24, 32, 40, 48, 64, 128, 256 };
     }
 }

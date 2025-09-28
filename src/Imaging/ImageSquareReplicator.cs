@@ -6,121 +6,166 @@
 //   * Replicate the left/right columns outward to fill horizontal padding (if width < height).
 //   * Replicate the top/bottom rows outward to fill vertical padding (if height < width).
 //   * If final dimension is off by 1 (odd/even concerns), we add one more replicated col/row.
+//   * Evenize to a multiple of 2 px
 // Performance: Uses GetPixel/SetPixel for clarity (images are small for tray/window). We can optimize later.
 
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace Stay_Awake_2.Imaging
 {
     internal static class ImageSquareReplicator
     {
+        /// <summary>
+        /// Make the image square by edge replication. If pads are odd, the extra pixel goes to right/bottom.
+        /// Finally ensure the result is an even-numbered square (replicate +1 right col and +1 bottom row if needed).
+        /// </summary>
         public static Bitmap MakeSquareByEdgeReplication(Bitmap src)
         {
             Trace.WriteLine("ImageSquareReplicator: Entered MakeSquareByEdgeReplication ...");
             if (src is null) throw new ArgumentNullException(nameof(src));
 
-            int w = src.Width;
-            int h = src.Height;
+            int w = src.Width, h = src.Height;
+            Trace.WriteLine($"ImageSquareReplicator: Source size = {w}x{h}");
+
             if (w == h)
             {
-                Trace.WriteLine("ImageSquareReplicator: Source already square; returning clone.");
-                return new Bitmap(src); // return a copy to keep ownership clear
+                // If odd, evenize; else just copy.
+                if ((w & 1) == 1)
+                {
+                    Trace.WriteLine("ImageSquareReplicator: Already square but odd; evenizing by +1 col and +1 row (replicate edges).");
+                    return EvenizeSquare(new Bitmap(src));
+                }
+                Trace.WriteLine("ImageSquareReplicator: Already square (even); returning clone.");
+                return new Bitmap(src);
             }
 
             int target = Math.Max(w, h);
+            int padXtotal = target - w; // may be 0
+            int padYtotal = target - h; // may be 0
+
+            // Compute side pads, put odd extra on right/bottom
+            int leftPad = padXtotal > 0 ? padXtotal / 2 : 0;
+            int rightPad = padXtotal > 0 ? (padXtotal - leftPad) : 0;
+            int topPad = padYtotal > 0 ? padYtotal / 2 : 0;
+            int bottomPad = padYtotal > 0 ? (padYtotal - topPad) : 0;
+
+            Trace.WriteLine($"ImageSquareReplicator: target={target}, leftPad={leftPad}, rightPad={rightPad}, topPad={topPad}, bottomPad={bottomPad}");
+
             var dst = new Bitmap(target, target);
             using (var g = Graphics.FromImage(dst))
             {
                 g.Clear(Color.Transparent);
+                g.CompositingQuality = CompositingQuality.HighQuality;
+                g.InterpolationMode = InterpolationMode.NearestNeighbor; // we want exact copy; replication happens manually
+                g.SmoothingMode = SmoothingMode.None;
+
                 // Draw original centered
-                int offsetX = (target - w) / 2;
-                int offsetY = (target - h) / 2;
-                g.DrawImage(src, offsetX, offsetY, w, h);
+                g.DrawImage(src, leftPad, topPad, w, h);
             }
 
-            // Replicate horizontally if needed
-            if (w < target)
+            // Replicate horizontally
+            if (padXtotal > 0)
             {
-                int pad = (target - w) / 2;
-                int leftX = (target - w) / 2;
-                int rightX = leftX + w - 1;
+                int leftSrcX = leftPad;         // left-most column of original
+                int rightSrcX = leftPad + w - 1; // right-most column of original
 
-                // replicate left pad outward using left-most column
-                for (int x = leftX - 1; x >= 0; x--)
+                // Fill left pad from left-most original column
+                for (int x = leftPad - 1; x >= 0; x--)
                 {
-                    int srcX = leftX; // left-most original column
                     for (int y = 0; y < target; y++)
-                    {
-                        Color c = dst.GetPixel(srcX, y);
-                        dst.SetPixel(x, y, c);
-                    }
+                        dst.SetPixel(x, y, dst.GetPixel(leftSrcX, y));
                 }
-                // replicate right pad outward using right-most column
-                for (int x = rightX + 1; x < target; x++)
+                // Fill right pad from right-most original column
+                for (int x = leftPad + w; x <= target - 1; x++)
                 {
-                    int srcX = rightX; // right-most original column
                     for (int y = 0; y < target; y++)
-                    {
-                        Color c = dst.GetPixel(srcX, y);
-                        dst.SetPixel(x, y, c);
-                    }
+                        dst.SetPixel(x, y, dst.GetPixel(rightSrcX, y));
                 }
             }
 
-            // Replicate vertically if needed
-            if (h < target)
+            // Replicate vertically
+            if (padYtotal > 0)
             {
-                int pad = (target - h) / 2;
-                int topY = (target - h) / 2;
-                int botY = topY + h - 1;
+                int topSrcY = topPad;            // top-most row of original
+                int bottomSrcY = topPad + h - 1; // bottom-most row of original
 
-                // replicate top pad using top-most row
-                for (int y = topY - 1; y >= 0; y--)
+                // Fill top pad from top-most original row
+                for (int y = topPad - 1; y >= 0; y--)
                 {
-                    int srcY = topY;
                     for (int x = 0; x < target; x++)
-                    {
-                        Color c = dst.GetPixel(x, srcY);
-                        dst.SetPixel(x, y, c);
-                    }
+                        dst.SetPixel(x, y, dst.GetPixel(x, topSrcY));
                 }
-                // replicate bottom pad using bottom-most row
-                for (int y = botY + 1; y < target; y++)
+                // Fill bottom pad from bottom-most original row
+                for (int y = topPad + h; y <= target - 1; y++)
                 {
-                    int srcY = botY;
                     for (int x = 0; x < target; x++)
-                    {
-                        Color c = dst.GetPixel(x, srcY);
-                        dst.SetPixel(x, y, c);
-                    }
+                        dst.SetPixel(x, y, dst.GetPixel(x, bottomSrcY));
                 }
             }
 
+            // Final evenization if needed
+            if ((target & 1) == 1)
+            {
+                Trace.WriteLine("ImageSquareReplicator: Result side is odd; evenizing by +1 right col and +1 bottom row.");
+                var even = EvenizeSquare(dst);
+                dst.Dispose();
+                Trace.WriteLine($"ImageSquareReplicator: Final evenized size = {even.Width}x{even.Height}");
+                Trace.WriteLine("ImageSquareReplicator: Exiting MakeSquareByEdgeReplication (success).");
+                return even;
+            }
+
+            Trace.WriteLine($"ImageSquareReplicator: Final size = {dst.Width}x{dst.Height} (already even).");
             Trace.WriteLine("ImageSquareReplicator: Exiting MakeSquareByEdgeReplication (success).");
             return dst;
         }
 
-        /// <summary>
-        /// Resize preserving aspect (square in, square out) with high-quality sampling.
-        /// </summary>
-        public static Bitmap ResizeSquare(Bitmap srcSquare, int targetSize)
+        private static Bitmap EvenizeSquare(Bitmap square)
         {
-            Trace.WriteLine($"ImageSquareReplicator: Entered ResizeSquare to {targetSize} ...");
+            int s = square.Width; // equals Height
+            var even = new Bitmap(s + 1, s + 1);
+            using (var g = Graphics.FromImage(even))
+            {
+                g.DrawImage(square, 0, 0, s, s);
+            }
+            // replicate right-most column into the new col s
+            for (int y = 0; y < s; y++)
+                even.SetPixel(s, y, square.GetPixel(s - 1, y));
+            // replicate bottom-most row into the new row s
+            for (int x = 0; x < s + 1; x++)
+                even.SetPixel(x, s, even.GetPixel(x, s - 1));
+            return even;
+        }
+
+        /// <summary>
+        /// Resize a square image down to targetSize (no upscaling). If src is <= target, returns a copy.
+        /// </summary>
+        public static Bitmap ResizeSquareMax(Bitmap srcSquare, int targetSize)
+        {
+            Trace.WriteLine($"ImageSquareReplicator: Entered ResizeSquareMax to {targetSize} ...");
             if (srcSquare is null) throw new ArgumentNullException(nameof(srcSquare));
             if (srcSquare.Width != srcSquare.Height)
-                throw new ArgumentException("ResizeSquare expects a square image.", nameof(srcSquare));
+                throw new ArgumentException("ResizeSquareMax expects a square image.", nameof(srcSquare));
 
-            int s = Math.Max(8, Math.Min(4096, targetSize));
-            var dst = new Bitmap(s, s);
+            int s = srcSquare.Width;
+            if (s <= targetSize)
+            {
+                Trace.WriteLine($"ImageSquareReplicator: No resize needed (side={s} <= cap={targetSize}). Returning clone.");
+                return new Bitmap(srcSquare);
+            }
+
+            int t = Math.Max(8, Math.Min(4096, targetSize));
+            var dst = new Bitmap(t, t);
             using var g = Graphics.FromImage(dst);
-            g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode = SmoothingMode.HighQuality;
             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-            g.DrawImage(srcSquare, 0, 0, s, s);
-            Trace.WriteLine("ImageSquareReplicator: Exiting ResizeSquare (success).");
+            g.DrawImage(srcSquare, 0, 0, t, t);
+            Trace.WriteLine($"ImageSquareReplicator: Resized from {s} to {t}.");
+            Trace.WriteLine("ImageSquareReplicator: Exiting ResizeSquareMax (success).");
             return dst;
         }
     }
