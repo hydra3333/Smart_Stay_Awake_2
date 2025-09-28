@@ -12,13 +12,12 @@ namespace Stay_Awake_2
     internal static class EmbeddedImage
     {
         // You can paste a huge base64 blob here (PNG/JPEG). Line breaks are fine.
-        // Example layout:
-        //    public static readonly string EYE_IMAGE_BASE64 = CleanBase64(
-        //@"
-        //I4yc1FXR2AMmylTKQJJMylrrpGt8xjehxpoGsWVuOEcmCKCPCJDfQarzUU+1iO9PB9cSRpIClD6qDO3VChj3lRhTNkKLdyyFjC5yF2OI6fe8E3Rt7LbUcjFn
-        //vkTqQ24cAE1qGp+ZGMp3oq6OUtc/yJlnUpm+LjKb2au6mtVEMT91R5D3qMO8h3ge9Pk2kh57g0Su8kWmxTHhDgCAqdO0pas6FUCaFKwafqamsu627VecizdM
-        //zPTRHYzHe+kxxv8fSCQ8kY4DHjsAAAAASUVORK5CYII=
-        //");
+        // In the IF test below,
+        //      set to true to signal "no embedded image",
+        //      or false to use the embedded image.
+#if true
+        public static readonly string EYE_IMAGE_BASE64 = CleanBase64(@"");
+#else
         public static readonly string EYE_IMAGE_BASE64 = CleanBase64(
 @"
 iVBORw0KGgoAAAANSUhEUgAABAAAAANZCAYAAACRO0wyAAEAAElEQVR4nEz9a49kaZadie1jduzqHhGZWdXVJAczgxldPuk/CxAGIDkc/RlBYpMUIAnSTDe7
@@ -21261,6 +21260,8 @@ I4yc1FXR2AMmylTKQJJMylrrpGt8xjehxpoGsWVuOEcmCKCPCJDfQarzUU+1iO9PB9cSRpIClD6qDO3V
 vkTqQ24cAE1qGp+ZGMp3oq6OUtc/yJlnUpm+LjKb2au6mtVEMT91R5D3qMO8h3ge9Pk2kh57g0Su8kWmxTHhDgCAqdO0pas6FUCaFKwafqamsu627VecizdM
 zPTRHYzHe+kxxv8fSCQ8kY4DHjsAAAAASUVORK5CYII=
 ");
+#endif
+
         /// <summary>
         /// Normalize the pasted base64:
         /// - Remove anything not in the base64 alphabet (A–Z a–z 0–9 + / =).

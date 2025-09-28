@@ -85,7 +85,7 @@ namespace Stay_Awake_2.Imaging
                 float drawH = drawW;
 
                 // Helper maps normalized [0..1] to drawable pixel space
-                PointF N(float x, float y) => new PointF(border + x * drawW, border + y * drawH);
+                // PointF N(float x, float y) => new PointF(border + x * drawW, border + y * drawH);
 
                 // Build all subpaths in normalized coords (0..1)
                 var paths = new[]

@@ -76,6 +76,12 @@ namespace Stay_Awake_2.UI
             Trace.WriteLine("UI.MainForm: OnShown: Exiting.");
         }
 
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            Trace.WriteLine("Stay_Awake_2: UI.MainForm_Load: Entered MainForm_Load ...");
+            Trace.WriteLine("Stay_Awake_2: UI.MainForm_Load: Exiting MainForm_Load ...");
+        }
+
         // Dispose tray in FormClosed (no duplicate Dispose override).
         private void MainForm_FormClosed(object? sender, FormClosedEventArgs e)
         {
