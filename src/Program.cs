@@ -1,6 +1,5 @@
 ﻿// File: src/Smart_Stay_Awake_2/Program.cs
 // Purpose: Entry point. Initialize WinForms defaults, parse CLI, help, configure tracing, build AppState, run MainForm.
-// NOTE: No single-instance/mutex in v11 plan.
 
 using System;
 using System.Diagnostics;
