@@ -51,7 +51,7 @@ namespace Smart_Stay_Awake_2.Imaging
             try
             {
                 string exeDir = AppContext.BaseDirectory;
-                string baseName = "Smart_Stay_Awake_icon";
+                string baseName = "Smart_Stay_Awake_2_icon";
                 foreach (var ext in AppConfig.ALLOWED_ICON_EXTENSIONS)
                 {
                     string candidate = Path.Combine(exeDir, baseName + ext);

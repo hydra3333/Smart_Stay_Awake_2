@@ -115,7 +115,7 @@ namespace Smart_Stay_Awake_2.UI
                 // SOURCE PRIORITY (Spec v11):
                 //   1) CLI --icon PATH
                 //   2) Embedded base64 (if non-empty)
-                //   3) File 'Smart_Stay_Awake_icon.*' next to EXE (supported: png/jpg/jpeg/bmp/gif/ico)
+                //   3) File 'Smart_Stay_Awake_2_icon.*' next to EXE (supported: png/jpg/jpeg/bmp/gif/ico)
                 //   4) Self-generated checkerboard “eye” fallback
                 // ------------------------------------------------------------
                 // Note: we validate extension for disk files against AppConfig.ALLOWED_ICON_EXTENSIONS
@@ -151,9 +151,9 @@ namespace Smart_Stay_Awake_2.UI
                     // Prefer next-to-EXE (root) first, then ./Assets as a courtesy
                     var probeList = new List<string>();
                     foreach (var ext in AppConfig.ALLOWED_ICON_EXTENSIONS)
-                        probeList.Add(Path.Combine(exeDir, $"Smart_Stay_Awake_icon{ext}"));
+                        probeList.Add(Path.Combine(exeDir, $"Smart_Stay_Awake_2_icon{ext}"));
                     foreach (var ext in AppConfig.ALLOWED_ICON_EXTENSIONS)
-                        probeList.Add(Path.Combine(exeDir, "Assets", $"Smart_Stay_Awake_icon{ext}"));
+                        probeList.Add(Path.Combine(exeDir, "Assets", $"Smart_Stay_Awake_2_icon{ext}"));
 
                     string? found = probeList.FirstOrDefault(File.Exists);
 

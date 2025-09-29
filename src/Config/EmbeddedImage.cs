@@ -1,4 +1,4 @@
-﻿// File: src/Stay_Awake_2/Config/EmbeddedImage.cs
+﻿// File: src/Smart_Stay_Awake_2/Config/EmbeddedImage.cs
 // Purpose: Optional embedded base64 PNG/JPG (internal fallback).
 // Notes:
 //   * Leave EYE_IMAGE_BASE64 empty ("") to simulate "no embedded image".
@@ -7,7 +7,7 @@
 
 using System.Text.RegularExpressions;
 
-namespace Stay_Awake_2
+namespace Smart_Stay_Awake_2
 {
     internal static class EmbeddedImage
     {
