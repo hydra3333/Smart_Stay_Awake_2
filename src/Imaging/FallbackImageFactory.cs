@@ -8,6 +8,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Text.RegularExpressions;
+using static System.Windows.Forms.LinkLabel;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace Stay_Awake_2.Imaging
@@ -670,6 +671,7 @@ jK6GQC4pdPogvKZTZymzlcryp0XW6wxplCtiuq8phiU1Hp//2Q==
 
             // Decode the embedded JPG
             using var src = LoadEmbeddedPngJpg(FALLBACK_EYE_IMAGE_BASE64);
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: decoded base64 image W x H = {src.Width} x {src.Height}");
 
             // If you really want to recolor a single PNG at runtime, uncomment ApplyTint().
             // NOTE: This costs quality (antialias fringing) unless your PNG is a pure alpha mask.
@@ -688,7 +690,11 @@ jK6GQC4pdPogvKZTZymzlcryp0XW6wxplCtiuq8phiU1Hp//2Q==
             var dstBox = new RectangleF(border, border, s - 2 * border, s - 2 * border);
 
             // Fit the source uniformly inside dstBox
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: Fitting source uniformly inside dstBox.");
             var fit = GetUniformFit(src.Width, src.Height, dstBox);
+
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: fit.rect x,y,w,h = ({fit.rect.X:0.##},{fit.rect.Y:0.##},{fit.rect.Width:0.##},{fit.rect.Height:0.##}), scale={fit.scale:0.####}");
+
             using var ia = new ImageAttributes(); // (hook for color matrices if you later choose tinting)
             g.DrawImage(
                 src,
@@ -698,27 +704,33 @@ jK6GQC4pdPogvKZTZymzlcryp0XW6wxplCtiuq8phiU1Hp//2Q==
                 ia
             );
 
-            Trace.WriteLine("FallbackImageFactory: Exiting CreateEyeOfHorusBitmap (success).");
+            Trace.WriteLine($"FallbackImageFactory: Exiting CreateEyeOfHorusBitmap (success) with bitmap W x H = {bmp.Width} x {bmp.Height}");
             return bmp;
         }
         // ---- helpers for CreateEyeOfHorusBitmap ----
         private static Bitmap LoadEmbeddedPngJpg(string base64)
         {
+            Trace.WriteLine("FallbackImageFactory: Entered LoadEmbeddedPngJpg  ...");
             var bytes = Convert.FromBase64String(base64);
             using var ms = new MemoryStream(bytes, writable: false);
             // Use Image.FromStream + clone into a standalone Bitmap we can draw
             using var img = Image.FromStream(ms, useEmbeddedColorManagement: true, validateImageData: true);
+            Trace.WriteLine($"FallbackImageFactory: Exiting LoadEmbeddedPngJpg with Bitmap(img) W x H = {img.Width} x {img.Height}");
             return new Bitmap(img); // ensures it’s not tied to the stream
         }
 
         // Given a source WxH and a destination rectangle, return the fitted rectangle.
         private static (RectangleF rect, float scale) GetUniformFit(float srcW, float srcH, RectangleF dst)
         {
+            Trace.WriteLine("FallbackImageFactory: Entered GetUniformFit ...");
+            Trace.WriteLine($"FallbackImageFactory: GetUniformFit: srcW x srcH = {srcW} x {srcH} , dst.Width x dst.Height = {dst.Width} x {dst.Height}");
             float scale = Math.Min(dst.Width / srcW, dst.Height / srcH);
             float w = srcW * scale;
             float h = srcH * scale;
             float x = dst.X + (dst.Width - w) * 0.5f;
             float y = dst.Y + (dst.Height - h) * 0.5f;
+            Trace.WriteLine($"FallbackImageFactory: GetUniformFit: CALCULATED result rect x,y,w,h = ({x:0.##},{y:0.##},{w:0.##},{h:0.##}), scale={scale:0.####}");
+            Trace.WriteLine("FallbackImageFactory: Exiting GetUniformFit");
             return (new RectangleF(x, y, w, h), scale);
         }
 
@@ -751,6 +763,4 @@ jK6GQC4pdPogvKZTZymzlcryp0XW6wxplCtiuq8phiU1Hp//2Q==
         }
     }
 }
-
-
 
