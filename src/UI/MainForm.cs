@@ -126,26 +126,26 @@ namespace Stay_Awake_2.UI
                 {
                     string path = _state.Options.IconPath!;
                     string ext = Path.GetExtension(path) ?? string.Empty;
-                    Trace.WriteLine($"UI.MainForm: Candidate source (1/CLI): {path} (ext='{ext}')");
+                    Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Candidate source (1/CLI): {path} (ext='{ext}')");
 
                     if (!AppConfig.ALLOWED_ICON_EXTENSIONS.Contains(ext))
                         throw new InvalidOperationException(
                             $"Unsupported --icon extension '{ext}'. Allowed: {string.Join(" ", AppConfig.ALLOWED_ICON_EXTENSIONS)}");
 
                     src = ImageLoader.LoadBitmapFromPath(path);
-                    Trace.WriteLine($"UI.MainForm: Using CLI image. Size={src.Width}x{src.Height}");
+                    Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Using CLI image. Size={src.Width}x{src.Height}");
                 }
                 // 2) Embedded base64
                 else if (Base64ImageLoader.HasEmbeddedImage())
                 {
-                    Trace.WriteLine("UI.MainForm: Using embedded base64 image (2/embedded).");
+                    Trace.WriteLine("UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Using embedded base64 image (2/embedded).");
                     src = Base64ImageLoader.LoadEmbeddedBitmap();
-                    Trace.WriteLine($"UI.MainForm: Embedded image. Size={src.Width}x{src.Height}");
+                    Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Retrieved embedded image. Size={src.Width}x{src.Height}");
                 }
                 // 3) Next-to-EXE file (Assets optional)
                 else
                 {
-                    Trace.WriteLine("UI.MainForm: Checking EXE-neighbor image (3/next-to-EXE).");
+                    Trace.WriteLine("UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Checking EXE-neighbor image (3/next-to-EXE).");
                     string exeDir = AppContext.BaseDirectory;
 
                     // Prefer next-to-EXE (root) first, then ./Assets as a courtesy
@@ -167,32 +167,32 @@ namespace Stay_Awake_2.UI
                     if (found != null)
                     {
                         string ext = Path.GetExtension(found) ?? string.Empty;
-                        Trace.WriteLine($"UI.MainForm: Found EXE-neighbor: {found} (ext='{ext}')");
+                        Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Found EXE-neighbor: {found} (ext='{ext}')");
                         if (!AppConfig.ALLOWED_ICON_EXTENSIONS.Contains(ext))
                             throw new InvalidOperationException(
                                 $"Neighbor image extension '{ext}' not allowed. Allowed: {string.Join(" ", AppConfig.ALLOWED_ICON_EXTENSIONS)}");
                         src = ImageLoader.LoadBitmapFromPath(found);
-                        Trace.WriteLine($"UI.MainForm: Using EXE-neighbor image. Size={src.Width}x{src.Height}");
+                        Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Using EXE-neighbor image. Size={src.Width}x{src.Height}");
                     }
                     else
                     {
                         // 4) Self-generated checkerboard “eye” fallback
-                        Trace.WriteLine("UI.MainForm: No disk/embedded image found; using synthetic fallback (4/checkerboard).");
+                        Trace.WriteLine("UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: No disk/embedded image found; using final fallback synthetic image (4/checkerboard).");
                         src = FallbackImageFactory.CreateEyeOfHorusBitmap(256);
-                        Trace.WriteLine($"UI.MainForm: Fallback synthetic. Size={src.Width}x{src.Height}");
+                        Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Retrieved final fallback synthetic image. Size={src.Width}x{src.Height}");
                     }
                 }
 
                 // --------- Squaring (edge replication) -----------------------------
-                Trace.WriteLine($"UI.MainForm: Source BEFORE square: {src.Width}x{src.Height}");
+                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Source BEFORE SQUARE: {src.Width}x{src.Height}");
                 squared = ImageSquareReplicator.MakeSquareByEdgeReplication(src);
-                Trace.WriteLine($"UI.MainForm: AFTER square:        {squared.Width}x{squared.Height}");
+                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Result AFTER SQUARE:        {squared.Width}x{squared.Height}");
 
                 // --------- Ensure even dimensions (spec requirement) ---------------
                 // If odd, replicate one more row/col (right/bottom) to make even
                 if ((squared.Width % 2) != 0 || (squared.Height % 2) != 0)
                 {
-                    Trace.WriteLine("UI.MainForm: Squared image has odd dimension; applying +1 replicate to make even.");
+                    Trace.WriteLine("UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Squared image has odd dimension; applying +1 replicate to make even.");
                     using var tmp = squared;
                     int newSize = Math.Max(squared.Width, squared.Height);
                     var even = new Bitmap(newSize + (newSize % 2 == 0 ? 0 : 1), newSize + (newSize % 2 == 0 ? 0 : 1));
@@ -214,14 +214,14 @@ namespace Stay_Awake_2.UI
                             even.SetPixel(x, even.Height - 1, even.GetPixel(x, even.Height - 2));
                     }
                     squared = even;
-                    Trace.WriteLine($"UI.MainForm: AFTER even-fix:      {squared.Width}x{squared.Height}");
+                    Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: AFTER even-fix:      {squared.Width}x{squared.Height}");
                 }
 
                 // --------- Window display (max edge) -------------------------------
                 int targetEdge = AppConfig.WINDOW_MAX_IMAGE_EDGE_PX; // e.g., 512
                 int maxEdge = Math.Max(squared.Width, squared.Height);
                 int finalEdge = (maxEdge > targetEdge) ? targetEdge : maxEdge; // shrink if > target; leave as-is if <= target
-                Trace.WriteLine($"UI.MainForm: Display target edge={targetEdge}, chosen final={finalEdge}");
+                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Display target edge={targetEdge}, chosen final={finalEdge}");
 
                 display = (finalEdge == maxEdge)
                     ? new Bitmap(squared) // copy as-is
@@ -235,12 +235,12 @@ namespace Stay_Awake_2.UI
                     _picture.Image = new Bitmap(display);
                     old?.Dispose();
 
-                    Trace.WriteLine($"UI.MainForm: PictureBox.Image set. Final={display.Width}x{display.Height}");
+                    Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: PictureBox.Image set. Final={display.Width}x{display.Height}");
                 }
 
                 // Adjust window client size to exactly fit image for now (later we’ll add bottom controls)
                 this.ClientSize = new Size(display.Width, display.Height);
-                Trace.WriteLine($"UI.MainForm: ClientSize set to {this.ClientSize.Width}x{this.ClientSize.Height}");
+                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: ClientSize set to {this.ClientSize.Width}x{this.ClientSize.Height}");
 
                 // --------- Multi-size ICON (16..256, all-PNG) ----------------------
                 var (icon, stream) = IcoBuilder.BuildMultiSizePngIco(squared, AppConfig.TRAY_ICON_SIZES);
@@ -286,7 +286,7 @@ namespace Stay_Awake_2.UI
             Trace.WriteLine("UI.MainForm: Entered AddRightAndBottomReplication ...");
             if (srcSquare == null) throw new ArgumentNullException(nameof(srcSquare));
             if (srcSquare.Width != srcSquare.Height)
-                throw new ArgumentException("AddRightAndBottomReplication expects a square image.");
+                throw new ArgumentException("UI.MainForm: AddRightAndBottomReplication expects a square image.");
 
             int w = srcSquare.Width;
             int h = srcSquare.Height;
@@ -295,7 +295,7 @@ namespace Stay_Awake_2.UI
 
             if (newW == w && newH == h)
             {
-                Trace.WriteLine("UI.MainForm: Even size already; returning clone.");
+                Trace.WriteLine("UI.MainForm: AddRightAndBottomReplication: Even size already; returning clone.");
                 return new Bitmap(srcSquare);
             }
 
@@ -333,7 +333,7 @@ namespace Stay_Awake_2.UI
                 }
             }
 
-            Trace.WriteLine($"UI.MainForm: AddRightAndBottomReplication -> {dst.Width}x{dst.Height}");
+            Trace.WriteLine($"UI.MainForm: AddRightAndBottomReplication -> Widht x Height {dst.Width}x{dst.Height}");
             return dst;
         }
 
@@ -344,6 +344,7 @@ namespace Stay_Awake_2.UI
         private void ResizeClientToBitmap(Bitmap bmp)
         {
             if (bmp == null) return;
+            Trace.WriteLine("UI.MainForm: Entered  ResizeClientToBitmap ...");
             Trace.WriteLine($"UI.MainForm: ResizeClientToBitmap: target client={bmp.Width}x{bmp.Height}");
 
             // Current non-client borders
@@ -356,7 +357,8 @@ namespace Stay_Awake_2.UI
 
             // Apply
             this.Size = new Size(targetW + ncW, targetH + ncH);
-            Trace.WriteLine($"UI.MainForm: New Window Size={this.Width}x{this.Height} (Client={this.ClientSize.Width}x{this.ClientSize.Height})");
+            Trace.WriteLine($"UI.MainForm: ResizeClientToBitmap: New Window Size={this.Width}x{this.Height} (Client={this.ClientSize.Width}x{this.ClientSize.Height})");
+            Trace.WriteLine("UI.MainForm: Exiting ResizeClientToBitmap");
         }
     }
 }

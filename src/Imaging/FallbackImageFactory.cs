@@ -658,9 +658,9 @@ jK6GQC4pdPogvKZTZymzlcryp0XW6wxplCtiuq8phiU1Hp//2Q==
 ");
 
         /// <summary>
-        /// LEFT Eye of Horus rendered from an embedded PNG.
+        /// LEFT Eye of Horus rendered from an embedded JPG.
         /// Scales uniformly to fill 99% of a square bitmap (1% border), centered on white.
-        /// If 'ink' is provided, prefer shipping a matching-colored PNG; tinting a raster is possible
+        /// If 'ink' is provided, prefer shipping a matching-colored JPG; tinting a raster is possible
         /// but adds code and can soften edges.
         /// </summary>
         public static Bitmap CreateEyeOfHorusBitmap(int size = 256, Color? ink = null)
@@ -668,19 +668,26 @@ jK6GQC4pdPogvKZTZymzlcryp0XW6wxplCtiuq8phiU1Hp//2Q==
             int s = Math.Max(64, Math.Min(1024, size));
             var bmp = new Bitmap(s, s, PixelFormat.Format32bppPArgb);
             Trace.WriteLine($"FallbackImageFactory: Entered CreateEyeOfHorusBitmap({size}, ink:{ink?.ToString() ?? "default"}) ...");
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [requested initial bmp] size={size}, clamped s={s}");
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [requested initial bmp] initial bmp W x H = {bmp.Width} x {bmp.Height}");
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [requested initial bmp] initial bmp DPI X x Y = {bmp.HorizontalResolution:0.##} x {bmp.VerticalResolution:0.##}");
 
             // Decode the embedded JPG
             using var src = LoadEmbeddedPngJpg(FALLBACK_EYE_IMAGE_BASE64);
-            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: decoded base64 image W x H = {src.Width} x {src.Height}");
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [decoded base64 image] W x H = {src.Width} x {src.Height}");
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [decoded base64 image] src (decoded) W x H = {src.Width} x {src.Height}");
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [decoded base64 image] src DPI X x Y = {src.HorizontalResolution:0.##} x {src.VerticalResolution:0.##}");
 
-            // If you really want to recolor a single PNG at runtime, uncomment ApplyTint().
-            // NOTE: This costs quality (antialias fringing) unless your PNG is a pure alpha mask.
+            // If you really want to recolor a single JPG at runtime, uncomment ApplyTint().
+            // NOTE: This costs quality (antialias fringing) unless your JPG is a pure alpha mask.
             // if (ink.HasValue) ApplyTint(src, ink.Value);
 
             using var g = Graphics.FromImage(bmp);
             g.SmoothingMode = SmoothingMode.HighQuality;
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [constructed g] Graphics page-unit={g.PageUnit}, DpiX x DpiY = {g.DpiX:0.##} x {g.DpiY:0.##}");
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [constructed g] Modes Smoothing={g.SmoothingMode}, Interp={g.InterpolationMode}, PixelOffset={g.PixelOffsetMode}");
 
             // White background “wall”
             g.Clear(Color.White);
@@ -688,12 +695,16 @@ jK6GQC4pdPogvKZTZymzlcryp0XW6wxplCtiuq8phiU1Hp//2Q==
             // Compute 1% border box
             float border = s * 0.01f;
             var dstBox = new RectangleF(border, border, s - 2 * border, s - 2 * border);
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [computed dstBox] dstBox x,y,w,h = ({dstBox.X:0.##},{dstBox.Y:0.##},{dstBox.Width:0.##},{dstBox.Height:0.##}) "
+               + $"(border={border:0.##}, border%={(border / s * 100):0.##}%)");
 
             // Fit the source uniformly inside dstBox
-            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: Fitting source uniformly inside dstBox.");
             var fit = GetUniformFit(src.Width, src.Height, dstBox);
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [Fit source uniformly inside dstBox] fit.rect x,y,w,h = ({fit.rect.X:0.##},{fit.rect.Y:0.##},{fit.rect.Width:0.##},{fit.rect.Height:0.##}), scale={fit.scale:0.####}");
 
-            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: fit.rect x,y,w,h = ({fit.rect.X:0.##},{fit.rect.Y:0.##},{fit.rect.Width:0.##},{fit.rect.Height:0.##}), scale={fit.scale:0.####}");
+            // show the exact rounded dest rect we actually draw
+            var destRect = Rectangle.Round(fit.rect);
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [destRect (rounded)] X,Y,W,H = ({destRect.X},{destRect.Y},{destRect.Width},{destRect.Height})");
 
             using var ia = new ImageAttributes(); // (hook for color matrices if you later choose tinting)
             g.DrawImage(
@@ -704,7 +715,12 @@ jK6GQC4pdPogvKZTZymzlcryp0XW6wxplCtiuq8phiU1Hp//2Q==
                 ia
             );
 
-            Trace.WriteLine($"FallbackImageFactory: Exiting CreateEyeOfHorusBitmap (success) with bitmap W x H = {bmp.Width} x {bmp.Height}");
+            Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [RETURNING FINAL] bmp W x H = {bmp.Width} x {bmp.Height} "
+               + $"| srcW x srcH = {src.Width} x {src.Height} | scale={fit.scale:0.####} "
+               + $"| drawnW x drawnH = {destRect.Width} x {destRect.Height} "
+               + $"| drawn%ofBmp={(100.0 * destRect.Width / bmp.Width):0.##}%");
+
+            Trace.WriteLine($"FallbackImageFactory: Exiting CreateEyeOfHorusBitmap (success)");
             return bmp;
         }
         // ---- helpers for CreateEyeOfHorusBitmap ----
@@ -734,8 +750,8 @@ jK6GQC4pdPogvKZTZymzlcryp0XW6wxplCtiuq8phiU1Hp//2Q==
             return (new RectangleF(x, y, w, h), scale);
         }
 
-        // Optional raster tinting (best if your PNG is an alpha-only mask).
-        // For a gold→black swap, it’s simpler and cleaner to ship a black PNG instead.
+        // Optional raster tinting (best if your JPG is an alpha-only mask).
+        // For a gold→black swap, it’s simpler and cleaner to ship a black JPG instead.
         private static void ApplyTint(Bitmap bmp, Color tint)
         {
             // ColorMatrix approach: keep alpha, replace RGB with tint * alpha
