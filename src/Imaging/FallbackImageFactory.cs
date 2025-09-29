@@ -751,7 +751,7 @@ jK6GQC4pdPogvKZTZymzlcryp0XW6wxplCtiuq8phiU1Hp//2Q==
         }
 
         // Optional raster tinting (best if your JPG is an alpha-only mask).
-        // For a gold→black swap, it’s simpler and cleaner to ship a black JPG instead.
+        // For a gold->black swap, it’s simpler and cleaner to ship a black JPG instead.
         private static void ApplyTint(Bitmap bmp, Color tint)
         {
             // ColorMatrix approach: keep alpha, replace RGB with tint * alpha
