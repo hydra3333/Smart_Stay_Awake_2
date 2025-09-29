@@ -86,7 +86,7 @@ namespace Stay_Awake_2
                         // Overwrite each run to keep logs tight.
                         // But CanOpenForWrite() creates the file to test writability anyway, so no need to open/truncate.
                         // TextWriterTraceListener will create the file if missing and append if present;
-                        // since CanOpenForWrite has already created a fresh file, you’ll get a clean file anyway.
+                        // since CanOpenForWrite has already created a fresh file, you'll get a clean file anyway.
                         // using (File.Create(logFullPath)) { /* truncate/close */ }
                         // Add listener and write a small session header
                         Trace.Listeners.Add(new TextWriterTraceListener(logFullPath));
@@ -180,7 +180,7 @@ namespace Stay_Awake_2
             sb.AppendLine("  --until \"YYYY-M-D H:m:s\"");
             sb.AppendLine("      Mutually exclusive with --for.");
             sb.AppendLine("      Keep awake until the given local 24-hour timestamp, then quit gracefully.");
-            sb.AppendLine("      Examples (relaxed spacing & 1–2 digit parts accepted):");
+            sb.AppendLine("      Examples (relaxed spacing & 1-2 digit parts accepted):");
             sb.AppendLine("        \"2025-01-02 23:22:21\"");
             sb.AppendLine("        \"2025- 1- 2  3: 2: 1\"");
             sb.AppendLine("        \"2025-1-2 3:2:1\"");
