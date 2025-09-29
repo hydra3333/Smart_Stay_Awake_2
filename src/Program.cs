@@ -56,7 +56,7 @@ namespace Stay_Awake_2
                 bool enableTrace = FORCED_TRACE || opts.Verbose;
                 string? logFullPath = null;
 
-                // When Tracing enabled, setup Listeners 
+                // When Tracing enabled, setup Listeners
                 Trace.WriteLine("Stay_Awake_2: Main: Start of tracing config TRY");
                 try
                 {
