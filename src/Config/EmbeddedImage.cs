@@ -15,7 +15,7 @@ namespace Stay_Awake_2
         // In the IF test below,
         //      set to true to signal "no embedded image",
         //      or false to use the embedded image.
-#if true
+#if false
         public static readonly string EYE_IMAGE_BASE64 = CleanBase64(@"");
 #else
         public static readonly string EYE_IMAGE_BASE64 = CleanBase64(

@@ -663,9 +663,9 @@ jK6GQC4pdPogvKZTZymzlcryp0XW6wxplCtiuq8phiU1Hp//2Q==
         /// If 'ink' is provided, prefer shipping a matching-colored JPG; tinting a raster is possible
         /// but adds code and can soften edges.
         /// </summary>
-        public static Bitmap CreateEyeOfHorusBitmap(int size = 256, Color? ink = null)
+        public static Bitmap CreateEyeOfHorusBitmap(int size = AppConfig.WINDOW_MAX_IMAGE_EDGE_PX, Color? ink = null)
         {
-            int s = Math.Max(64, Math.Min(1024, size));
+            int s = Math.Max(64, Math.Min(AppConfig.WINDOW_MAX_IMAGE_EDGE_PX, size));
             var bmp = new Bitmap(s, s, PixelFormat.Format32bppPArgb);
             Trace.WriteLine($"FallbackImageFactory: Entered CreateEyeOfHorusBitmap({size}, ink:{ink?.ToString() ?? "default"}) ...");
             Trace.WriteLine($"FallbackImageFactory: CreateEyeOfHorusBitmap: [requested initial bmp] size={size}, clamped s={s}");

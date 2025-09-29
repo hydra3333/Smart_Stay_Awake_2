@@ -156,14 +156,14 @@ namespace Stay_Awake_2.UI
                         probeList.Add(Path.Combine(exeDir, "Assets", $"Stay_Awake_icon{ext}"));
 
                     string? found = probeList.FirstOrDefault(File.Exists);
-                    // **********************************************************************
+
                     // ??????????????????????????????????????????????????????????????????????
                     // for testing only: disable EXE-neighbour to force FALLBACK
                     //
-                    found = null; // TEMP: disable EXE-neighbor for now
+                    // found = null; // TEMP: disable EXE-neighbor for now
                     //
                     // ??????????????????????????????????????????????????????????????????????
-                    // **********************************************************************
+
                     if (found != null)
                     {
                         string ext = Path.GetExtension(found) ?? string.Empty;
@@ -178,7 +178,7 @@ namespace Stay_Awake_2.UI
                     {
                         // 4) Self-generated checkerboard “eye” fallback
                         Trace.WriteLine("UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: No disk/embedded image found; using final fallback synthetic image (4/checkerboard).");
-                        src = FallbackImageFactory.CreateEyeOfHorusBitmap(256);
+                        src = FallbackImageFactory.CreateEyeOfHorusBitmap(AppConfig.WINDOW_MAX_IMAGE_EDGE_PX);
                         Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Retrieved final fallback synthetic image. Size={src.Width}x{src.Height}");
                     }
                 }
