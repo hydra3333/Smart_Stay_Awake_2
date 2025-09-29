@@ -88,7 +88,7 @@ namespace Stay_Awake_2
                         // TextWriterTraceListener will create the file if missing and append if present;
                         // since CanOpenForWrite has already created a fresh file, you'll get a clean file anyway.
                         // using (File.Create(logFullPath)) { /* truncate/close */ }
-                        // Add listener and write a small session header
+                        // Add listener and write a small session header.
                         Trace.Listeners.Add(new TextWriterTraceListener(logFullPath));
 #if DEBUG
                         // Mirror to VS Output window while debugging
