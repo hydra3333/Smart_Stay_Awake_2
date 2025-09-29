@@ -1,15 +1,15 @@
-# Stay_Awake_2 - C# WinForms Re-implementation SPECIFICATION — v12
+﻿# Smart_Stay_Awake_2 - C# WinForms Re-implementation SPECIFICATION — v12
 
 **Date:** 2025-09-29
 
 ## v12 Delta (changes from v11 — minimal edits only)
 - **Image source priority order updated** to prefer a sidecar image next to the EXE before the embedded base64 image, to reduce memory footprint when an external file is available. (Exact order shown in §4.3.)
-- **Repository/structure note clarified**: source lives under `/src` in the repo `https://github.com/hydra3333/Stay_Awake_2` (see Appendix B.1).
+- **Repository/structure note clarified**: source lives under `/src` in the repo `https://github.com/hydra3333/Smart_Stay_Awake_2` (see Appendix B.1).
 - **Housekeeping (Visual Studio)** updated with the **NuGet packages we added** and what they are for: `Microsoft.Windows.CsWin32`, `Microsoft.Windows.SDK.Win32Metadata`, `Microsoft.Windows.WDK.Win32Metadata` (see Appendix B.9.7).
 - **⚠️ LARGE NOTE added:** do **NOT** auto-download or open `EmbeddedImage.cs` because it contains a very large base64 image and can overwhelm tools and memory; humans may open locally if needed. (See the banner below.)
 - No other content changes; wording and section layout preserved unless strictly necessary for clarity of the above updates.
 
-# Stay\_Awake\_2 - C# WinForms Re-implementation SPECIFICATION
+# Smart\_Stay\_Awake\_2 - C# WinForms Re-implementation SPECIFICATION
 
 **⚠️⚠️ VERY IMPORTANT (v12): DO NOT auto-download or open `EmbeddedImage.cs`.**
 It contains a very large base64 image and will swamp automated tools/memory. 
@@ -19,7 +19,7 @@ This is a *developer-only* file and should be handled manually if needed.
 
 ## 0) Goal (What we’re doing)
 
-We are re-imagining and re-developing the **Stay\_Awake\_2** utility
+We are re-imagining and re-developing the **Smart\_Stay\_Awake\_2** utility
 originally written in Python (tkinter + Pillow + pystray + wakepy) into **C# (.NET 8, WinForms)**.
 
 This is specifically **not** a line-for-line re-implementation of the example python program (although the 
@@ -112,7 +112,7 @@ C# using Visual Studio Community edition with specific intent to
   * Search order priority:
     1. CLI `--icon PATH`
     2. embedded base64 variable (if non-empty)
-    3. file named `Stay_Awake_icon.*` next to the EXE/script; supported types: **PNG, JPG/JPEG, BMP, GIF, ICO**
+    3. file named `Smart_Stay_Awake_icon.*` next to the EXE/script; supported types: **PNG, JPG/JPEG, BMP, GIF, ICO**
     4. Validation:    
       * File must exist.
       * Extension must be one of above (case-insensitive).
@@ -164,7 +164,7 @@ C# using Visual Studio Community edition with specific intent to
     * Labels for: blurb, ETA, remaining time, cadence (frequency of gui countdown update, adjusts based on bands of time remaining, throttles when hidden, timer display snaps to neat boundaries when far from the deadline (calm UI)).
   * Window re-sized to cater for image size plus other labels and fields.
   * User Resizing disabled (via `FormBorderStyle.FixedSingle`, `MaximizeBox=false`).
-* **Stay_Awake_2 logic**:
+* **Smart_Stay_Awake_2 logic**:
   * On ready: call `SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED)`.
   * On quit: call `SetThreadExecutionState(ES_CONTINUOUS)` to clear.
   * please check/confirm this is the case with the working python program as the example .
@@ -212,7 +212,7 @@ C# using Visual Studio Community edition with specific intent to
   * Update labels and tray tooltip.
   * Use adaptive cadence (frequency of gui countdown update, adjusts based on bands of time remaining, throttles when hidden, timer display snaps to neat boundaries when far from the deadline (calm UI))
 
-4. **Stay_Awake_2 logic**    
+4. **Smart_Stay_Awake_2 logic**    
   * Set thread execution state.
   * Ensure revert on quit.
 
@@ -259,7 +259,7 @@ C# using Visual Studio Community edition with specific intent to
    ├─ Start timers (System.Windows.Forms.Timer (UI thread), not System.Timers.Timer) (Timers are on the UI thread, simplifying updates.)
    ├─ Periodically recalc and update labels according to cadence (countdown update frequency) and related specifications
    └─ Throttle updates to avoid repaints storms
-4. Stay_Awake_2 Logic
+4. Smart_Stay_Awake_2 Logic
    ├─ Once UI + timers are stable, call SetThreadExecutionState
    └─ On quit/exit: Clear, restore defaults, cleanup, exit
 5. Cleanup
@@ -296,7 +296,7 @@ C# using Visual Studio Community edition with specific intent to
 * Load image from source priority order
 * Load image from source priority order
   * CLI --icon PATH
-  * **Stay_Awake_icon.*** next to the EXE (PNG, JPG/JPEG, BMP, GIF, ICO)
+  * **Smart_Stay_Awake_icon.*** next to the EXE (PNG, JPG/JPEG, BMP, GIF, ICO)
   * embedded base64 image (last resort before Tiny fallback glyph)
   * internal tiny fallback glyph (if present)
     * Validation: file must exist and extension must be supported (case-insensitive)
@@ -377,7 +377,7 @@ return square, ico
 
 1. **ImageLoader** (input orchestration)
 
-   * **Inputs:** CLI `--icon` path (preferred), embedded base64 (optional), `Stay_Awake_icon.*` next to EXE (fallback), internal glyph (last resort).
+   * **Inputs:** CLI `--icon` path (preferred), embedded base64 (optional), `Smart_Stay_Awake_icon.*` next to EXE (fallback), internal glyph (last resort).
    * **Outputs:** `Bitmap original` (32bpp ARGB).
    * **Rules:**
      * Supported extensions: `.png`, `.jpg/.jpeg`, `.bmp`, `.gif`, `.ico`.
@@ -455,7 +455,7 @@ return square, ico
 
 * **Tray**:
   `notifyIcon.Icon = multiImageIcon;`
-  `notifyIcon.Text = "Stay Awake - running (ETA 12:34)";` *(tooltip updated by timers)*
+  `notifyIcon.Text = "Smart Stay Awake - running (ETA 12:34)";` *(tooltip updated by timers)*
 * **Window title & form icon** (optional):
   `this.Icon = multiImageIcon;` *(WinForms window chrome icon)*
 * **Application Icon** (Explorer/shortcuts):
@@ -479,7 +479,7 @@ return square, ico
 
 * **DIB for small frames** (hybrid encoding): match historical toolchains (≤48 as DIB + AND mask, 256 as PNG). Not necessary for Win10/11; only if you need maximum cross-tool compatibility.
 
-### 4.4 Stay_Awake_2 logic (Win32)
+### 4.4 Smart_Stay_Awake_2 logic (Win32)
 
 * Use **`SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED)`** when armed, and call again with `ES_CONTINUOUS` on **quit** to clear.
 * Verify these states with what is used in the working example python program
@@ -523,7 +523,7 @@ enum QuitMode
 ```csharp
 internal static class AppState
 {
-    public static string AppName = "Stay_Awake_2";
+    public static string AppName = "Smart_Stay_Awake_2";
     public static bool DEBUG_IS_ON = false;
 
     public static string? ImagePath;
@@ -568,9 +568,9 @@ struct ImageAssets
   * `TRACE_ENABLED` (bool) - computed at startup:
   * `TRACE_ENABLED = FORCED_TRACE || args.Has("--verbose")`
 * Paths (globals):
-  * `LOG_FILE_BASENAME` = `"Stay_Awake_2_Trace_{yyyyMMdd}.log"` (zero-padded date fields)
+  * `LOG_FILE_BASENAME` = `"Smart_Stay_Awake_2_Trace_{yyyyMMdd}.log"` (zero-padded date fields)
   * `LOG_PRIMARY_DIR` = `<directory containing the EXE>`
-  * `LOG_FALLBACK_DIR` = `%LocalAppData%\Stay_Awake_2\Logs`
+  * `LOG_FALLBACK_DIR` = `%LocalAppData%\Smart_Stay_Awake_2\Logs`
   * `LOG_FULL_PATH` (resolved final path; stored in AppState)
 * Listener name: `"FileTraceListener"`
 
@@ -579,8 +579,8 @@ struct ImageAssets
 * If `TRACE_ENABLED == true`:
   1. `Trace.Listeners.Clear()` (remove default listener; nothing goes to OS debug stream).
   2. Compute LOG_FULL_PATH:
-      - Try primary: `<EXE folder>\Stay_Awake_2_Trace_YYYYMMDD.log` with overwrite semantics (FileMode.Create).
-      - If access denied or IO error, create the folder `%LocalAppData%\Stay_Awake_2\Logs` and set LOG_FULL_PATH to that location.
+      - Try primary: `<EXE folder>\Smart_Stay_Awake_2_Trace_YYYYMMDD.log` with overwrite semantics (FileMode.Create).
+      - If access denied or IO error, create the folder `%LocalAppData%\Smart_Stay_Awake_2\Logs` and set LOG_FULL_PATH to that location.
   3. Create a `TextWriterTraceListener(LOG_FULL_PATH) named `"FileTraceListener"`.
   4. `Trace.Listeners.Add(...)`; `Trace.AutoFlush = true` (recommended: `Trace.UseGlobalLock = true`).
   5. Emit a header line with absolute path and UTC/local timestamp, app version, CLI args (minus secrets), and DPI/machine basics.
@@ -591,7 +591,7 @@ struct ImageAssets
 #### 4.11.3 Usage guidance
 
 * Use `Trace.WriteLine(...)` consistently for all diagnostics (including what was formerly considered "Debug").
-* Use and Add consistent context prefixes (e.g., `[Init]`, `[Image]`, `[Icon]`, `[Timer]`, `[Stay_Awake_2]`) to the start of each trace line, for easy grepping.
+* Use and Add consistent context prefixes (e.g., `[Init]`, `[Image]`, `[Icon]`, `[Timer]`, `[Smart_Stay_Awake_2]`) to the start of each trace line, for easy grepping.
 * Example patterns (not code):
   - "`[Init] Entered ParseCli()`", "`[Init] Exiting ParseCli()`"
   - "`[Image] MakeSquare: 320×200 -> 320×320 (replicated edges)`"
@@ -633,7 +633,7 @@ struct ImageAssets
 * Tray icon displays.
 * Tooltip updates with ETA.
 * Timers tick at adaptive cadence.
-* Stay_Awake_2 state toggled.
+* Smart_Stay_Awake_2 state toggled.
 
 ### DST tests
 
@@ -736,45 +736,45 @@ then the Bounds below are controlled by constants `MIN_AUTO_QUIT_SECS` and `MAX_
 # Appendix B — Draft initial Visual Studio file–project structure for consideration
 
 > Target: **.NET 8**, **WinForms**, single-EXE publish (self-contained optional).
-> Namespace: `Stay_Awake_2.
+> Namespace: `Smart_Stay_Awake_2.
 > Resources you said you have: a **PNG image** (window content) and a **PNG icon** (used for desktop shortcut/App Icon). We’ll also embed a tiny fallback glyph.
 
 
 ## B.1 Solution & project layout
 
 ```
-Stay_Awake_2/                              <- Solution root (on disk)
-├─ Stay_Awake_2.sln                        <- Double-click this to open in VS
+Smart_Stay_Awake_2/                              <- Solution root (on disk)
+├─ Smart_Stay_Awake_2.sln                        <- Double-click this to open in VS
 ├─ .gitignore                            <- (optional, for Git)
 ├─ README.md                             <- (optional, project docs)
 └─ docs/                                 <- Source code container
 └─ src/                                  <- Source code container
-   └─ Stay_Awake_2/                        <- WinForms project root
-      ├─ Stay_Awake_2.csproj               <- Project file
+   └─ Smart_Stay_Awake_2/                        <- WinForms project root
+      ├─ Smart_Stay_Awake_2.csproj               <- Project file
       ├─ Program.cs                      
       ├─ AppState.cs                     
       ├─ Fatal.cs                        
-      ├─ PowerManagement/                <- Namespace: Stay_Awake_2.PowerManagement
+      ├─ PowerManagement/                <- Namespace: Smart_Stay_Awake_2.PowerManagement
       │  └─ ExecutionState.cs
-      ├─ Cli/                            <- Namespace: Stay_Awake_2.Cli
+      ├─ Cli/                            <- Namespace: Smart_Stay_Awake_2.Cli
       │  ├─ CliOptions.cs
       │  └─ CliParser.cs
-      ├─ Imaging/                        <- Namespace: Stay_Awake_2.Imaging
+      ├─ Imaging/                        <- Namespace: Smart_Stay_Awake_2.Imaging
       │  ├─ ImageLoader.cs
       │  ├─ ImageSquareReplicator.cs
       │  └─ IconWriter.cs
-      ├─ Time/                           <- Namespace: Stay_Awake_2.Time
+      ├─ Time/                           <- Namespace: Smart_Stay_Awake_2.Time
       │  ├─ TimezoneHelpers.cs
       │  └─ CountdownPlanner.cs
-      ├─ UI/                             <- Namespace: Stay_Awake_2.UI
+      ├─ UI/                             <- Namespace: Smart_Stay_Awake_2.UI
       │  ├─ MainForm.cs
       │  ├─ MainForm.Designer.cs
       │  └─ TrayManager.cs
       ├─ Properties/
       │  └─ Resources.resx
       ├─ Assets/
-      │  ├─ Stay_Awake_icon.png
-      │  └─ Stay_Awake_icon.ico
+      │  ├─ Smart_Stay_Awake_icon.png
+      │  └─ Smart_Stay_Awake_icon.ico
       ├─ Publishing/
       │  └─ FolderProfile.pubxml
       ├─ app.manifest
@@ -794,7 +794,7 @@ Stay_Awake_2/                              <- Solution root (on disk)
 
 * **Build-time Application Icon**
   * Use **Project -> Properties -> Application -> Icon** and point to a prebuilt **.ico** (multi-image) you already have.
-  * Keep the **source PNG** you used for that .ico under `src/Stay_Awake_2/Assets/app_icon_256.png` (for provenance).
+  * Keep the **source PNG** you used for that .ico under `src/Smart_Stay_Awake_2/Assets/app_icon_256.png` (for provenance).
 
 * **Runtime tray icon**
   * Built at startup in memory (`IconWriter`) from whichever image `ImageLoader` chooses (CLI -> embedded -> sidecar -> fallback).
@@ -851,14 +851,14 @@ Stay_Awake_2/                              <- Solution root (on disk)
 
 ## B.5 Publish profile (Folder)
 
-`src/Stay_Awake_2/Publishing/FolderProfile.pubxml`
+`src/Smart_Stay_Awake_2/Publishing/FolderProfile.pubxml`
 
 ```xml
 <Project>
   <PropertyGroup>
     <Configuration>Release</Configuration>
     <Platform>Any CPU</Platform>
-    <PublishDir>..\..\..\dist\Stay_Awake_2\</PublishDir>
+    <PublishDir>..\..\..\dist\Smart_Stay_Awake_2\</PublishDir>
     <PublishProtocol>FileSystem</PublishProtocol>
     <TargetFramework>net8.0-windows</TargetFramework>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -904,7 +904,7 @@ Stay_Awake_2/                              <- Solution root (on disk)
   * `TimezoneHelpers`: `TimeZoneInfo.Local`, DST boundary checks vs Win32.
   * `CountdownPlanner`: `--for/--until` -> absolute target -> cadence schedule.
 
-* **Stay_Awake_2/**
+* **Smart_Stay_Awake_2/**
   * `ExecutionState`: P/Invoke to `SetThreadExecutionState`, tracks “armed” flag so `Fatal()` can revert safely.
 
 * **UI/**
@@ -915,7 +915,7 @@ Stay_Awake_2/                              <- Solution root (on disk)
 
 ## B.7 Where to put your two PNGs (your note)
 
-* **Shortcut/App icon**: keep the final **`.ico`** at `src/Stay_Awake_2/Assets/AppIcon.ico` and set it in **Project Properties -> Application**.
+* **Shortcut/App icon**: keep the final **`.ico`** at `src/Smart_Stay_Awake_2/Assets/AppIcon.ico` and set it in **Project Properties -> Application**.
   * Keep your **source `app_icon_256.png`** alongside for reference, but not required at runtime.
 
 * **Window image**: put your **`window_image.png`** in `Assets/` for dev; the production app will normally get the image from `--icon` or embedded fallback.
@@ -1067,7 +1067,7 @@ Nice-to-haves (optional):
 ## B.10.5 Visual Studio Environment Checklist
 
 ```
-Stay_Awake_2 — Visual Studio Environment Checklist
+Smart_Stay_Awake_2 — Visual Studio Environment Checklist
 ================================================
 
 Setup IDE (Visual Studio Installer)
@@ -1474,7 +1474,7 @@ The cadence system dynamically adjusts how frequently the countdown display upda
 
 **Critical Ordering** (from `run()` method):
 
-1. **Activate wake lock** (`self.start_Stay_Awake_2()`)
+1. **Activate wake lock** (`self.start_Smart_Stay_Awake_2()`)
 2. **Recalculate seconds** (re-ceil from target epoch)
 3. **Start auto-quit timer** (`self._start_auto_quit_timer(secs_to_run)`)
    - Sets `self.auto_quit_deadline` (monotonic)
@@ -1898,19 +1898,19 @@ PInvoke.SetThreadExecutionState(
 ### Issue
 Appendix B.1 proposed:
 ```
-Stay_Awake_2/                    <- Project folder
-├─ Stay_Awake_2/                 <- Subfolder (collision!)
+Smart_Stay_Awake_2/                    <- Project folder
+├─ Smart_Stay_Awake_2/                 <- Subfolder (collision!)
 │  └─ ExecutionState.cs
 ```
 
-**Problem:** Creates namespace `Stay_Awake_2.Stay_Awake_2.ExecutionState` (confusing for novice developers).
+**Problem:** Creates namespace `Smart_Stay_Awake_2.Smart_Stay_Awake_2.ExecutionState` (confusing for novice developers).
 
 ### Resolution
 **Renamed subfolder to `PowerManagement/`:**
 ```
-Stay_Awake_2/                    <- Project folder
+Smart_Stay_Awake_2/                    <- Project folder
 ├─ PowerManagement/            <- Clear, descriptive name
-│  └─ ExecutionState.cs        <- Namespace: Stay_Awake_2.PowerManagement
+│  └─ ExecutionState.cs        <- Namespace: Smart_Stay_Awake_2.PowerManagement
 ```
 
 **Benefits:**
@@ -1959,7 +1959,7 @@ if (logSetupFailed && SHOW_LOG_FAILURE_MESSAGEBOX)
 | Form layout constants | ✅ Resolved | Extracted from Python; defined in AppState.cs |
 | Fallback glyph | ✅ Resolved | C# GDI+ translation of Python drawing code |
 | Win32 "formal" definitions | ✅ Resolved | CsWin32 NuGet package (Microsoft-official) |
-| Namespace collision | ✅ Resolved | Folder renamed: Stay_Awake_2/ → PowerManagement/ |
+| Namespace collision | ✅ Resolved | Folder renamed: Smart_Stay_Awake_2/ → PowerManagement/ |
 | Log failure MessageBox | ✅ Resolved | Toggleable const SHOW_LOG_FAILURE_MESSAGEBOX |
 
 **All technical ambiguities clarified. Development can proceed with confidence.**
@@ -2015,5 +2015,5 @@ on Microsoft’s website and install the latest 8.x.y or later version.
 ---
 
 
-> Repository: https://github.com/hydra3333/Stay_Awake_2 — **source code lives under `/src`** (e.g., `src/Stay_Awake_2/`). 
+> Repository: https://github.com/hydra3333/Smart_Stay_Awake_2 — **source code lives under `/src`** (e.g., `src/Smart_Stay_Awake_2/`). 
 > When cloning, work in the `/src` subtree for code; docs may live under `/docs`.

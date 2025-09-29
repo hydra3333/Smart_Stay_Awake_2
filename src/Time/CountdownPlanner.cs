@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Stay_Awake_2.Time
+namespace Smart_Stay_Awake_2.Time
 {
     internal class CountdownPlanner
     {

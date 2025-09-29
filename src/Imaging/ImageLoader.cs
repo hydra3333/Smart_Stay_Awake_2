@@ -1,4 +1,4 @@
-﻿// File: src/Stay_Awake_2/Imaging/ImageLoader.cs
+﻿// File: src/Smart_Stay_Awake_2/Imaging/ImageLoader.cs
 // Purpose: Load a Bitmap from a chosen source (CLI path now; fallback next).
 // Notes:
 //   * System.Drawing on .NET 8 is supported on Windows. We dispose streams promptly.
@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 
-namespace Stay_Awake_2.Imaging
+namespace Smart_Stay_Awake_2.Imaging
 {
     internal static class ImageLoader
     {
@@ -51,7 +51,7 @@ namespace Stay_Awake_2.Imaging
             try
             {
                 string exeDir = AppContext.BaseDirectory;
-                string baseName = "Stay_Awake_icon";
+                string baseName = "Smart_Stay_Awake_icon";
                 foreach (var ext in AppConfig.ALLOWED_ICON_EXTENSIONS)
                 {
                     string candidate = Path.Combine(exeDir, baseName + ext);

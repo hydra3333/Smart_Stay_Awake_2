@@ -1,4 +1,4 @@
-﻿namespace Stay_Awake_2.UI
+﻿namespace Smart_Stay_Awake_2.UI
 {
     internal partial class MainForm
     {

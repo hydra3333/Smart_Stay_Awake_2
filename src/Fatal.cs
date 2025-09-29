@@ -1,4 +1,4 @@
-﻿// File: src/Stay_Awake_2/Fatal.cs
+﻿// File: src/Smart_Stay_Awake_2/Fatal.cs
 // Purpose: Centralized "fatal error" helper.
 // Shows a modal message box and exits the process with a specific code.
 // Pre-UI safe: do not depend on any Form/NotifyIcon being initialized.
@@ -7,7 +7,7 @@ using System;
 using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace Stay_Awake_2
+namespace Smart_Stay_Awake_2
 {
     internal static class FatalHelper
     {

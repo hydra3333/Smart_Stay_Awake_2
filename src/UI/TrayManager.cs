@@ -1,11 +1,11 @@
-﻿// File: src/Stay_Awake_2/UI/TrayManager.cs
+﻿// File: src/Smart_Stay_Awake_2/UI/TrayManager.cs
 using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;            // <-- needed for MemoryStream
 using System.Windows.Forms;
 
-namespace Stay_Awake_2.UI
+namespace Smart_Stay_Awake_2.UI
 {
     internal sealed class TrayManager : IDisposable
     {
@@ -24,7 +24,7 @@ namespace Stay_Awake_2.UI
 
         public TrayManager(AppState state, Form ownerForm)
         {
-            Trace.WriteLine("Stay_Awake_2: TrayManager: Entered ctor ...");
+            Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Entered ctor ...");
             _state = state ?? throw new ArgumentNullException(nameof(state));
             _ownerForm = ownerForm ?? throw new ArgumentNullException(nameof(ownerForm));
             Trace.WriteLine("TrayManager: Exiting ctor (success).");
@@ -35,20 +35,20 @@ namespace Stay_Awake_2.UI
         /// </summary>
         public void Initialize()
         {
-            Trace.WriteLine("Stay_Awake_2: TrayManager: Initialize: Entered ...");
+            Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Initialize: Entered ...");
             if (_disposed) throw new ObjectDisposedException(nameof(TrayManager));
             if (_initialized)
             {
-                Trace.WriteLine("Stay_Awake_2: TrayManager: Initialize: Already initialized; exiting.");
+                Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Initialize: Already initialized; exiting.");
                 return;
             }
 
             // Minimal placeholder context menu (items will be wired later).
             _menu = new ContextMenuStrip();
-            _menu.Items.Add("Show Window", null, (s, e) => Trace.WriteLine("Stay_Awake_2: TrayManager: Show Window clicked (stub)."));
-            _menu.Items.Add("Minimize to Tray", null, (s, e) => Trace.WriteLine("Stay_Awake_2: TrayManager: Minimize clicked (stub)."));
+            _menu.Items.Add("Show Window", null, (s, e) => Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Show Window clicked (stub)."));
+            _menu.Items.Add("Minimize to Tray", null, (s, e) => Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Minimize clicked (stub)."));
             _menu.Items.Add(new ToolStripSeparator());
-            _menu.Items.Add("Quit", null, (s, e) => Trace.WriteLine("Stay_Awake_2: TrayManager: Quit clicked (stub)."));
+            _menu.Items.Add("Quit", null, (s, e) => Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Quit clicked (stub)."));
 
             _tray = new NotifyIcon
             {
@@ -61,7 +61,7 @@ namespace Stay_Awake_2.UI
             };
 
             _initialized = true;
-            Trace.WriteLine("Stay_Awake_2: TrayManager: Initialize: Exiting (success).");
+            Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Initialize: Exiting (success).");
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Stay_Awake_2.UI
         /// </summary>
         public void SetIcon(Icon icon, MemoryStream backingStream)
         {
-            Trace.WriteLine("Stay_Awake_2: TrayManager: SetIcon ...");
+            Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: SetIcon ...");
             if (_disposed) throw new ObjectDisposedException(nameof(TrayManager));
             if (!_initialized) Initialize();
 
@@ -90,11 +90,11 @@ namespace Stay_Awake_2.UI
         /// </summary>
         public void Show()
         {
-            Trace.WriteLine("Stay_Awake_2: TrayManager: Show: Entered ...");
+            Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Show: Entered ...");
             if (_disposed) throw new ObjectDisposedException(nameof(TrayManager));
             if (!_initialized) Initialize();
             if (_tray != null) _tray.Visible = true;
-            Trace.WriteLine("Stay_Awake_2: TrayManager: Show: Exiting.");
+            Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Show: Exiting.");
         }
 
         /// <summary>
@@ -102,15 +102,15 @@ namespace Stay_Awake_2.UI
         /// </summary>
         public void Hide()
         {
-            Trace.WriteLine("Stay_Awake_2: TrayManager: Hide: Entered ...");
+            Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Hide: Entered ...");
             if (_tray != null) _tray.Visible = false;
-            Trace.WriteLine("Stay_Awake_2: TrayManager: Hide: Exiting.");
+            Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Hide: Exiting.");
         }
 
         public void Dispose()
         {
             if (_disposed) return;
-            Trace.WriteLine("Stay_Awake_2: TrayManager: Dispose: Entered ...");
+            Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Dispose: Entered ...");
 
             try
             {
@@ -127,12 +127,12 @@ namespace Stay_Awake_2.UI
             }
             catch (Exception ex)
             {
-                Trace.WriteLine("Stay_Awake_2: TrayManager: Dispose: Caught exception: " + ex);
+                Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Dispose: Caught exception: " + ex);
             }
             finally
             {
                 _disposed = true;
-                Trace.WriteLine("Stay_Awake_2: TrayManager: Dispose: Exiting.");
+                Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Dispose: Exiting.");
             }
         }
     }

@@ -1,10 +1,10 @@
-﻿// File: src/Stay_Awake_2/Cli/CliOptions.cs
+﻿// File: src/Smart_Stay_Awake_2/Cli/CliOptions.cs
 // Purpose: Plain Old C# Object (POCO) that carries parsed command line options.
 // Coding style: PascalCase for public properties, camelCase for locals.
 
 using System;
 
-namespace Stay_Awake_2
+namespace Smart_Stay_Awake_2
 {
     /// <summary>
     /// Holds all command-line options after parsing.

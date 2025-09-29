@@ -1,11 +1,11 @@
-Here’s a **draft, evolving iteration plan** for next steps focused on **tray/menu integration** that
+﻿Here’s a **draft, evolving iteration plan** for next steps focused on **tray/menu integration** that
 mirrors the *behaviors* of the example Python program, while aligning with your v11 spec, coding rules, and the current C# solution layout.
 
 > **Assumptions / references**
 >
 > * **(1) Example Python program**: we’ll treat it as the behavioral reference for the tray/menu (menu items, state machine, and outcomes).
 > * **(2) “v11 change spec”**: the source of truth for safety-first rules, coding style, comments, and tracing requirements (even if slightly out of date).
-> * **(3) Repo**: `github.com/hydra3333/Stay_Awake_2` with C# sources under `/src`.
+> * **(3) Repo**: `github.com/hydra3333/Smart_Stay_Awake_2` with C# sources under `/src`.
 >
 >   * **Do not fetch or open** `EmbeddedImage.cs` (huge base64). We’ll avoid downloading/reading that file; where needed we’ll stub interfaces.
 > * **(4) Current code**: we keep existing function/variable names and comments wherever reasonable.

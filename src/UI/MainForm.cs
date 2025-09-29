@@ -1,4 +1,4 @@
-﻿using Stay_Awake_2.Imaging;
+﻿using Smart_Stay_Awake_2.Imaging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.LinkLabel;
 
-namespace Stay_Awake_2.UI
+namespace Smart_Stay_Awake_2.UI
 {
     // Accessibility matches internal AppState to avoid CS0051.
     internal partial class MainForm : Form
@@ -29,7 +29,7 @@ namespace Stay_Awake_2.UI
         // Constructor is lightweight: build controls, wire events, set fixed window policy.
         internal MainForm(AppState state)
         {
-            Trace.WriteLine("Stay_Awake_2: UI.MainForm: Entered MainForm ctor ...");
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Entered MainForm ctor ...");
             _state = state ?? throw new ArgumentNullException(nameof(state));
 
             InitializeComponent(); // designer baseline: AutoScaleMode=Dpi, etc.
@@ -61,7 +61,7 @@ namespace Stay_Awake_2.UI
             this.Controls.Add(_picture);
 
             Trace.WriteLine($"UI.MainForm: Using TraceEnabled={_state.TraceEnabled}");
-            Trace.WriteLine("Stay_Awake_2: UI.MainForm: Exiting MainForm ctor.");
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Exiting MainForm ctor.");
         }
 
         /// <summary>
@@ -78,17 +78,17 @@ namespace Stay_Awake_2.UI
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            Trace.WriteLine("Stay_Awake_2: UI.MainForm_Load: Entered MainForm_Load ...");
-            Trace.WriteLine("Stay_Awake_2: UI.MainForm_Load: Exiting MainForm_Load ...");
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm_Load: Entered MainForm_Load ...");
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm_Load: Exiting MainForm_Load ...");
         }
 
         // Dispose tray in FormClosed (no duplicate Dispose override).
         private void MainForm_FormClosed(object? sender, FormClosedEventArgs e)
         {
-            Trace.WriteLine("Stay_Awake_2: UI.MainForm: Entered MainForm_FormClosed ...");
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Entered MainForm_FormClosed ...");
             try { _tray?.Dispose(); _tray = null; }
             catch (Exception ex) { Trace.WriteLine("UI.MainForm: Tray dispose error: " + ex); }
-            Trace.WriteLine("Stay_Awake_2: UI.MainForm: Exiting MainForm_FormClosed ...");
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Exiting MainForm_FormClosed ...");
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace Stay_Awake_2.UI
                 // SOURCE PRIORITY (Spec v11):
                 //   1) CLI --icon PATH
                 //   2) Embedded base64 (if non-empty)
-                //   3) File 'Stay_Awake_icon.*' next to EXE (supported: png/jpg/jpeg/bmp/gif/ico)
+                //   3) File 'Smart_Stay_Awake_icon.*' next to EXE (supported: png/jpg/jpeg/bmp/gif/ico)
                 //   4) Self-generated checkerboard “eye” fallback
                 // ------------------------------------------------------------
                 // Note: we validate extension for disk files against AppConfig.ALLOWED_ICON_EXTENSIONS
@@ -151,9 +151,9 @@ namespace Stay_Awake_2.UI
                     // Prefer next-to-EXE (root) first, then ./Assets as a courtesy
                     var probeList = new List<string>();
                     foreach (var ext in AppConfig.ALLOWED_ICON_EXTENSIONS)
-                        probeList.Add(Path.Combine(exeDir, $"Stay_Awake_icon{ext}"));
+                        probeList.Add(Path.Combine(exeDir, $"Smart_Stay_Awake_icon{ext}"));
                     foreach (var ext in AppConfig.ALLOWED_ICON_EXTENSIONS)
-                        probeList.Add(Path.Combine(exeDir, "Assets", $"Stay_Awake_icon{ext}"));
+                        probeList.Add(Path.Combine(exeDir, "Assets", $"Smart_Stay_Awake_icon{ext}"));
 
                     string? found = probeList.FirstOrDefault(File.Exists);
 

@@ -1,11 +1,11 @@
-﻿// File: src/Stay_Awake_2/AppState.cs
+﻿// File: src/Smart_Stay_Awake_2/AppState.cs
 // Purpose: Immutable snapshot of runtime configuration and environment, created once in Program.Main.
 
 using System;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace Stay_Awake_2
+namespace Smart_Stay_Awake_2
 {
     internal enum IconSourceKind { None, CliPath, EmbeddedFallback, NeighborFile }
     internal enum PlannedMode { Indefinite, ForDuration, UntilTimestamp }

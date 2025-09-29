@@ -1,4 +1,4 @@
-// File: src/Stay_Awake_2/Program.cs
+﻿// File: src/Smart_Stay_Awake_2/Program.cs
 // Purpose: Entry point. Initialize WinForms defaults, parse CLI, help, configure tracing, build AppState, run MainForm.
 // NOTE: No single-instance/mutex in v11 plan.
 
@@ -10,7 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Stay_Awake_2
+namespace Smart_Stay_Awake_2
 {
     internal static class Program
     {
@@ -37,17 +37,17 @@ namespace Stay_Awake_2
 
             try
             {
-                Trace.WriteLine("Stay_Awake_2: Main: Entered Program.Main ...");
+                Trace.WriteLine("Smart_Stay_Awake_2: Main: Entered Program.Main ...");
 
                 // 1) Parse CLI -> may throw CliParseException with a friendly message.
-                Trace.WriteLine("Stay_Awake_2: Main: Start of CLI parse TRY");
+                Trace.WriteLine("Smart_Stay_Awake_2: Main: Start of CLI parse TRY");
                 CliOptions opts = CliParser.Parse(args);
-                Trace.WriteLine("Stay_Awake_2: Main: End of   CLI parse TRY (success)");
+                Trace.WriteLine("Smart_Stay_Awake_2: Main: End of   CLI parse TRY (success)");
 
                 // 1a) If --help was requested, print usage and exit(0) BEFORE any other work.
                 if (opts.ShowHelp)
                 {
-                    Trace.WriteLine("Stay_Awake_2: Main: Help requested via CLI. Showing usage and exiting.");
+                    Trace.WriteLine("Smart_Stay_Awake_2: Main: Help requested via CLI. Showing usage and exiting.");
                     ShowHelpAndExit();
                     return; // (unreached; Environment.Exit inside)
                 }
@@ -57,7 +57,7 @@ namespace Stay_Awake_2
                 string? logFullPath = null;
 
                 // When Tracing enabled, setup Listeners
-                Trace.WriteLine("Stay_Awake_2: Main: Start of tracing config TRY");
+                Trace.WriteLine("Smart_Stay_Awake_2: Main: Start of tracing config TRY");
                 try
                 {
                     Trace.Listeners.Clear(); // always clear first; avoid OutputDebugString noise
@@ -121,28 +121,28 @@ namespace Stay_Awake_2
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                 }
-                Trace.WriteLine("Stay_Awake_2: Main: End of   tracing config TRY");
+                Trace.WriteLine("Smart_Stay_Awake_2: Main: End of   tracing config TRY");
 
                 // 3) Create AppState (collects version, options, trace flags) (currently unused)
                 AppState mainApplicationState = AppState.Create(opts, enableTrace, logFullPath);
 
                 // 4) Run the MainForm (inject application state)
-                Trace.WriteLine("Stay_Awake_2: Main: Starting UI.MainForm ...");
+                Trace.WriteLine("Smart_Stay_Awake_2: Main: Starting UI.MainForm ...");
                 Application.Run(new UI.MainForm(mainApplicationState));
-                Trace.WriteLine("Stay_Awake_2: Main: UI.MainForm exited normally.");
-                Trace.WriteLine("Stay_Awake_2: Main: Exiting Program.Main (success).");
+                Trace.WriteLine("Smart_Stay_Awake_2: Main: UI.MainForm exited normally.");
+                Trace.WriteLine("Smart_Stay_Awake_2: Main: Exiting Program.Main (success).");
             }
             catch (CliParseException ex)
             {
                 // Known, friendly CLI error (bad args, etc.)
-                Trace.WriteLine("Stay_Awake_2: Main: Caught CliParseException in Program.Main.");
-                FatalHelper.Fatal("Stay_Awake_2: Main: Command-line error:\n" + ex.Message, exitCode: 2);
+                Trace.WriteLine("Smart_Stay_Awake_2: Main: Caught CliParseException in Program.Main.");
+                FatalHelper.Fatal("Smart_Stay_Awake_2: Main: Command-line error:\n" + ex.Message, exitCode: 2);
             }
             catch (Exception ex)
             {
                 // Unexpected, catch-all path.
-                Trace.WriteLine("Stay_Awake_2: Main: Caught unexpected exception in Program.Main: " + ex);
-                FatalHelper.Fatal("Stay_Awake_2: Main: Unexpected error: " + ex.Message, exitCode: 99);
+                Trace.WriteLine("Smart_Stay_Awake_2: Main: Caught unexpected exception in Program.Main: " + ex);
+                FatalHelper.Fatal("Smart_Stay_Awake_2: Main: Unexpected error: " + ex.Message, exitCode: 99);
             }
         }
 
@@ -154,7 +154,7 @@ namespace Stay_Awake_2
         {
             var sb = new StringBuilder();
             sb.AppendLine("Usage:");
-            sb.AppendLine("  Stay_Awake_2.exe [--help] [--verbose] [--icon PATH] (--for DURATION | --until \"YYYY-M-D H:m:s\")");
+            sb.AppendLine("  Smart_Stay_Awake_2.exe [--help] [--verbose] [--icon PATH] (--for DURATION | --until \"YYYY-M-D H:m:s\")");
             sb.AppendLine();
             sb.AppendLine("Options:");
             sb.AppendLine("  --help");
@@ -162,8 +162,8 @@ namespace Stay_Awake_2
             sb.AppendLine();
             sb.AppendLine("  --verbose");
             sb.AppendLine("      Enable detailed trace logging to a file.");
-            sb.AppendLine("      Log file created/overwritten alongside \"Stay_Awake_2.exe\" if that directory is writable,");
-            sb.AppendLine("               otherwise in: \"%LocalAppData%\\Stay_Awake_2\\Logs\"");
+            sb.AppendLine("      Log file created/overwritten alongside \"Smart_Stay_Awake_2.exe\" if that directory is writable,");
+            sb.AppendLine("               otherwise in: \"%LocalAppData%\\Smart_Stay_Awake_2\\Logs\"");
             sb.AppendLine();
             sb.AppendLine("  --icon PATH");
             sb.AppendLine("      Use a specific image file for the window/tray icon.");
