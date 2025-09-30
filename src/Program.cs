@@ -148,9 +148,61 @@ namespace Smart_Stay_Awake_2
         /// <summary>
         /// Prints concise usage/help to Console (if visible) AND shows a MessageBox (for double-clicked runs).
         /// Exits the process with code 0.
+        /// Now uses HelpTextBuilder so help content is shared with the UI Help button.
         /// </summary>
         private static void ShowHelpAndExit()
         {
+            Trace.WriteLine("Smart_Stay_Awake_2: Entered ShowHelpAndExit ...");
+            Trace.WriteLine("Smart_Stay_Awake_2: ShowHelpAndExit: Help requested via CLI. Showing usage and exiting.");
+
+            string help = HelpTextBuilder.BuildHelpText();
+
+            // Write to Trace
+            try { Trace.WriteLine(help); } catch { /* ignore */ }
+
+            // Show a modal dialog (if launched by double-click)
+            Trace.WriteLine("Smart_Stay_Awake_2: ShowHelpAndExit: about to show a MessageBox with help");
+            try
+            {
+                MessageBox.Show(help, AppConfig.APP_DISPLAY_NAME + " - Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch { /* ignore */ }
+
+
+            Trace.WriteLine("Smart_Stay_Awake_2: Exiting ShowHelpAndExit ...");
+            try { Environment.Exit(0); } catch { /* ignore */ }
+        }
+
+        private static bool CanOpenForWrite(string fullPath)
+        {
+            try
+            {
+                // If directory doesn't exist, create it.
+                Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
+                // Try open exclusive write (side effect = overwrite), then close.
+                using var fs = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.Read);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+    /// <summary>
+    /// Builds the help text shown by CLI --help and the Help button.
+    /// Centralizes help content to avoid drift between CLI and UI.
+    /// </summary>
+    internal static class HelpTextBuilder
+    {
+        /// <summary>
+        /// Builds and returns the complete help text as a string.
+        /// Identical content to what CLI --help displays.
+        /// </summary>
+        /// <returns>Multi-line help text with usage, options, and examples.</returns>
+        public static string BuildHelpText()
+        {
+            Trace.WriteLine("Smart_Stay_Awake_2: Entered BuildHelpText ...");
             var sb = new StringBuilder();
             sb.AppendLine("Usage:");
             sb.AppendLine("  Smart_Stay_Awake_2.exe [--help] [--verbose] [--icon PATH] (--for DURATION | --until \"YYYY-M-D H:m:s\")");
@@ -185,35 +237,8 @@ namespace Smart_Stay_Awake_2
             sb.AppendLine("        \"2025-1-2 3:2:1\"");
             sb.AppendLine($"      Bounds: at least {AppConfig.MIN_AUTO_QUIT_SECONDS}s ahead, at most {AppConfig.MAX_AUTO_QUIT_SECONDS}s from now.");
             sb.AppendLine();
-            string help = sb.ToString();
-            // Write to Trace
-            try { Trace.WriteLine(help); } catch { /* ignore */ }
-            // Write to console (if launched from a terminal)
-            try { Console.WriteLine(help); } catch { /* ignore */ }
-            // Also show a modal dialog (if launched by double-click)
-            try
-            {
-                MessageBox.Show(help, AppConfig.APP_DISPLAY_NAME + " - Help",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch { /* ignore */ }
-            try { Environment.Exit(0); } catch { /* ignore */ }
-        }
-
-        private static bool CanOpenForWrite(string fullPath)
-        {
-            try
-            {
-                // If directory doesn't exist, create it.
-                Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
-                // Try open exclusive write (side effect = overwrite), then close.
-                using var fs = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.Read);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            Trace.WriteLine("Smart_Stay_Awake_2: Exiting BuildHelpText");
+            return sb.ToString();
         }
     }
 }
