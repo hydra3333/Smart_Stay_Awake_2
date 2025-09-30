@@ -26,6 +26,9 @@ namespace Smart_Stay_Awake_2.UI
         // Simple image host – fills the client area. We assign a cloned Bitmap to it.
         private PictureBox? _picture;
 
+        // Unified quit guard: prevents recursive calls during shutdown
+        private bool _isClosing = false;
+
         // Constructor is lightweight: build controls, wire events, set fixed window policy.
         internal MainForm(AppState state)
         {
@@ -50,6 +53,18 @@ namespace Smart_Stay_Awake_2.UI
             // Build tray and a basic context menu (Show/Minimize/Quit will be wired later)
             _tray = new TrayManager(_state, this);
             _tray.Initialize();
+
+            // Wire tray events to unified handlers
+            _tray.ShowRequested += (s, e) =>
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Tray.ShowRequested => RestoreFromTray");
+                RestoreFromTray();
+            };
+            _tray.QuitRequested += (s, e) =>
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Tray.QuitRequested => QuitApplication");
+                QuitApplication("Tray.Quit");
+            };
 
             // Add an image host (fills the client area)
             _picture = new PictureBox
@@ -91,6 +106,230 @@ namespace Smart_Stay_Awake_2.UI
             Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Exiting MainForm_FormClosed ...");
         }
 
+        // =====================================================================
+        // Unified Handlers: All restore/minimize/quit paths funnel through here
+        // =====================================================================
+
+        /// <summary>
+        /// Restore main window from system tray.
+        /// Called by: tray left-click, tray menu "Show Window", Show Window button (future).
+        /// </summary>
+        private void RestoreFromTray()
+        {
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Entered RestoreFromTray ...");
+            try
+            {
+                if (_isClosing)
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: RestoreFromTray: Already closing; ignoring.");
+                    return;
+                }
+
+                // Show and activate the window
+                this.Show();
+                this.WindowState = FormWindowState.Normal;
+                this.Activate();
+                this.BringToFront();
+
+                // Hide tray icon (window is now visible)
+                if (_tray != null)
+                {
+                    _tray.Hide();
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: RestoreFromTray: Tray icon hidden");
+                }
+
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: RestoreFromTray: Window restored and activated");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: RestoreFromTray FAILED: {ex.GetType().Name}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: RestoreFromTray error message: {ex.Message}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: RestoreFromTray stack trace: {ex.StackTrace}");
+            }
+            finally
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Exiting RestoreFromTray");
+            }
+        }
+
+        /// <summary>
+        /// Minimize main window to system tray (hide window, show tray icon).
+        /// Called by: title bar minimize button, Minimize button (future).
+        /// </summary>
+        private void MinimizeToTray()
+        {
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Entered MinimizeToTray ...");
+            try
+            {
+                if (_isClosing)
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: MinimizeToTray: Already closing; ignoring.");
+                    return;
+                }
+
+                // Show tray icon first (so user knows where the window went)
+                if (_tray != null)
+                {
+                    _tray.Show();
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: MinimizeToTray: Tray icon shown");
+                }
+
+                // Hide the window completely (cleaner than WindowState.Minimized)
+                this.Hide();
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: MinimizeToTray: Window hidden");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: MinimizeToTray FAILED: {ex.GetType().Name}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: MinimizeToTray error message: {ex.Message}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: MinimizeToTray stack trace: {ex.StackTrace}");
+            }
+            finally
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Exiting MinimizeToTray");
+            }
+        }
+
+        /// <summary>
+        /// Unified quit/shutdown handler. Cleans up tray, stops timers (future), exits application.
+        /// Called by: title bar close X, Alt+F4, tray Quit, Quit button (future), session end.
+        /// </summary>
+        /// <param name="source">Trace-friendly description of quit trigger source.</param>
+        private void QuitApplication(string source)
+        {
+            Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: Entered QuitApplication (source={source}) ...");
+            try
+            {
+                // Guard against recursive calls (e.g., Close() triggering FormClosing which calls this again)
+                if (_isClosing)
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Already closing; ignoring recursive call.");
+                    return;
+                }
+
+                _isClosing = true;
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Guard flag set (_isClosing = true)");
+
+                // TODO (future iterations): Stop timers, clear keep-awake state, etc.
+
+                // Hide and dispose tray icon
+                if (_tray != null)
+                {
+                    try
+                    {
+                        _tray.Hide();
+                        _tray.Dispose();
+                        _tray = null;
+                        Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Tray disposed");
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Tray disposal error: {ex.Message}");
+                    }
+                }
+
+                // Close the form (will trigger FormClosing/FormClosed, but _isClosing guard prevents recursion)
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Calling this.Close()");
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: QuitApplication FAILED: {ex.GetType().Name}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: QuitApplication error message: {ex.Message}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: QuitApplication stack trace: {ex.StackTrace}");
+
+                // Last resort: force exit
+                try
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Forcing Application.Exit() as last resort");
+                    Application.Exit();
+                }
+                catch { }
+            }
+            finally
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Exiting QuitApplication");
+            }
+        }
+
+        // =====================================================================
+        /// <summary>
+        /// Intercepts window resize/minimize events.
+        /// When user clicks title bar minimize button "_", redirect to MinimizeToTray() instead.
+        /// </summary>
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+
+            // Only trace and act if actually minimizing (not just resizing)
+            if (this.WindowState == FormWindowState.Minimized && !_isClosing)
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnResize: Minimize detected => MinimizeToTray");
+                MinimizeToTray();
+            }
+        }
+
+        /// <summary>
+        /// Intercepts form closing events (title bar X, Alt+F4, programmatic Close()).
+        /// Routes all close attempts through unified QuitApplication() handler.
+        /// Guard flag (_isClosing) prevents infinite recursion.
+        /// </summary>
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: OnFormClosing: Entered (CloseReason={e.CloseReason})");
+
+            // If we're already in the quit flow, allow default close behavior
+            if (_isClosing)
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnFormClosing: Already closing; allowing default close");
+                base.OnFormClosing(e);
+                return;
+            }
+
+            // For user-initiated closes (X button, Alt+F4), route through unified handler
+            if (e.CloseReason == CloseReason.UserClosing ||
+                e.CloseReason == CloseReason.WindowsShutDown ||
+                e.CloseReason == CloseReason.TaskManagerClosing ||
+                e.CloseReason == CloseReason.FormOwnerClosing)
+            {
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: OnFormClosing: User/system close => QuitApplication (CloseReason={e.CloseReason})");
+                e.Cancel = true;  // Cancel the default close
+                QuitApplication($"FormClosing:{e.CloseReason}");
+                return;
+            }
+
+            // Other close reasons (application-initiated, etc.) - allow default
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnFormClosing: Non-user close; allowing default");
+            base.OnFormClosing(e);
+        }
+
+        /// <summary>
+        /// Handles Windows session ending events (shutdown, logoff, restart).
+        /// Ensures clean shutdown via unified QuitApplication() handler.
+        /// </summary>
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_QUERYENDSESSION = 0x0011;
+            const int WM_ENDSESSION = 0x0016;
+
+            if (m.Msg == WM_QUERYENDSESSION || m.Msg == WM_ENDSESSION)
+            {
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: WndProc: Session ending (Msg=0x{m.Msg:X4}) => QuitApplication");
+
+                if (!_isClosing)
+                {
+                    QuitApplication($"SessionEnd:0x{m.Msg:X4}");
+                }
+                // Allow Windows to proceed with shutdown
+                m.Result = (IntPtr)1;
+                return;
+            }
+
+            base.WndProc(ref m);
+        }
+        // =====================================================================
+
+        // Image/Icon Loading and Preparation Pipeline
         /// <summary>
         /// Full imaging pipeline with very verbose tracing:
         /// 1) Source selection (priority): CLI --icon -> embedded base64 -> EXE neighbor -> checkerboard fallback
