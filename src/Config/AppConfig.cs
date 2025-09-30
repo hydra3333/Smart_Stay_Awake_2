@@ -32,7 +32,7 @@ namespace Smart_Stay_Awake_2
             { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".ico" };
 
         // ---- Icon imaging knobs ---------------------------------------------------------
-        public const int WINDOW_MAX_IMAGE_EDGE_PX = 512;
+        public const int WINDOW_MAX_IMAGE_EDGE_PX = 768; // 512; // 768; // 1024; // Max edge length for loaded image in main window
         // We’ll use TRAY_ICON_SIZES in the next sub-iteration when we switch to multi-size ICO:
         public static readonly int[] TRAY_ICON_SIZES = new[] { 16, 20, 24, 32, 40, 48, 64, 128, 256 };
     }
