@@ -29,6 +29,23 @@ namespace Smart_Stay_Awake_2.UI
         // Unified quit guard: prevents recursive calls during shutdown
         private bool _isClosing = false;
 
+        // UI containers and controls (added below the image in Module 4)
+        private Label? _lblPrimary;              // "Smart Stay Awake 2"
+        private Panel? _separator;               // Thin horizontal line
+        private Label? _lblSecondary;            // "Ready • No timers armed"
+        private FlowLayoutPanel? _buttonsRow;    // Buttons: Show/Minimize/Help/Quit
+        private TableLayoutPanel? _fieldsTable;  // Dummy fields grid
+
+        // Individual dummy field value labels
+        private Label? _fldMode;
+        private Label? _fldStatus;
+        private Label? _fldUntil;
+        private Label? _fldRemaining;
+        private Label? _fldCadence;
+        private Label? _fldIconSource;
+        private Label? _fldVersion;
+        private Label? _fldDpi;
+
         // Constructor is lightweight: build controls, wire events, set fixed window policy.
         internal MainForm(AppState state)
         {
@@ -45,7 +62,8 @@ namespace Smart_Stay_Awake_2.UI
             this.StartPosition = FormStartPosition.CenterScreen;
 
             // Title uses AppState
-            this.Text = $"{_state.AppDisplayName} — v{_state.AppVersion}";
+            // this.Text = $"{_state.AppDisplayName} — v{_state.AppVersion}";
+            this.Text = _state.AppDisplayName; // Just Title from AppState", no version
 
             // Cleanup hook (tray disposal, etc.)
             this.FormClosed += MainForm_FormClosed;
@@ -82,13 +100,20 @@ namespace Smart_Stay_Awake_2.UI
         /// <summary>
         /// Prefer doing the image pipeline here (once) instead of the ctor.
         /// At this point the form handle exists; scaling/DPIs are fully resolved.
+        /// After image loads, build the controls panel and resize the form.
         /// </summary>
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
-            Trace.WriteLine("UI.MainForm: OnShown: Entered.");
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Entered.");
+
+            // Load and prepare image (sets PictureBox.Image and resizes form to image only)
             TryLoadPrepareAndApplyImageAndIcon();
-            Trace.WriteLine("UI.MainForm: OnShown: Exiting.");
+
+            // Now convert layout: image at top, controls below
+            BuildBelowImageLayout();
+
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Exiting.");
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -513,6 +538,372 @@ namespace Smart_Stay_Awake_2.UI
                 // 'squared' and 'src' are no longer needed
                 try { squared?.Dispose(); } catch { }
                 try { src?.Dispose(); } catch { }
+            }
+        }
+
+        /// <summary>
+        /// Builds the UI controls panel below the image and adjusts form size.
+        /// Called once after image is loaded and displayed.
+        /// Creates: primary text, separator, secondary text, buttons, dummy fields.
+        /// </summary>
+        private void BuildBelowImageLayout()
+        {
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Entered BuildBelowImageLayout ...");
+            try
+            {
+                if (_picture == null)
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: PictureBox is null; cannot proceed");
+                    return;
+                }
+
+                // Step 1: Convert image from Dock=Fill to Dock=Top with fixed height
+                int imageHeight = _picture.Height;
+                _picture.Dock = DockStyle.Top;
+                _picture.Height = imageHeight;
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Image converted to Dock=Top, Height={imageHeight}");
+
+                // Step 2: Create controls container using simple FlowLayoutPanel (vertical flow)
+                var mainStack = new FlowLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    FlowDirection = FlowDirection.TopDown,
+                    WrapContents = false,
+                    AutoScroll = true,
+                    Padding = new Padding(12, 10, 12, 12),
+                    BackColor = SystemColors.Control
+                };
+                this.Controls.Add(mainStack);
+
+                // Primary text
+                _lblPrimary = new Label
+                {
+                    Text = "Smart Stay Awake 2",
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    AutoSize = false,
+                    Width = 488, // 512 - padding
+                    Height = 30,
+                    Margin = new Padding(0, 6, 0, 8),
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 10.5f, FontStyle.Bold)
+                };
+                mainStack.Controls.Add(_lblPrimary);
+
+                // Separator
+                _separator = new Panel
+                {
+                    Width = 488,
+                    Height = 1,
+                    Margin = new Padding(0, 4, 0, 10),
+                    BackColor = SystemColors.ControlDark
+                };
+                mainStack.Controls.Add(_separator);
+
+                // Secondary text
+                _lblSecondary = new Label
+                {
+                    Text = "Ready • No timers armed",
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    AutoSize = false,
+                    Width = 488,
+                    Height = 25,
+                    Margin = new Padding(0, 0, 0, 10),
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
+                };
+                mainStack.Controls.Add(_lblSecondary);
+
+                // Buttons
+                BuildButtonsRow();
+                if (_buttonsRow != null)
+                {
+                    _buttonsRow.Width = 488;
+                    mainStack.Controls.Add(_buttonsRow);
+                }
+
+                // Fields
+                BuildFieldsTable();
+                if (_fieldsTable != null)
+                {
+                    _fieldsTable.Width = 488;
+                    mainStack.Controls.Add(_fieldsTable);
+                }
+
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Controls added to main stack");
+
+                // Form will auto-size height based on FlowLayoutPanel content
+                int newClientHeight = imageHeight + 300; // Approximate; FlowLayoutPanel handles actual layout
+                this.ClientSize = new Size(this.ClientSize.Width, newClientHeight);
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Form resized to {this.ClientSize.Width}x{this.ClientSize.Height}");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout FAILED: {ex.GetType().Name}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout error message: {ex.Message}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout stack trace: {ex.StackTrace}");
+            }
+            finally
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Exiting BuildBelowImageLayout");
+            }
+        }
+
+        /// <summary>
+        /// Builds the button row: Show Window, Minimize to system tray, Help, Quit.
+        /// All buttons wire to unified handlers.
+        /// </summary>
+        private void BuildButtonsRow()
+        {
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Entered BuildButtonsRow ...");
+            try
+            {
+                _buttonsRow = new FlowLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    FlowDirection = FlowDirection.LeftToRight,
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    WrapContents = true,
+                    Margin = new Padding(0, 0, 0, 10)
+                };
+
+                // Show Window button
+                var btnShow = new Button
+                {
+                    Text = "Show Window",
+                    AutoSize = true,
+                    Margin = new Padding(4, 2, 4, 2)
+                };
+                btnShow.Click += (s, e) =>
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Show Window' clicked => RestoreFromTray");
+                    RestoreFromTray();
+                };
+                _buttonsRow.Controls.Add(btnShow);
+
+                // Minimize to system tray button
+                var btnMin = new Button
+                {
+                    Text = "Minimise to system tray",
+                    AutoSize = true,
+                    Margin = new Padding(4, 2, 4, 2)
+                };
+                btnMin.Click += (s, e) =>
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Minimise to system tray' clicked => MinimizeToTray");
+                    MinimizeToTray();
+                };
+                _buttonsRow.Controls.Add(btnMin);
+
+                // Help button
+                var btnHelp = new Button
+                {
+                    Text = "Help",
+                    AutoSize = true,
+                    Margin = new Padding(4, 2, 4, 2)
+                };
+                btnHelp.Click += (s, e) =>
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Help' clicked => ShowHelpModal");
+                    ShowHelpModal();
+                };
+                _buttonsRow.Controls.Add(btnHelp);
+
+                // Quit button
+                var btnQuit = new Button
+                {
+                    Text = "Quit",
+                    AutoSize = true,
+                    Margin = new Padding(4, 2, 4, 2)
+                };
+                btnQuit.Click += (s, e) =>
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Quit' clicked => QuitApplication");
+                    QuitApplication("Button.Quit");
+                };
+                _buttonsRow.Controls.Add(btnQuit);
+
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow: 4 buttons added");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow FAILED: {ex.GetType().Name}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow error message: {ex.Message}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow stack trace: {ex.StackTrace}");
+            }
+            finally
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Exiting BuildButtonsRow");
+            }
+        }
+
+        /// <summary>
+        /// Builds the dummy fields table showing current state placeholders.
+        /// Fields: Mode, Status, Until, Time Remaining, Update Cadence, Icon Source, Version, DPI/Scale.
+        /// Values pulled from AppState where available; placeholders otherwise.
+        /// </summary>
+        private void BuildFieldsTable()
+        {
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Entered BuildFieldsTable ...");
+            try
+            {
+                _fieldsTable = new TableLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    ColumnCount = 2,
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    Margin = new Padding(0, 4, 0, 0)
+                };
+                _fieldsTable.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+                _fieldsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+
+                // Helper: create label pair (name + value)
+                Label CreateNameLabel(string text) => new Label
+                {
+                    Text = text + ":",
+                    AutoSize = true,
+                    Margin = new Padding(0, 2, 8, 2),
+                    TextAlign = ContentAlignment.MiddleLeft
+                };
+
+                Label CreateValueLabel(string text) => new Label
+                {
+                    Text = text,
+                    AutoSize = true,
+                    Margin = new Padding(0, 2, 0, 2),
+                    TextAlign = ContentAlignment.MiddleLeft
+                };
+
+                // Populate field values
+                _fldMode = CreateValueLabel("System only (inactive)");
+                _fldStatus = CreateValueLabel("Idle (no timers)");
+                _fldUntil = CreateValueLabel("—");
+                _fldRemaining = CreateValueLabel("—");
+                _fldCadence = CreateValueLabel("—");
+                _fldIconSource = CreateValueLabel(DetermineIconSourceText());
+                _fldVersion = CreateValueLabel(_state.AppVersion);
+
+                // Calculate DPI scale percentage (after handle created)
+                int dpiPercent = 100;
+                try
+                {
+                    using (Graphics g = this.CreateGraphics())
+                    {
+                        dpiPercent = (int)Math.Round(g.DpiX / 96.0 * 100.0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: DPI calculation failed: {ex.Message}");
+                }
+                _fldDpi = CreateValueLabel($"{dpiPercent}%");
+
+                // Add rows to table
+                int row = 0;
+                void AddRow(string name, Label valueLabel)
+                {
+                    _fieldsTable.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+                    _fieldsTable.Controls.Add(CreateNameLabel(name), 0, row);
+                    _fieldsTable.Controls.Add(valueLabel, 1, row);
+                    row++;
+                }
+
+                AddRow("Mode", _fldMode);
+                AddRow("Status", _fldStatus);
+                AddRow("Until", _fldUntil);
+                AddRow("Time Remaining", _fldRemaining);
+                AddRow("Update Cadence", _fldCadence);
+                AddRow("Icon Source", _fldIconSource);
+                AddRow("Version", _fldVersion);
+                AddRow("DPI/Scale", _fldDpi);
+
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: 8 field rows added");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable FAILED: {ex.GetType().Name}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable error message: {ex.Message}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable stack trace: {ex.StackTrace}");
+            }
+            finally
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Exiting BuildFieldsTable");
+            }
+        }
+
+        /// <summary>
+        /// Determines friendly text for Icon Source field based on what was actually used.
+        /// </summary>
+        private string DetermineIconSourceText()
+        {
+            if (!string.IsNullOrWhiteSpace(_state.Options?.IconPath))
+                return $"CLI (--icon {Path.GetFileName(_state.Options.IconPath)})";
+
+            if (Base64ImageLoader.HasEmbeddedImage())
+                return "Embedded (base64)";
+
+            // Check if neighbor file was used
+            string exeDir = AppContext.BaseDirectory;
+            foreach (var ext in AppConfig.ALLOWED_ICON_EXTENSIONS)
+            {
+                string path = Path.Combine(exeDir, $"Smart_Stay_Awake_2_icon{ext}");
+                if (File.Exists(path))
+                    return $"Neighbor ({Path.GetFileName(path)})";
+            }
+
+            return "Fallback (synthetic)";
+        }
+
+        /// <summary>
+        /// Shows help content in a modal dialog.
+        /// Reuses the same help text as CLI --help (from HelpTextBuilder).
+        /// Unlike CLI --help, this does NOT exit the application.
+        /// </summary>
+        private void ShowHelpModal()
+        {
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Entered ShowHelpModal ...");
+            try
+            {
+                string helpText = HelpTextBuilder.BuildHelpText();
+
+                using var dlg = new Form
+                {
+                    Text = _state.AppDisplayName + " — Help",
+                    StartPosition = FormStartPosition.CenterParent,
+                    Size = new Size(760, 560),
+                    MinimizeBox = false,
+                    MaximizeBox = false,
+                    FormBorderStyle = FormBorderStyle.Sizable
+                };
+
+                var tb = new TextBox
+                {
+                    Multiline = true,
+                    ReadOnly = true,
+                    ScrollBars = ScrollBars.Both,
+                    Dock = DockStyle.Fill,
+                    WordWrap = false,
+                    Font = new Font(FontFamily.GenericMonospace, 9.0f),
+                    Text = helpText
+                };
+
+                dlg.Controls.Add(tb);
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: ShowHelpModal: Displaying modal help dialog");
+                dlg.ShowDialog(this);
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: ShowHelpModal: Help dialog closed");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: ShowHelpModal FAILED: {ex.GetType().Name}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: ShowHelpModal error message: {ex.Message}");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: ShowHelpModal stack trace: {ex.StackTrace}");
+
+                MessageBox.Show(this, "Help is unavailable.\n" + ex.Message,
+                    _state.AppDisplayName + " — Help Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            finally
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Exiting ShowHelpModal");
             }
         }
 
