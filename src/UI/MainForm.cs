@@ -36,6 +36,10 @@ namespace Smart_Stay_Awake_2.UI
         private FlowLayoutPanel? _buttonsRow;    // Buttons: Show/Minimize/Help/Quit
         private TableLayoutPanel? _fieldsTable;  // Dummy fields grid
 
+        // FOR DEBUGGING
+        // Container under the image (grey area) so we can trace its size
+        private FlowLayoutPanel? _belowPanel;
+
         // Individual dummy field value labels
         private Label? _fldMode;
         private Label? _fldStatus;
@@ -112,6 +116,17 @@ namespace Smart_Stay_Awake_2.UI
 
             // Now convert layout: image at top, controls below
             BuildBelowImageLayout();
+
+            //------------------------------------
+            //------------------------------------
+            // FOR DEBUGGING: Trace the panel below the image
+            // Make sure any suspended parents are resumed, then trace a full snapshot
+            DebugLayout.EnsureResumed(this, _belowPanel, _fieldsTable);
+            DebugLayout.TraceLayoutSnapshot(this, _picture, _belowPanel, _fieldsTable);
+            // one-time z-order flip test if you suspect the image is covering controls
+            DebugLayout.FlipZOrderForTest(this, _picture!);
+            //------------------------------------
+            //------------------------------------
 
             Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Exiting.");
         }
@@ -574,6 +589,8 @@ namespace Smart_Stay_Awake_2.UI
                     BackColor = SystemColors.Control
                 };
                 this.Controls.Add(mainStack);
+                // FOR DEBUGGING: keep a ref to this panel so we can trace its size later
+                _belowPanel = mainStack;
 
                 // Primary text
                 _lblPrimary = new Label
