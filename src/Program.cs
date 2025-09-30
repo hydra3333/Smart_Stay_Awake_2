@@ -28,6 +28,13 @@ namespace Smart_Stay_Awake_2
         [STAThread]
         static void Main(string[] args)
         {
+#if DEBUG
+            // Mirror Tracing to VS Output window while debugging
+            // Ensure this is present at the top of main() even if tracing is re-configured later.
+            Trace.Listeners.Add(new DefaultTraceListener());
+            Trace.AutoFlush = true;
+#endif
+
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             // Modern WinForms defaults (high DPI plumbing, default fonts, etc.)
