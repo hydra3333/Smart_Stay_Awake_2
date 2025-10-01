@@ -541,7 +541,7 @@ namespace Smart_Stay_Awake_2.UI
                 this.ClientSize = new Size(display.Width, display.Height);
                 Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: ClientSize set to {this.ClientSize.Width}x{this.ClientSize.Height}");
 
-                // --------- Multi-size ICON (16..256, all-PNG) ----------------------
+                // --------- Multi-size ICON (16..256, all-PNG) ---------
                 var (icon, stream) = IcoBuilder.BuildMultiSizePngIco(squared, AppConfig.TRAY_ICON_SIZES);
                 multiIcon = icon;
                 icoStream = stream;
