@@ -641,41 +641,83 @@ namespace Smart_Stay_Awake_2.UI
                 // STEP 5: Build child controls (using calculated dimensions)
                 // =====================================================================
 
-                // Primary text
-                _lblPrimary = new Label
+                // =====================================================================
+                // Text blurb section (matches Python APP_BLURB structure)
+                // =====================================================================
+                // Line 1: Title (centered, plain text - Python doesn't bold this)
+                var lblTitle = new Label
                 {
-                    Text = "Smart Stay Awake 2",
+                    Text = "WEDJAT  :  THE EYE OF HORUS",
                     TextAlign = ContentAlignment.MiddleCenter,
                     AutoSize = false,
-                    Width = contentWidth,  // Calculated, not hardcoded
-                    Height = 30,
-                    Margin = new Padding(0, 6, 0, 8),
-                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 10.5f, FontStyle.Bold)
+                    Width = contentWidth,
+                    Height = 25,
+                    Margin = new Padding(0, 6, 0, 0),
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
                 };
-                mainStack.Controls.Add(_lblPrimary);
+                mainStack.Controls.Add(lblTitle);
 
-                // Separator
+                // Line 2: Empty spacing line (matches Python's "\n")
+                var lblSpacer = new Label
+                {
+                    Text = "",
+                    AutoSize = false,
+                    Width = contentWidth,
+                    Height = 10,
+                    Margin = new Padding(0, 0, 0, 0)
+                };
+                mainStack.Controls.Add(lblSpacer);
+
+                // Line 3: First description line
+                var lblDesc1 = new Label
+                {
+                    Text = "Prevents system sleep & hibernation while active.",
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    AutoSize = false,
+                    Width = contentWidth,
+                    Height = 20,
+                    Margin = new Padding(0, 0, 0, 0),
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
+                };
+                mainStack.Controls.Add(lblDesc1);
+
+                // Line 4: Second description line
+                var lblDesc2 = new Label
+                {
+                    Text = "Display Monitor sleep is allowed.",
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    AutoSize = false,
+                    Width = contentWidth,
+                    Height = 20,
+                    Margin = new Padding(0, 0, 0, 0),
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
+                };
+                mainStack.Controls.Add(lblDesc2);
+
+                // Line 5: Third description line
+                var lblDesc3 = new Label
+                {
+                    Text = "Closing this app re-allows sleep & hibernation.",
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    AutoSize = false,
+                    Width = contentWidth,
+                    Height = 20,
+                    Margin = new Padding(0, 0, 0, 8),  // Bottom margin before separator
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
+                };
+                mainStack.Controls.Add(lblDesc3);
+
+                // Separator line (matches Python's ttk.Separator)
                 _separator = new Panel
                 {
-                    Width = contentWidth,  // Calculated, not hardcoded
+                    Width = contentWidth,
                     Height = 1,
-                    Margin = new Padding(0, 4, 0, 10),
+                    Margin = new Padding(0, 4, 0, 8),
                     BackColor = SystemColors.ControlDark
                 };
                 mainStack.Controls.Add(_separator);
 
-                // Secondary text
-                _lblSecondary = new Label
-                {
-                    Text = "Ready • No timers armed",
-                    TextAlign = ContentAlignment.MiddleCenter,
-                    AutoSize = false,
-                    Width = contentWidth,  // Calculated, not hardcoded
-                    Height = 25,
-                    Margin = new Padding(0, 0, 0, 10),
-                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
-                };
-                mainStack.Controls.Add(_lblSecondary);
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Text blurb (5 lines) and separator added");
 
                 // Buttons
                 BuildButtonsRow();
@@ -684,6 +726,21 @@ namespace Smart_Stay_Awake_2.UI
                     _buttonsRow.Width = contentWidth;  // Calculated, not hardcoded
                     mainStack.Controls.Add(_buttonsRow);
                 }
+                
+                // Status hint (matches Python: gray centered text below buttons)
+                var lblStatusHint = new Label
+                {
+                    Text = "Right-click the tray icon for options.",
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    ForeColor = SystemColors.GrayText,
+                    AutoSize = false,
+                    Width = contentWidth,
+                    Height = 20,
+                    Margin = new Padding(0, 8, 0, 8),
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
+                };
+                mainStack.Controls.Add(lblStatusHint);
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Status hint label added");
 
                 // Fields
                 BuildFieldsTable();
@@ -726,8 +783,8 @@ namespace Smart_Stay_Awake_2.UI
         }
 
         /// <summary>
-        /// Builds the button row: Show Window, Minimize to system tray, Help, Quit.
-        /// All buttons wire to unified handlers.
+        /// Builds the button row: Minimize to system tray, Quit.
+        /// Matches Python program's button layout (2 buttons, left-to-right).
         /// </summary>
         private void BuildButtonsRow()
         {
@@ -744,49 +801,21 @@ namespace Smart_Stay_Awake_2.UI
                     Margin = new Padding(0, 0, 0, 10)
                 };
 
-                // Show Window button
-                var btnShow = new Button
-                {
-                    Text = "Show Window",
-                    AutoSize = true,
-                    Margin = new Padding(4, 2, 4, 2)
-                };
-                btnShow.Click += (s, e) =>
-                {
-                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Show Window' clicked => RestoreFromTray");
-                    RestoreFromTray();
-                };
-                _buttonsRow.Controls.Add(btnShow);
-
-                // Minimize to system tray button
+                // Left button: Minimize to system tray
                 var btnMin = new Button
                 {
-                    Text = "Minimise to system tray",
+                    Text = "Minimize to System Tray",
                     AutoSize = true,
                     Margin = new Padding(4, 2, 4, 2)
                 };
                 btnMin.Click += (s, e) =>
                 {
-                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Minimise to system tray' clicked => MinimizeToTray");
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Minimize to System Tray' clicked => MinimizeToTray");
                     MinimizeToTray();
                 };
                 _buttonsRow.Controls.Add(btnMin);
 
-                // Help button
-                var btnHelp = new Button
-                {
-                    Text = "Help",
-                    AutoSize = true,
-                    Margin = new Padding(4, 2, 4, 2)
-                };
-                btnHelp.Click += (s, e) =>
-                {
-                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Help' clicked => ShowHelpModal");
-                    ShowHelpModal();
-                };
-                _buttonsRow.Controls.Add(btnHelp);
-
-                // Quit button
+                // Right button: Quit
                 var btnQuit = new Button
                 {
                     Text = "Quit",
@@ -800,7 +829,7 @@ namespace Smart_Stay_Awake_2.UI
                 };
                 _buttonsRow.Controls.Add(btnQuit);
 
-                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow: 4 buttons added");
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow: 2 buttons added (matches Python layout)");
             }
             catch (Exception ex)
             {
@@ -815,9 +844,12 @@ namespace Smart_Stay_Awake_2.UI
         }
 
         /// <summary>
-        /// Builds the dummy fields table showing current state placeholders.
-        /// Fields: Mode, Status, Until, Time Remaining, Update Cadence, Icon Source, Version, DPI/Scale.
-        /// Values pulled from AppState where available; placeholders otherwise.
+        /// Builds the fields table showing countdown/timer information (when active).
+        /// Matches Python program's 2-column layout with dummy placeholder values.
+        /// Fields: Auto-quit at, Time remaining, Timer update frequency.
+        /// 
+        /// COMMENTED OUT (for future iterations):
+        /// - Mode, Status, Icon Source, Version, DPI/Scale
         /// </summary>
         private void BuildFieldsTable()
         {
@@ -841,7 +873,8 @@ namespace Smart_Stay_Awake_2.UI
                     Text = text + ":",
                     AutoSize = true,
                     Margin = new Padding(0, 2, 8, 2),
-                    TextAlign = ContentAlignment.MiddleLeft
+                    TextAlign = ContentAlignment.MiddleLeft,
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
                 };
 
                 Label CreateValueLabel(string text) => new Label
@@ -849,34 +882,40 @@ namespace Smart_Stay_Awake_2.UI
                     Text = text,
                     AutoSize = true,
                     Margin = new Padding(0, 2, 0, 2),
-                    TextAlign = ContentAlignment.MiddleLeft
+                    TextAlign = ContentAlignment.MiddleLeft,
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
                 };
 
-                // Populate field values
-                _fldMode = CreateValueLabel("System only (inactive)");
-                _fldStatus = CreateValueLabel("Idle (no timers)");
-                _fldUntil = CreateValueLabel("—");
-                _fldRemaining = CreateValueLabel("—");
-                _fldCadence = CreateValueLabel("—");
-                _fldIconSource = CreateValueLabel(DetermineIconSourceText());
-                _fldVersion = CreateValueLabel(_state.AppVersion);
+                // Populate field values with dummy data matching Python's format
+                // Python shows: "2025-01-02 23:22:21" format for Auto-quit at
+                _fldUntil = CreateValueLabel("2025-12-31 23:59:59");
 
-                // Calculate DPI scale percentage (after handle created)
-                int dpiPercent = 100;
-                try
-                {
-                    using (Graphics g = this.CreateGraphics())
-                    {
-                        dpiPercent = (int)Math.Round(g.DpiX / 96.0 * 100.0);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: DPI calculation failed: {ex.Message}");
-                }
-                _fldDpi = CreateValueLabel($"{dpiPercent}%");
+                // Python shows: "DDDd HH:MM:SS" or "HH:MM:SS" format for Time remaining
+                _fldRemaining = CreateValueLabel("0d 01:30:45");
 
-                // Add rows to table
+                // Python shows: "HH:MM:SS" format for Timer update frequency (cadence)
+                _fldCadence = CreateValueLabel("00:00:10");
+
+                // COMMENTED OUT FIELDS (for future iterations):
+                // _fldMode = CreateValueLabel("System only (inactive)");
+                // _fldStatus = CreateValueLabel("Idle (no timers)");
+                // _fldIconSource = CreateValueLabel(DetermineIconSourceText());
+                // _fldVersion = CreateValueLabel(_state.AppVersion);
+                // int dpiPercent = 100;
+                // try
+                // {
+                //     using (Graphics g = this.CreateGraphics())
+                //     {
+                //         dpiPercent = (int)Math.Round(g.DpiX / 96.0 * 100.0);
+                //     }
+                // }
+                // catch (Exception ex)
+                // {
+                //     Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: DPI calculation failed: {ex.Message}");
+                // }
+                // _fldDpi = CreateValueLabel($"{dpiPercent}%");
+
+                // Add rows to table (only active fields)
                 int row = 0;
                 void AddRow(string name, Label valueLabel)
                 {
@@ -886,16 +925,19 @@ namespace Smart_Stay_Awake_2.UI
                     row++;
                 }
 
-                AddRow("Mode", _fldMode);
-                AddRow("Status", _fldStatus);
-                AddRow("Until", _fldUntil);
-                AddRow("Time Remaining", _fldRemaining);
-                AddRow("Update Cadence", _fldCadence);
-                AddRow("Icon Source", _fldIconSource);
-                AddRow("Version", _fldVersion);
-                AddRow("DPI/Scale", _fldDpi);
+                // Python field order and exact label text
+                AddRow("Auto-quit at", _fldUntil);
+                AddRow("Time remaining", _fldRemaining);
+                AddRow("Timer update frequency", _fldCadence);
 
-                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: 8 field rows added");
+                // COMMENTED OUT (preserved for future use):
+                // AddRow("Mode", _fldMode);
+                // AddRow("Status", _fldStatus);
+                // AddRow("Icon Source", _fldIconSource);
+                // AddRow("Version", _fldVersion);
+                // AddRow("DPI/Scale", _fldDpi);
+
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: 3 field rows added (Auto-quit at, Time remaining, Timer update frequency)");
             }
             catch (Exception ex)
             {
@@ -948,7 +990,7 @@ namespace Smart_Stay_Awake_2.UI
                 {
                     Text = _state.AppDisplayName + " — Help",
                     StartPosition = FormStartPosition.CenterParent,
-                    Size = new Size(760, 560),
+                    Size = new Size(900, 700),  // Larger default to show help text without excessive scrolling
                     MinimizeBox = false,
                     MaximizeBox = false,
                     FormBorderStyle = FormBorderStyle.Sizable
@@ -966,7 +1008,7 @@ namespace Smart_Stay_Awake_2.UI
                 };
 
                 dlg.Controls.Add(tb);
-                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: ShowHelpModal: Displaying modal help dialog");
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: ShowHelpModal: Displaying modal help dialog (900x700)");
                 dlg.ShowDialog(this);
                 Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: ShowHelpModal: Help dialog closed");
             }
