@@ -673,7 +673,7 @@ namespace Smart_Stay_Awake_2.UI
                     Width = contentWidth,
                     Height = 25,
                     Margin = new Padding(0, 6, 0, 0),
-                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold)
                 };
                 mainStack.Controls.Add(lblTitle);
 
@@ -697,7 +697,7 @@ namespace Smart_Stay_Awake_2.UI
                     Width = contentWidth,
                     Height = 20,
                     Margin = new Padding(0, 0, 0, 0),
-                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold)
                 };
                 mainStack.Controls.Add(lblDesc1);
 
@@ -710,7 +710,7 @@ namespace Smart_Stay_Awake_2.UI
                     Width = contentWidth,
                     Height = 20,
                     Margin = new Padding(0, 0, 0, 0),
-                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold)
                 };
                 mainStack.Controls.Add(lblDesc2);
 
@@ -723,7 +723,7 @@ namespace Smart_Stay_Awake_2.UI
                     Width = contentWidth,
                     Height = 20,
                     Margin = new Padding(0, 0, 0, 8),  // Bottom margin before separator
-                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold)
                 };
                 mainStack.Controls.Add(lblDesc3);
 
@@ -746,8 +746,17 @@ namespace Smart_Stay_Awake_2.UI
                     _buttonsRow.Width = contentWidth;  // Calculated, not hardcoded
                     mainStack.Controls.Add(_buttonsRow);
                 }
-                
+
+                // Fields
+                BuildFieldsTable();
+                if (_fieldsTable != null)
+                {
+                    _fieldsTable.Width = contentWidth;  // Calculated, not hardcoded
+                    mainStack.Controls.Add(_fieldsTable);
+                }
+
                 // Status hint (matches Python: gray centered text below buttons)
+                // Must be defined after buttons and fields
                 var lblStatusHint = new Label
                 {
                     Text = "Right-click the tray icon for options.",
@@ -761,14 +770,6 @@ namespace Smart_Stay_Awake_2.UI
                 };
                 mainStack.Controls.Add(lblStatusHint);
                 Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Status hint label added");
-
-                // Fields
-                BuildFieldsTable();
-                if (_fieldsTable != null)
-                {
-                    _fieldsTable.Width = contentWidth;  // Calculated, not hardcoded
-                    mainStack.Controls.Add(_fieldsTable);
-                }
 
                 Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Controls added to main stack");
 
@@ -803,53 +804,68 @@ namespace Smart_Stay_Awake_2.UI
         }
 
         /// <summary>
-        /// Builds the button row: Minimize to system tray, Quit.
-        /// Matches Python program's button layout (2 buttons, left-to-right).
+        /// Builds the button row: Minimize to system tray (left), Quit (right).
+        /// Matches Python program's button layout with bold text and left/right positioning.
         /// </summary>
         private void BuildButtonsRow()
         {
             Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Entered BuildButtonsRow ...");
             try
             {
-                _buttonsRow = new FlowLayoutPanel
+                // Use TableLayoutPanel for simple 2-column layout (left button | right button)
+                var buttonTable = new TableLayoutPanel
                 {
-                    Dock = DockStyle.Fill,
-                    FlowDirection = FlowDirection.LeftToRight,
+                    ColumnCount = 2,
                     AutoSize = true,
                     AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                    WrapContents = true,
                     Margin = new Padding(0, 0, 0, 10)
                 };
+                buttonTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));  // Left column: 50%
+                buttonTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));  // Right column: 50%
 
-                // Left button: Minimize to system tray
+                // Left button: Minimize to system tray (BOLD text to match Python)
                 var btnMin = new Button
                 {
                     Text = "Minimize to System Tray",
                     AutoSize = true,
-                    Margin = new Padding(4, 2, 4, 2)
+                    Anchor = AnchorStyles.Left,  // Anchor to left side of cell
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold),
+                    Margin = new Padding(0, 2, 4, 2)
                 };
                 btnMin.Click += (s, e) =>
                 {
                     Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Minimize to System Tray' clicked => MinimizeToTray");
                     MinimizeToTray();
                 };
-                _buttonsRow.Controls.Add(btnMin);
+                buttonTable.Controls.Add(btnMin, 0, 0);  // Column 0, Row 0
 
-                // Right button: Quit
+                // Right button: Quit (BOLD text to match Python)
                 var btnQuit = new Button
                 {
                     Text = "Quit",
                     AutoSize = true,
-                    Margin = new Padding(4, 2, 4, 2)
+                    Anchor = AnchorStyles.Right,  // Anchor to right side of cell
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold),
+                    Margin = new Padding(4, 2, 0, 2)
                 };
                 btnQuit.Click += (s, e) =>
                 {
                     Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Quit' clicked => QuitApplication");
                     QuitApplication("Button.Quit");
                 };
-                _buttonsRow.Controls.Add(btnQuit);
+                buttonTable.Controls.Add(btnQuit, 1, 0);  // Column 1, Row 0
 
-                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow: 2 buttons added (matches Python layout)");
+                // Wrap in FlowLayoutPanel to maintain type compatibility with _buttonsRow field
+                _buttonsRow = new FlowLayoutPanel
+                {
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    FlowDirection = FlowDirection.TopDown,
+                    Margin = new Padding(0, 0, 0, 10)
+                };
+                _buttonsRow.Controls.Add(buttonTable);
+
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow: 2 buttons added (left/right positioned, bold text)");
             }
             catch (Exception ex)
             {
