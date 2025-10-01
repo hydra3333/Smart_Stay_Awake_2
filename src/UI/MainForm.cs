@@ -33,9 +33,9 @@ namespace Smart_Stay_Awake_2.UI
         // COMMENTED OUT (iteration 2 - removed from UI to match Python layout):
         // private Label? _lblPrimary;              // "Smart Stay Awake 2"
         // private Label? _lblSecondary;            // "Ready • No timers armed"
-        private Panel? _separator;               // Thin horizontal line (still used)
-        private FlowLayoutPanel? _buttonsRow;    // Buttons: Minimize/Quit
-        private TableLayoutPanel? _fieldsTable;  // Dummy fields grid
+        private Panel? _separator;                  // Thin horizontal line (still used)
+        private FlowLayoutPanel? _buttonsRow;       // Buttons: Minimize/Quit
+        private TableLayoutPanel? _fieldsTable;     // Dummy fields grid
 
         // FOR DEBUGGING
         // Container under the image (grey area) so we can trace its size
