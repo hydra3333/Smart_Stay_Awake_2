@@ -968,22 +968,24 @@ namespace Smart_Stay_Awake_2.UI
                     AutoSize = true,
                     Anchor = AnchorStyles.Right,  // Use Anchor instead of TextAlign for auto-size labels
                     Margin = new Padding(0, 2, 12, 2),  // 12px gap between label and value
-                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold)
                 };
-
                 Label CreateValueLabel(string text) => new Label
                 {
                     Text = text,
                     AutoSize = true,
                     Margin = new Padding(0, 2, 0, 2),
                     TextAlign = ContentAlignment.MiddleLeft,  // LEFT-aligned (unchanged)
-                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold)
                 };
 
                 // Populate field values with dummy data matching Python's format
-                _fldUntil = CreateValueLabel("2025-12-31 23:59:59");
-                _fldRemaining = CreateValueLabel("0d 01:30:45");
-                _fldCadence = CreateValueLabel("00:00:10");
+                // _fldUntil = CreateValueLabel("2025-12-31 23:59:59");
+                // _fldRemaining = CreateValueLabel("0d 01:30:45");
+                // _fldCadence = CreateValueLabel("00:00:10");
+                _fldUntil = CreateValueLabel("0000-00-00 00:00:00");
+                _fldRemaining = CreateValueLabel("0d 00:00:00");
+                _fldCadence = CreateValueLabel("00:00:00");
 
                 // Add rows to table (only active fields)
                 int row = 0;
@@ -1048,14 +1050,20 @@ namespace Smart_Stay_Awake_2.UI
             {
                 string helpText = HelpTextBuilder.BuildHelpText();
 
+                int help_size_x = 1200;
+                int help_size_y = 750;
+                int help_size_x_min = (int) (help_size_x * 0.9);
+                int help_size_y_min = (int) (help_size_y * 0.9);
                 using var dlg = new Form
                 {
                     Text = _state.AppDisplayName + " — Help",
-                    StartPosition = FormStartPosition.CenterParent,
-                    Size = new Size(900, 700),  // Larger default to show help text without excessive scrolling
+                    StartPosition = FormStartPosition.CenterScreen,  // Changed from CenterParent (parent may be hidden)
+                    Size = new Size(help_size_x, help_size_y),
+                    MinimumSize = new Size(help_size_x_min, help_size_y_min),  // Add minimum size constraint
                     MinimizeBox = false,
-                    MaximizeBox = false,
-                    FormBorderStyle = FormBorderStyle.Sizable
+                    MaximizeBox = true,  // Changed to true - allow user to maximize if needed
+                    FormBorderStyle = FormBorderStyle.Sizable,
+                    ShowInTaskbar = true  // Show in taskbar since parent may be hidden
                 };
 
                 var tb = new TextBox
@@ -1070,7 +1078,17 @@ namespace Smart_Stay_Awake_2.UI
                 };
 
                 dlg.Controls.Add(tb);
-                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: ShowHelpModal: Displaying modal help dialog (900x700)");
+                // Deselect text after form is shown (prevents "highlighted" appearance)
+                dlg.Shown += (s, e) =>
+                {
+                    tb.SelectionStart = 0;
+                    tb.SelectionLength = 0;
+                };
+
+                // Ensure size is set after controls are added
+                dlg.ClientSize = new Size(help_size_x, help_size_y);
+
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: ShowHelpModal: Displaying modal help dialog");
                 dlg.ShowDialog(this);
                 Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: ShowHelpModal: Help dialog closed");
             }
