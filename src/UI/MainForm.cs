@@ -292,6 +292,23 @@ namespace Smart_Stay_Awake_2.UI
             }
         }
 
+        /// <summary>
+        /// Public wrapper for ShowHelpModal() so TrayManager can trigger help display.
+        /// Called by: tray menu "Help" item.
+        /// </summary>
+        internal void ShowHelp()
+        {
+            // Invoke on UI thread if called from tray background thread
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(ShowHelpModal));
+            }
+            else
+            {
+                ShowHelpModal();
+            }
+        }
+
         // =====================================================================
         /// <summary>
         /// Intercepts window resize/minimize events.
