@@ -739,17 +739,19 @@ namespace Smart_Stay_Awake_2.UI
 
                 Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Text blurb (5 lines) and separator added");
 
-                // Buttons (positioned at bottom: left edge and right edge)
-                BuildButtonsRow();
-                if (_buttonsRow != null)
+                var lblStatusHint = new Label
                 {
-                    // Find the inner Panel and set its width
-                    if (_buttonsRow.Controls.Count > 0 && _buttonsRow.Controls[0] is Panel buttonPanel)
-                    {
-                        buttonPanel.Width = contentWidth;
-                    }
-                    mainStack.Controls.Add(_buttonsRow);
-                }
+                    Text = "Right-click the tray icon for options.",
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    ForeColor = SystemColors.GrayText,
+                    AutoSize = false,
+                    Width = contentWidth,
+                    Height = 24,  // Increased to prevent clipping
+                    Margin = new Padding(0, 0, 0, 12),  // Space below before fields
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
+                };
+                mainStack.Controls.Add(lblStatusHint);
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Status hint label added");
 
                 // Fields table (centered block, positioned after status hint)
                 BuildFieldsTable();
@@ -780,27 +782,17 @@ namespace Smart_Stay_Awake_2.UI
                     mainStack.Controls.Add(fieldsContainer);
                 }
 
-                // Status hint (matches Python: gray centered text, positioned BELOW separator, ABOVE fields)
-                // Wait - this should be BELOW buttons, ABOVE fields based on your description
-                // Let me re-read... "just below the horizontal line... then Right-click... then fields... then buttons"
-                // So order should be: separator → status hint → fields → buttons
-
-                // Actually, re-reading your description: separator → right-click text → fields → buttons
-                // So status hint should have space above (after separator) and below (before fields)
-
-                var lblStatusHint = new Label
+                // Buttons (positioned at bottom: left edge and right edge)
+                BuildButtonsRow();
+                if (_buttonsRow != null)
                 {
-                    Text = "Right-click the tray icon for options.",
-                    TextAlign = ContentAlignment.MiddleCenter,
-                    ForeColor = SystemColors.GrayText,
-                    AutoSize = false,
-                    Width = contentWidth,
-                    Height = 24,  // Increased to prevent clipping
-                    Margin = new Padding(0, 0, 0, 12),  // Space below before fields
-                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
-                };
-                mainStack.Controls.Add(lblStatusHint);
-                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Status hint label added");
+                    // Find the inner TableLayoutPanel and set its width
+                    if (_buttonsRow.Controls.Count > 0 && _buttonsRow.Controls[0] is TableLayoutPanel buttonTable)
+                    {
+                        buttonTable.Width = contentWidth;
+                    }
+                    mainStack.Controls.Add(_buttonsRow);
+                }
 
                 Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Controls added to main stack");
 
@@ -843,53 +835,51 @@ namespace Smart_Stay_Awake_2.UI
             Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Entered BuildButtonsRow ...");
             try
             {
-                // Use Panel for absolute positioning of buttons at left/right edges
-                var buttonPanel = new Panel
+                // Use TableLayoutPanel with proper column sizing for left/right button placement
+                var buttonTable = new TableLayoutPanel
                 {
-                    AutoSize = false,  // Fixed size to match content width
-                    Height = 35,  // Fixed height for buttons
+                    ColumnCount = 3,
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
                     Margin = new Padding(0, 12, 0, 0)  // Space above buttons
                 };
 
-                // Left button: Minimize to system tray (BOLD text, positioned at left edge)
+                // Column layout: [Button] [Spacer] [Button]
+                buttonTable.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));   // Left button column
+                buttonTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F)); // Middle spacer (grows)
+                buttonTable.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));   // Right button column
+
+                // Left button: Minimize to system tray
                 var btnMin = new Button
                 {
                     Text = "Minimize to System Tray",
                     AutoSize = true,
                     Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold),
-                    Location = new Point(0, 0)
+                    Margin = new Padding(0, 2, 4, 2)
                 };
                 btnMin.Click += (s, e) =>
                 {
                     Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Minimize to System Tray' clicked => MinimizeToTray");
                     MinimizeToTray();
                 };
-                buttonPanel.Controls.Add(btnMin);
+                buttonTable.Controls.Add(btnMin, 0, 0);  // Column 0
 
-                // Right button: Quit (BOLD text, positioned at right edge)
+                // Right button: Quit
                 var btnQuit = new Button
                 {
                     Text = "Quit",
                     AutoSize = true,
-                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold)
+                    Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold),
+                    Margin = new Padding(4, 2, 0, 2)
                 };
                 btnQuit.Click += (s, e) =>
                 {
                     Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Quit' clicked => QuitApplication");
                     QuitApplication("Button.Quit");
                 };
-                buttonPanel.Controls.Add(btnQuit);
+                buttonTable.Controls.Add(btnQuit, 2, 0);  // Column 2 (skip column 1 = spacer)
 
-                // Position Quit button at right edge (needs to happen after size is known)
-                buttonPanel.Layout += (s, e) =>
-                {
-                    if (buttonPanel.Width > 0 && btnQuit.Width > 0)
-                    {
-                        btnQuit.Location = new Point(buttonPanel.Width - btnQuit.Width, 0);
-                    }
-                };
-
-                // Wrap in FlowLayoutPanel for type compatibility
+                // Wrap for compatibility
                 _buttonsRow = new FlowLayoutPanel
                 {
                     AutoSize = true,
@@ -897,9 +887,9 @@ namespace Smart_Stay_Awake_2.UI
                     FlowDirection = FlowDirection.TopDown,
                     Margin = new Padding(0)
                 };
-                _buttonsRow.Controls.Add(buttonPanel);
+                _buttonsRow.Controls.Add(buttonTable);
 
-                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow: 2 buttons added (left edge, right edge, bold text)");
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow: 2 buttons added (TableLayoutPanel approach)");
             }
             catch (Exception ex)
             {
@@ -946,8 +936,8 @@ namespace Smart_Stay_Awake_2.UI
                 {
                     Text = text + ":",
                     AutoSize = true,
+                    Anchor = AnchorStyles.Right,  // Use Anchor instead of TextAlign for auto-size labels
                     Margin = new Padding(0, 2, 12, 2),  // 12px gap between label and value
-                    TextAlign = ContentAlignment.MiddleRight,  // RIGHT-aligned (changed from MiddleLeft)
                     Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
                 };
 
