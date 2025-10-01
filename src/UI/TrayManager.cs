@@ -58,16 +58,9 @@ namespace Smart_Stay_Awake_2.UI
                 return;
             }
 
-            // Minimal placeholder context menu (items will be wired later).
-            // === replaced by the code below ===
-            //_menu = new ContextMenuStrip();
-            //_menu.Items.Add("Show Window", null, (s, e) => Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Show Window clicked (stub)."));
-            //_menu.Items.Add("Minimize to Tray", null, (s, e) => Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Minimize clicked (stub)."));
-            //_menu.Items.Add(new ToolStripSeparator());
-            //_menu.Items.Add("Quit", null, (s, e) => Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Quit clicked (stub)."));
-            // === start of new iteration 2 code below ===
-            // Context menu: Show Window, Quit (simplified per Iteration 2)
+            // Context menu: Show Window, Help, Quit (Iteration 2)
             _menu = new ContextMenuStrip();
+            // Show Window
             var miShow = new ToolStripMenuItem("Show Window");
             miShow.Click += (s, e) =>
             {
@@ -75,6 +68,25 @@ namespace Smart_Stay_Awake_2.UI
                 ShowRequested?.Invoke(this, EventArgs.Empty);
             };
             _menu.Items.Add(miShow);
+            // Help
+            var miHelp = new ToolStripMenuItem("Help");
+            miHelp.Click += (s, e) =>
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Context menu 'Help' clicked => calling MainForm.ShowHelp()");
+                // Safely invoke ShowHelp() on the owner form (MainForm)
+                if (_ownerForm is MainForm mainForm)
+                {
+                    mainForm.ShowHelp();
+                }
+                else
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: WARNING: Owner form is not MainForm; cannot show help");
+                }
+            };
+            _menu.Items.Add(miHelp);
+            // Separator before Quit
+            _menu.Items.Add(new ToolStripSeparator());
+            // Quit
             var miQuit = new ToolStripMenuItem("Quit");
             miQuit.Click += (s, e) =>
             {
@@ -82,8 +94,7 @@ namespace Smart_Stay_Awake_2.UI
                 QuitRequested?.Invoke(this, EventArgs.Empty);
             };
             _menu.Items.Add(miQuit);
-            Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Context menu built (2 items: Show Window, Quit)");
-            // === end of new iteration 2 code above ===
+            Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Context menu built (3 items: Show Window, Help, Quit)");
 
             _tray = new NotifyIcon
             {
@@ -94,12 +105,10 @@ namespace Smart_Stay_Awake_2.UI
                 // For now, use the app’s default icon if available.
                 Icon = _ownerForm.Icon ?? SystemIcons.Application
             };
-            // === start of new iteration 2 code below ===
             // Left-click on tray icon => restore main window
             // Right-click shows context menu (standard NotifyIcon behavior)
             _tray.MouseClick += OnTrayIconMouseClick;
             Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Left-click handler registered");
-            // === end of new iteration 2 code above ===
 
             _initialized = true;
             Trace.WriteLine("Smart_Stay_Awake_2: TrayManager: Initialize: Exiting (success).");
