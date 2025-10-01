@@ -482,65 +482,99 @@ namespace Smart_Stay_Awake_2.UI
                     }
                 }
 
-                // --------- Squaring (edge replication) -----------------------------
-                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Source BEFORE SQUARE: {src.Width}x{src.Height}");
-                squared = ImageSquareReplicator.MakeSquareByEdgeReplication(src);
-                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Result AFTER SQUARE:        {squared.Width}x{squared.Height}");
+                // =========================================================================
+                // PIPELINE SPLIT: Window display vs. Tray icon (different requirements)
+                // =========================================================================
+                // Window: Show original aspect ratio (no squaring), resize if needed
+                // Tray:   Square + even dimensions for proper icon rendering
+                // Separation of concerns: /Imaging classes handle pixel manipulation
 
-                // --------- Ensure even dimensions (spec requirement) ---------------
-                // If odd, replicate one more row/col (right/bottom) to make even
-                if ((squared.Width % 2) != 0 || (squared.Height % 2) != 0)
+                // --------- Window display pipeline (preserve aspect ratio) ---------------
+                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [WINDOW] Source image: {src.Width}x{src.Height}");
+
+                int targetEdge = AppConfig.WINDOW_MAX_IMAGE_EDGE_PX;
+                int srcMaxEdge = Math.Max(src.Width, src.Height);
+
+                // Resize only if source exceeds target; otherwise use as-is
+                if (srcMaxEdge > targetEdge)
                 {
-                    Trace.WriteLine("UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Squared image has odd dimension; applying +1 replicate to make even.");
-                    using var tmp = squared;
-                    int newSize = Math.Max(squared.Width, squared.Height);
-                    var even = new Bitmap(newSize + (newSize % 2 == 0 ? 0 : 1), newSize + (newSize % 2 == 0 ? 0 : 1));
-                    using (var g = Graphics.FromImage(even))
+                    // Calculate scale to fit within max edge while preserving aspect ratio
+                    float scale = (float)targetEdge / srcMaxEdge;
+                    int newWidth = Math.Max(1, (int)Math.Round(src.Width * scale));
+                    int newHeight = Math.Max(1, (int)Math.Round(src.Height * scale));
+
+                    Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [WINDOW] Resizing from {src.Width}x{src.Height} to {newWidth}x{newHeight} (scale={scale:F3})");
+
+                    display = new Bitmap(newWidth, newHeight);
+                    using (var g = Graphics.FromImage(display))
                     {
-                        g.Clear(Color.Transparent);
-                        g.DrawImage(tmp, 0, 0);
+                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        g.SmoothingMode = SmoothingMode.HighQuality;
+                        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                        g.CompositingQuality = CompositingQuality.HighQuality;
+                        g.DrawImage(src, 0, 0, newWidth, newHeight);
                     }
-                    // replicate rightmost column if needed
-                    if ((even.Width % 2) != 0)
-                    {
-                        for (int y = 0; y < even.Height; y++)
-                            even.SetPixel(even.Width - 1, y, even.GetPixel(even.Width - 2, y));
-                    }
-                    // replicate bottom row if needed
-                    if ((even.Height % 2) != 0)
-                    {
-                        for (int x = 0; x < even.Width; x++)
-                            even.SetPixel(x, even.Height - 1, even.GetPixel(x, even.Height - 2));
-                    }
-                    squared = even;
-                    Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: AFTER even-fix:      {squared.Width}x{squared.Height}");
+                }
+                else
+                {
+                    // Use original size (already within limits)
+                    Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [WINDOW] Using original size (within {targetEdge}px limit)");
+                    display = new Bitmap(src);
                 }
 
-                // --------- Window display (max edge) -------------------------------
-                int targetEdge = AppConfig.WINDOW_MAX_IMAGE_EDGE_PX; // e.g., 512
-                int maxEdge = Math.Max(squared.Width, squared.Height);
-                int finalEdge = (maxEdge > targetEdge) ? targetEdge : maxEdge; // shrink if > target; leave as-is if <= target
-                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Display target edge={targetEdge}, chosen final={finalEdge}");
+                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [WINDOW] Final display size: {display.Width}x{display.Height}");
 
-                display = (finalEdge == maxEdge)
-                    ? new Bitmap(squared) // copy as-is
-                    : ImageSquareReplicator.ResizeSquareMax(squared, finalEdge);
-
-                // Push to PictureBox
+                // Apply to PictureBox
                 if (_picture != null)
                 {
-                    // Ensure old image is released (avoid GDI handle leaks while editing live)
                     var old = _picture.Image;
-                    _picture.Image = new Bitmap(display);
+                    _picture.Image = new Bitmap(display);  // Clone for PictureBox
                     old?.Dispose();
-
-                    Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: PictureBox.Image set. Final={display.Width}x{display.Height}");
+                    Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [WINDOW] PictureBox.Image set");
                 }
 
-                // Adjust window client size to exactly fit image for now (later we’ll add bottom controls)
+                // Adjust window client size to fit the display image
                 this.ClientSize = new Size(display.Width, display.Height);
-                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: ClientSize set to {this.ClientSize.Width}x{this.ClientSize.Height}");
+                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [WINDOW] ClientSize set to {this.ClientSize.Width}x{this.ClientSize.Height}");
 
+                // --------- Tray icon pipeline (square + even dimensions) ----------------
+                // Note: ImageSquareReplicator.MakeSquareByEdgeReplication() guarantees even-dimensioned output,
+                // so no manual evenization is needed here (proper separation of concerns)
+                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [TRAY] Starting icon pipeline from original source");
+
+                // Square by edge replication (no distortion of subject)
+                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [TRAY] Source BEFORE SQUARE: {src.Width}x{src.Height}");
+                squared = ImageSquareReplicator.MakeSquareByEdgeReplication(src);
+                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [TRAY] Result AFTER SQUARE (guaranteed even): {squared.Width}x{squared.Height}");
+
+                // --------- Build multi-size ICO from squared image ----------------------
+                Trace.WriteLine($"UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [TRAY] Building multi-size ICO from {squared.Width}x{squared.Height} square");
+                var (icon, stream) = IcoBuilder.BuildMultiSizePngIco(squared, AppConfig.TRAY_ICON_SIZES);
+                multiIcon = icon;
+                icoStream = stream;
+
+                // Apply to Form (title bar / taskbar)
+                this.Icon = multiIcon;
+
+                // Apply to Tray
+                _tray?.SetIcon(multiIcon, icoStream);
+
+                Trace.WriteLine("UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [TRAY] Multi-size ICO applied to Form and Tray");
+
+                // --------- Cleanup: Dispose intermediates (keep only what's in use) -----
+                // 'src' is no longer needed (we made copies for display and icon)
+                try { src?.Dispose(); src = null; } catch { }
+                Trace.WriteLine("UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Disposed source bitmap");
+
+                // 'squared' is no longer needed (icon was built from it)
+                try { squared?.Dispose(); squared = null; } catch { }
+                Trace.WriteLine("UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Disposed squared bitmap");
+
+                // 'display' is no longer needed (we cloned it into PictureBox)
+                try { display?.Dispose(); display = null; } catch { }
+                Trace.WriteLine("UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Disposed display bitmap");
+
+                // multiIcon and icoStream are held by TrayManager; will be disposed on app exit
                 // --------- Multi-size ICON (16..256, all-PNG) ---------
                 var (icon, stream) = IcoBuilder.BuildMultiSizePngIco(squared, AppConfig.TRAY_ICON_SIZES);
                 multiIcon = icon;
