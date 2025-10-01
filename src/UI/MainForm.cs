@@ -120,14 +120,47 @@ namespace Smart_Stay_Awake_2.UI
             // Now convert layout: image at top, controls below
             BuildBelowImageLayout();
 
+            // =====================================================================
+            // Arm keep-awake: Prevent system sleep/hibernation (CRITICAL)
+            // =====================================================================
+            // Now that form is fully initialized (image loaded, layout built), arm keep-awake.
+            // This blocks system sleep/hibernation while app is running.
+            // Display monitor sleep is still allowed (ES_AWAYMODE_REQUIRED permits this).
+            // CRITICAL: If arming fails, the app's entire purpose is defeated - this is FATAL.
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Arming keep-awake ...");
+            bool keepAwakeSuccess = PowerManagement.KeepAwakeManager.Arm();
+            if (keepAwakeSuccess)
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Keep-awake armed successfully");
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: OnShown: System sleep/hibernation now BLOCKED (IsArmed={PowerManagement.KeepAwakeManager.IsArmed})");
+            }
+            else
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: FATAL - FAILED to arm keep-awake (SetThreadExecutionState failed)");
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: FATAL - System sleep/hibernation NOT blocked (keep-awake did not activate)");
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: FATAL - App purpose is defeated, cannot continue");
+
+                // Fatal error: app cannot fulfill its purpose
+                FatalHelper.Fatal(
+                    "FATAL ERROR: Failed to prevent system sleep.\n\n" +
+                    "The System Win32 SetThreadExecutionState API call failed.\n\n" +
+                    "Possible causes:\n" +
+                    "- System policy prevents sleep blocking\n" +
+                    "- Windows API compatibility issue\n\n" +
+                    "Check trace log for details.\n\n" +
+                    "The application cannot continue without keep-awake functionality.",
+                    exitCode: 10);
+                // Unreachable: FatalHelper.Fatal exits process
+            }
+
             //------------------------------------
             //------------------------------------
             // FOR DEBUGGING: Trace the panel below the image, containing text and fields.
             // Make sure any suspended parents are resumed, then trace a full snapshot
-            DebugLayout.EnsureResumed(this, _belowPanel, _fieldsTable);
-            DebugLayout.TraceLayoutSnapshot(this, _picture, _belowPanel, _fieldsTable);
+            // DebugLayout.EnsureResumed(this, _belowPanel, _fieldsTable);
+            // DebugLayout.TraceLayoutSnapshot(this, _picture, _belowPanel, _fieldsTable);
             // one-time z-order flip test if you suspect the image is covering controls
-            DebugLayout.FlipZOrderForTest(this, _picture!);
+            // DebugLayout.FlipZOrderForTest(this, _picture!);
             //------------------------------------
             //------------------------------------
 
@@ -253,7 +286,28 @@ namespace Smart_Stay_Awake_2.UI
                 _isClosing = true;
                 Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Guard flag set (_isClosing = true)");
 
-                // TODO (future iterations): Stop timers, clear keep-awake state, etc.
+                // =====================================================================
+                // Disarm keep-awake: Restore normal power management
+                // =====================================================================
+                // Critical cleanup: Allow system sleep/hibernation again before app exits.
+                // If this fails, the system will remain in keep-awake state even after app closes!
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Disarming keep-awake ...");
+                bool disarmSuccess = PowerManagement.KeepAwakeManager.Disarm();
+                if (disarmSuccess)
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Keep-awake disarmed successfully");
+                    Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: QuitApplication: System sleep/hibernation now ALLOWED (IsArmed={PowerManagement.KeepAwakeManager.IsArmed})");
+                }
+                else
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: CRITICAL - FAILED to disarm keep-awake!");
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: CRITICAL - System may remain in keep-awake state after app closes!");
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: CRITICAL - User may need to manually check 'powercfg -requests' and reboot if necessary");
+                    // Don't block quit on disarm failure - app must close
+                    // But log it very loudly so user can investigate
+                }
+
+                // TODO (future iterations): Stop timers, etc.
 
                 // Hide and dispose tray icon
                 if (_tray != null)
@@ -1001,8 +1055,29 @@ namespace Smart_Stay_Awake_2.UI
                 AddRow("Auto-quit at", _fldUntil);
                 AddRow("Time remaining", _fldRemaining);
                 AddRow("Timer update frequency", _fldCadence);
-
                 Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: 3 field rows added (right/left aligned)");
+
+                // =====================================================================
+                // Conditional visibility: Hide countdown fields when no timer is active
+                // =====================================================================
+                // Per spec: When no --for and no --until, hide countdown fields (they're irrelevant).
+                // Mode == Indefinite means keep-awake runs forever with no auto-quit timer.
+                if (_state.Mode == PlannedMode.Indefinite)
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Mode is Indefinite (no timer)");
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Hiding entire fields table (countdown info not applicable)");
+
+                    // Hide the entire table (cleaner than hiding individual rows)
+                    _fieldsTable.Visible = false;
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Fields table hidden (_fieldsTable.Visible=false)");
+                }
+                else
+                {
+                    Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Mode is {_state.Mode} (timer active)");
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Fields table remains visible (countdown info relevant)");
+                    Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Timer details: Until={_state.PlannedUntilLocal?.ToString("yyyy-MM-dd HH:mm:ss") ?? "<none>"}, Duration={_state.PlannedTotal?.ToString() ?? "<none>"}");
+                    // Fields stay visible with placeholder values (will be updated by timer in future iteration)
+                }
             }
             catch (Exception ex)
             {
