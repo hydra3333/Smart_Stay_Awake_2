@@ -786,10 +786,10 @@ namespace Smart_Stay_Awake_2.UI
                 BuildButtonsRow();
                 if (_buttonsRow != null)
                 {
-                    // Find the inner TableLayoutPanel and set its width
-                    if (_buttonsRow.Controls.Count > 0 && _buttonsRow.Controls[0] is TableLayoutPanel buttonTable)
+                    // Find the inner Panel and set its width to match content width
+                    if (_buttonsRow.Controls.Count > 0 && _buttonsRow.Controls[0] is Panel buttonPanel)
                     {
-                        buttonTable.Width = contentWidth;
+                        buttonPanel.Width = contentWidth;
                     }
                     mainStack.Controls.Add(_buttonsRow);
                 }
@@ -835,26 +835,13 @@ namespace Smart_Stay_Awake_2.UI
             Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Entered BuildButtonsRow ...");
             try
             {
-                // Use TableLayoutPanel with proper column sizing for left/right button placement
-                var buttonTable = new TableLayoutPanel
-                {
-                    ColumnCount = 3,
-                    AutoSize = true,
-                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                    Margin = new Padding(0, 12, 0, 0)  // Space above buttons
-                };
-
-                // Column layout: [Button] [Spacer] [Button]
-                buttonTable.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));   // Left button column
-                buttonTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F)); // Middle spacer (grows)
-                buttonTable.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));   // Right button column
-
                 // Left button: Minimize to system tray
                 var btnMin = new Button
                 {
                     Text = "Minimize to System Tray",
                     AutoSize = true,
                     Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold),
+                    Anchor = AnchorStyles.Left,  // Anchor to left
                     Margin = new Padding(0, 2, 4, 2)
                 };
                 btnMin.Click += (s, e) =>
@@ -862,7 +849,6 @@ namespace Smart_Stay_Awake_2.UI
                     Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Minimize to System Tray' clicked => MinimizeToTray");
                     MinimizeToTray();
                 };
-                buttonTable.Controls.Add(btnMin, 0, 0);  // Column 0
 
                 // Right button: Quit
                 var btnQuit = new Button
@@ -870,6 +856,7 @@ namespace Smart_Stay_Awake_2.UI
                     Text = "Quit",
                     AutoSize = true,
                     Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Bold),
+                    Anchor = AnchorStyles.Right,  // Anchor to right
                     Margin = new Padding(4, 2, 0, 2)
                 };
                 btnQuit.Click += (s, e) =>
@@ -877,7 +864,26 @@ namespace Smart_Stay_Awake_2.UI
                     Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: Button 'Quit' clicked => QuitApplication");
                     QuitApplication("Button.Quit");
                 };
-                buttonTable.Controls.Add(btnQuit, 2, 0);  // Column 2 (skip column 1 = spacer)
+
+                // Use a Panel with manual positioning (will be set in BuildBelowImageLayout)
+                var buttonPanel = new Panel
+                {
+                    AutoSize = false,  // Fixed size (set by caller)
+                    Height = 35,
+                    Margin = new Padding(0, 12, 0, 0)
+                };
+                buttonPanel.Controls.Add(btnMin);
+                buttonPanel.Controls.Add(btnQuit);
+
+                // Position buttons on resize/layout
+                buttonPanel.Layout += (s, e) =>
+                {
+                    if (buttonPanel.Width > 0)
+                    {
+                        btnMin.Location = new Point(0, 0);
+                        btnQuit.Location = new Point(buttonPanel.Width - btnQuit.Width, 0);
+                    }
+                };
 
                 // Wrap for compatibility
                 _buttonsRow = new FlowLayoutPanel
@@ -887,9 +893,9 @@ namespace Smart_Stay_Awake_2.UI
                     FlowDirection = FlowDirection.TopDown,
                     Margin = new Padding(0)
                 };
-                _buttonsRow.Controls.Add(buttonTable);
+                _buttonsRow.Controls.Add(buttonPanel);
 
-                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow: 2 buttons added (TableLayoutPanel approach)");
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow: 2 buttons added (manual positioning)");
             }
             catch (Exception ex)
             {
