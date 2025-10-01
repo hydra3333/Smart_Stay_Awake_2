@@ -119,7 +119,7 @@ namespace Smart_Stay_Awake_2.UI
 
             //------------------------------------
             //------------------------------------
-            // FOR DEBUGGING: Trace the panel below the image
+            // FOR DEBUGGING: Trace the panel below the image, containing text and fields.
             // Make sure any suspended parents are resumed, then trace a full snapshot
             DebugLayout.EnsureResumed(this, _belowPanel, _fieldsTable);
             DebugLayout.TraceLayoutSnapshot(this, _picture, _belowPanel, _fieldsTable);
@@ -560,6 +560,12 @@ namespace Smart_Stay_Awake_2.UI
         /// Builds the UI controls panel below the image and adjusts form size.
         /// Called once after image is loaded and displayed.
         /// Creates: primary text, separator, secondary text, buttons, dummy fields.
+        /// 
+        /// CRITICAL: Z-order matters for dock processing. WinForms docks controls in REVERSE z-order
+        /// (back-to-front, highest index first). For Dock=Top followed by Dock=Fill to work correctly:
+        ///   - Top-docked control must be at HIGHER index (back)
+        ///   - Fill-docked control must be at index 0 (front)
+        /// Otherwise Fill claims entire client area first, then Top paints over it (overlap).
         /// </summary>
         private void BuildBelowImageLayout()
         {
@@ -572,25 +578,68 @@ namespace Smart_Stay_Awake_2.UI
                     return;
                 }
 
-                // Step 1: Convert image from Dock=Fill to Dock=Top with fixed height
+                // =====================================================================
+                // STEP 1: Calculate dimensions (no hardcoded magic numbers)
+                // =====================================================================
+                // Well-named inline constants for padding (single-use, don't pollute AppConfig)
+                const int PANEL_PADDING_LEFT = 12;
+                const int PANEL_PADDING_TOP = 10;
+                const int PANEL_PADDING_RIGHT = 12;
+                const int PANEL_PADDING_BOTTOM = 12;
+                const int FORM_HEIGHT_SAFETY_MARGIN = 20;  // Extra pixels to prevent clipping at various DPI
+
+                // Calculate content width: form's client area minus panel's horizontal padding
+                // This ensures controls scale properly with form size and DPI scaling
+                int formClientWidth = this.ClientSize.Width;
+                int contentWidth = formClientWidth - PANEL_PADDING_LEFT - PANEL_PADDING_RIGHT;
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Width calculation: formClient={formClientWidth}, padding={PANEL_PADDING_LEFT}+{PANEL_PADDING_RIGHT}, contentWidth={contentWidth}");
+
+                // =====================================================================
+                // STEP 2: Convert image from Dock=Fill to Dock=Top with fixed height
+                // =====================================================================
                 int imageHeight = _picture.Height;
                 _picture.Dock = DockStyle.Top;
                 _picture.Height = imageHeight;
                 Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Image converted to Dock=Top, Height={imageHeight}");
 
-                // Step 2: Create controls container using simple FlowLayoutPanel (vertical flow)
+                // =====================================================================
+                // STEP 3: Create controls container (FlowLayoutPanel with Dock=Fill)
+                // =====================================================================
                 var mainStack = new FlowLayoutPanel
                 {
                     Dock = DockStyle.Fill,
                     FlowDirection = FlowDirection.TopDown,
                     WrapContents = false,
                     AutoScroll = true,
-                    Padding = new Padding(12, 10, 12, 12),
+                    Padding = new Padding(PANEL_PADDING_LEFT, PANEL_PADDING_TOP, PANEL_PADDING_RIGHT, PANEL_PADDING_BOTTOM),
                     BackColor = SystemColors.Control
                 };
                 this.Controls.Add(mainStack);
-                // FOR DEBUGGING: keep a ref to this panel so we can trace its size later
-                _belowPanel = mainStack;
+                _belowPanel = mainStack;  // Keep ref for debugging
+
+                // =====================================================================
+                // STEP 4: Fix z-order immediately (CRITICAL for correct dock processing)
+                // =====================================================================
+                // WinForms docks controls in REVERSE z-order (back-to-front, highest index first).
+                // Current state after adding mainStack:
+                //   [0] PictureBox (added in ctor) - FRONT
+                //   [1] mainStack (just added) - BACK
+                // This causes Fill to dock first (claims entire area), then Top paints over it.
+                //
+                // Correct order for Top-then-Fill layout:
+                //   [0] mainStack (Dock=Fill) - FRONT - docked SECOND (gets remainder after Top)
+                //   [1] PictureBox (Dock=Top) - BACK - docked FIRST (claims top portion)
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Z-order BEFORE fix: Picture={this.Controls.GetChildIndex(_picture)}, Panel={this.Controls.GetChildIndex(mainStack)}");
+
+                this.Controls.SetChildIndex(_picture, 1);      // Move picture to back (higher index)
+                this.Controls.SetChildIndex(mainStack, 0);     // Ensure panel is front (index 0)
+
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Z-order AFTER fix: Picture={this.Controls.GetChildIndex(_picture)}, Panel={this.Controls.GetChildIndex(mainStack)}");
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Z-order corrected for proper dock processing (Top before Fill)");
+
+                // =====================================================================
+                // STEP 5: Build child controls (using calculated dimensions)
+                // =====================================================================
 
                 // Primary text
                 _lblPrimary = new Label
@@ -598,7 +647,7 @@ namespace Smart_Stay_Awake_2.UI
                     Text = "Smart Stay Awake 2",
                     TextAlign = ContentAlignment.MiddleCenter,
                     AutoSize = false,
-                    Width = 488, // 512 - padding
+                    Width = contentWidth,  // Calculated, not hardcoded
                     Height = 30,
                     Margin = new Padding(0, 6, 0, 8),
                     Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 10.5f, FontStyle.Bold)
@@ -608,7 +657,7 @@ namespace Smart_Stay_Awake_2.UI
                 // Separator
                 _separator = new Panel
                 {
-                    Width = 488,
+                    Width = contentWidth,  // Calculated, not hardcoded
                     Height = 1,
                     Margin = new Padding(0, 4, 0, 10),
                     BackColor = SystemColors.ControlDark
@@ -621,7 +670,7 @@ namespace Smart_Stay_Awake_2.UI
                     Text = "Ready • No timers armed",
                     TextAlign = ContentAlignment.MiddleCenter,
                     AutoSize = false,
-                    Width = 488,
+                    Width = contentWidth,  // Calculated, not hardcoded
                     Height = 25,
                     Margin = new Padding(0, 0, 0, 10),
                     Font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 9.0f, FontStyle.Regular)
@@ -632,7 +681,7 @@ namespace Smart_Stay_Awake_2.UI
                 BuildButtonsRow();
                 if (_buttonsRow != null)
                 {
-                    _buttonsRow.Width = 488;
+                    _buttonsRow.Width = contentWidth;  // Calculated, not hardcoded
                     mainStack.Controls.Add(_buttonsRow);
                 }
 
@@ -640,14 +689,27 @@ namespace Smart_Stay_Awake_2.UI
                 BuildFieldsTable();
                 if (_fieldsTable != null)
                 {
-                    _fieldsTable.Width = 488;
+                    _fieldsTable.Width = contentWidth;  // Calculated, not hardcoded
                     mainStack.Controls.Add(_fieldsTable);
                 }
 
                 Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Controls added to main stack");
 
-                // Form will auto-size height based on FlowLayoutPanel content
-                int newClientHeight = imageHeight + 300; // Approximate; FlowLayoutPanel handles actual layout
+                // =====================================================================
+                // STEP 6: Calculate final form height based on actual control measurements
+                // =====================================================================
+                // Force layout engine to calculate PreferredSize based on actual children
+                mainStack.PerformLayout();
+
+                // Measure how much vertical space the bottom panel actually needs
+                int bottomPanelHeight = mainStack.PreferredSize.Height;
+
+                // Calculate total client height: image + bottom panel + safety margin
+                // Safety margin prevents clipping at different DPI scales or with slight measurement variations
+                int newClientHeight = imageHeight + bottomPanelHeight + FORM_HEIGHT_SAFETY_MARGIN;
+
+                Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Height calculation: image={imageHeight}, panel={bottomPanelHeight}, margin={FORM_HEIGHT_SAFETY_MARGIN}, total={newClientHeight}");
+
                 this.ClientSize = new Size(this.ClientSize.Width, newClientHeight);
                 Trace.WriteLine($"Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Form resized to {this.ClientSize.Width}x{this.ClientSize.Height}");
             }
