@@ -574,18 +574,8 @@ namespace Smart_Stay_Awake_2.UI
                 try { display?.Dispose(); display = null; } catch { }
                 Trace.WriteLine("UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Disposed display bitmap");
 
+
                 // multiIcon and icoStream are held by TrayManager; will be disposed on app exit
-                // --------- Multi-size ICON (16..256, all-PNG) ---------
-                var (icon, stream) = IcoBuilder.BuildMultiSizePngIco(squared, AppConfig.TRAY_ICON_SIZES);
-                multiIcon = icon;
-                icoStream = stream;
-
-                // Apply to Form (title bar / taskbar)
-                this.Icon = multiIcon;
-
-                // Apply to Tray
-                _tray?.SetIcon(multiIcon, icoStream);
-
                 Trace.WriteLine("UI.MainForm: Exiting TryLoadPrepareAndApplyImageAndIcon (success).");
                 // NOTE: Do NOT dispose multiIcon or icoStream here; TrayManager holds refs.
                 // The Form will also use this.Icon. Dispose them on FormClosed via TrayManager.
