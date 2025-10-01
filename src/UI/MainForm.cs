@@ -30,25 +30,28 @@ namespace Smart_Stay_Awake_2.UI
         private bool _isClosing = false;
 
         // UI containers and controls (added below the image in Module 4)
-        private Label? _lblPrimary;              // "Smart Stay Awake 2"
-        private Panel? _separator;               // Thin horizontal line
-        private Label? _lblSecondary;            // "Ready • No timers armed"
-        private FlowLayoutPanel? _buttonsRow;    // Buttons: Show/Minimize/Help/Quit
+        // COMMENTED OUT (iteration 2 - removed from UI to match Python layout):
+        // private Label? _lblPrimary;              // "Smart Stay Awake 2"
+        // private Label? _lblSecondary;            // "Ready • No timers armed"
+        private Panel? _separator;               // Thin horizontal line (still used)
+        private FlowLayoutPanel? _buttonsRow;    // Buttons: Minimize/Quit
         private TableLayoutPanel? _fieldsTable;  // Dummy fields grid
 
         // FOR DEBUGGING
         // Container under the image (grey area) so we can trace its size
         private FlowLayoutPanel? _belowPanel;
 
-        // Individual dummy field value labels
-        private Label? _fldMode;
-        private Label? _fldStatus;
-        private Label? _fldUntil;
-        private Label? _fldRemaining;
-        private Label? _fldCadence;
-        private Label? _fldIconSource;
-        private Label? _fldVersion;
-        private Label? _fldDpi;
+        // Individual dummy field value labels (active fields for countdown display)
+        private Label? _fldUntil;           // Auto-quit at timestamp
+        private Label? _fldRemaining;       // Time remaining countdown
+        private Label? _fldCadence;         // Timer update frequency
+
+        // COMMENTED OUT (iteration 2 - removed from UI to match Python layout):
+        // private Label? _fldMode;         // System mode
+        // private Label? _fldStatus;       // Current status
+        // private Label? _fldIconSource;   // Icon source info
+        // private Label? _fldVersion;      // App version
+        // private Label? _fldDpi;          // DPI/Scale percentage
 
         // Constructor is lightweight: build controls, wire events, set fixed window policy.
         internal MainForm(AppState state)
