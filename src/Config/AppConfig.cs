@@ -26,6 +26,29 @@ namespace Smart_Stay_Awake_2
         public const int MIN_AUTO_QUIT_SECONDS = 10;                 // ≥ 10s
         public const int MAX_AUTO_QUIT_SECONDS = 365 * 24 * 3600;    // ≤ ~365d
 
+        // ---- Timer cadence configuration (adaptive update frequency) ----
+        // Each tuple: (ThresholdSeconds, CadenceMilliseconds)
+        // Rule: if remaining > threshold, use this cadence
+        public static readonly (int ThresholdSeconds, int CadenceMs)[] COUNTDOWN_CADENCE = new[]
+        {
+            (3600, 600_000),  // > 60 min:  update every 10 minutes
+            (1800, 300_000),  // > 30 min:  update every  5 minutes
+            ( 900,  60_000),  // > 15 min:  update every  1 minute
+            ( 600,  30_000),  // > 10 min:  update every 30 seconds
+            ( 300,  15_000),  // >  5 min:  update every 15 seconds
+            ( 120,  10_000),  // >  2 min:  update every 10 seconds
+            (  60,   5_000),  // >  1 min:  update every  5 seconds
+            (  30,   2_000),  // > 30 sec:  update every  2 seconds
+            (  -1,   1_000),  // ≤ 30 sec:  update every  1 second (catch-all)
+        };
+
+        // ---- Snap-to-boundary configuration (cadence alignment) ----
+        // Snap-to only applies when remaining >= this threshold
+        public const int HARD_CADENCE_SNAP_TO_THRESHOLD_SECONDS = 60;
+
+        // Micro-sleep protection: if snap interval < this, add one full cadence
+        public const int SNAP_TO_MIN_INTERVAL_MS = 200;
+
         // ---- Allowed image/icon extensions -----------------------------------
         public static readonly HashSet<string> ALLOWED_ICON_EXTENSIONS =
             new(StringComparer.OrdinalIgnoreCase)

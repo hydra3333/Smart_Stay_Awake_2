@@ -90,6 +90,7 @@ namespace Smart_Stay_Awake_2
                 bool verbose = false;
                 TimeSpan? forDuration = null;
                 DateTime? untilLocal = null;
+                double? untilTargetEpoch = null;  // For two-stage ceiling
                 bool showHelp = false;
 
                 // -----------------------------------------------------------------
@@ -174,15 +175,25 @@ namespace Smart_Stay_Awake_2
                             throw new CliParseException("Smart_Stay_Awake_2: CliParser: Missing value for --until. Example: --until \"2025-1-2 3:4:5\"");
                         string raw = (args[i] ?? string.Empty).Trim().Trim('"', '\''); // relaxed quotes
                         var parsed = ParseUntilLocalRelaxed(raw);
-                        // Validate bounds relative to "now"
-                        DateTime nowLocal = DateTime.Now;
-                        TimeSpan delta = parsed - nowLocal;
-                        if (delta.TotalSeconds < AppConfig.MIN_AUTO_QUIT_SECONDS)
-                            throw new CliParseException($"Smart_Stay_Awake_2: CliParser: --until must be at least {AppConfig.MIN_AUTO_QUIT_SECONDS} seconds in the future.");
-                        if (delta.TotalSeconds > AppConfig.MAX_AUTO_QUIT_SECONDS)
+
+                        // Calculate epoch seconds for two-stage ceiling (Stage 1)
+                        DateTime utc = parsed.ToUniversalTime();
+                        double targetEpoch = (utc - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
+
+                        // Validate bounds relative to "now" (using epoch for precision)
+                        double nowCeil = Math.Ceiling(GetCurrentEpochSeconds());
+                        int deltaSeconds = (int)(targetEpoch - nowCeil);
+
+                        if (deltaSeconds < AppConfig.MIN_AUTO_QUIT_SECONDS)
+                            throw new CliParseException($"Smart_Stay_Awake_2: CliParser: --until must be at least {AppConfig.MIN_AUTO_QUIT_SECONDS} seconds in the future (got {deltaSeconds}s).");
+                        if (deltaSeconds > AppConfig.MAX_AUTO_QUIT_SECONDS)
                             throw new CliParseException($"Smart_Stay_Awake_2: CliParser: --until must be within {AppConfig.MAX_AUTO_QUIT_SECONDS} seconds from now (~365 days).");
+
                         untilLocal = parsed;
+                        untilTargetEpoch = targetEpoch;  // Store for two-stage ceiling
+
                         Trace.WriteLine($"Smart_Stay_Awake_2: CliParser: UntilLocal accepted: {untilLocal:yyyy-MM-dd HH:mm:ss}");
+                        Trace.WriteLine($"Smart_Stay_Awake_2: CliParser: UntilTargetEpoch (Stage 1): {targetEpoch:F1} (delta={deltaSeconds}s)");
                         continue;
                     }
                     // Unknown token -> friendly error
@@ -199,6 +210,7 @@ namespace Smart_Stay_Awake_2
                     Verbose = verbose,
                     ForDuration = forDuration,
                     UntilLocal = untilLocal,
+                    UntilTargetEpoch = untilTargetEpoch,
                     ShowHelp = showHelp
                 };
                 Trace.WriteLine("Smart_Stay_Awake_2: CliParser: Exiting CliParser.Parse (success).");
@@ -333,6 +345,15 @@ namespace Smart_Stay_Awake_2
             int begin = firstSpace + 1;
             while (begin < raw.Length && char.IsWhiteSpace(raw[begin])) begin++;
             return raw.Substring(begin);
+        }
+
+        /// <summary>
+        /// Get current UTC time as epoch seconds (seconds since Unix epoch: 1970-01-01 00:00:00 UTC).
+        /// Used for two-stage ceiling precision in timer arming.
+        /// </summary>
+        private static double GetCurrentEpochSeconds()
+        {
+            return (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
         }
     }
 }

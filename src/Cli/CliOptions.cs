@@ -36,6 +36,12 @@ namespace Smart_Stay_Awake_2
         public DateTime? UntilLocal { get; init; }
 
         /// <summary>
+        /// If provided, the target epoch seconds for --until (for two-stage ceiling precision).
+        /// Used to recalculate delay just before arming timer in OnShown().
+        /// </summary>
+        public double? UntilTargetEpoch { get; init; }
+
+        /// <summary>
         /// Optional: if you later add --help, set this and exit early after printing help.
         /// </summary>
         public bool ShowHelp { get; init; }

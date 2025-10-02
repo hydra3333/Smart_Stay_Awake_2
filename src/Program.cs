@@ -31,8 +31,8 @@ namespace Smart_Stay_Awake_2
 #if DEBUG
             // Mirror Tracing to VS Output window while debugging
             // Ensure this is present at the top of main() even if tracing is re-configured later.
-            Trace.Listeners.Add(new DefaultTraceListener());
-            Trace.AutoFlush = true;
+            //Trace.Listeners.Add(new DefaultTraceListener());
+            //Trace.AutoFlush = true;
 #endif
 
             // To customize application configuration such as set high DPI settings or default font,

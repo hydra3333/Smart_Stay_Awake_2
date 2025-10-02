@@ -1,13 +1,13 @@
 ==================================================
-[Init] Smart_Stay_Awake_2 start 2025-10-02 15:11:11
-[Init] Version: 1.0.0+c2f2923bc7e098703e611063cfed81aa52b8a660
-[Init] Args: --verbose --for 3m
+[Init] Smart_Stay_Awake_2 start 2025-10-02 20:55:37
+[Init] Version: 1.0.0+def9b7338a100f45e19a15336f8907c92de935a3
+[Init] Args: --verbose --until 2025-10-03 0:0:1
 [Init] Tracing enabled.
 [Init] Log file: E:\SOFTWARE-Win11\Smart_Stay_Awake_2\GITHUB\hydra3333\Smart_Stay_Awake_2\src\deployment\Debug\net8.0-windows10.0.19041.0\Smart_Stay_Awake_2_Trace_20251002.log
 Smart_Stay_Awake_2: Main: End of   tracing config TRY
 Entered AppState.Create ...
-AppState.Create: Version=1.0.0+c2f2923bc7e098703e611063cfed81aa52b8a660, TraceEnabled=True, LogPath=E:\SOFTWARE-Win11\Smart_Stay_Awake_2\GITHUB\hydra3333\Smart_Stay_Awake_2\src\deployment\Debug\net8.0-windows10.0.19041.0\Smart_Stay_Awake_2_Trace_20251002.log
-AppState.Create: Mode=ForDuration, Until=<none>, Total=00:03:00
+AppState.Create: Version=1.0.0+def9b7338a100f45e19a15336f8907c92de935a3, TraceEnabled=True, LogPath=E:\SOFTWARE-Win11\Smart_Stay_Awake_2\GITHUB\hydra3333\Smart_Stay_Awake_2\src\deployment\Debug\net8.0-windows10.0.19041.0\Smart_Stay_Awake_2_Trace_20251002.log
+AppState.Create: Mode=UntilTimestamp, Until=2025-10-03 00:00:01, Total=<none>
 AppState.Create: IconSource=None, IconPath=<none>
 Exiting AppState.Create.
 Smart_Stay_Awake_2: Main: Starting UI.MainForm ...
@@ -97,9 +97,9 @@ Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Text blurb (5 lines) and
 Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Status hint label added
 Smart_Stay_Awake_2: UI.MainForm: Entered BuildFieldsTable ...
 Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: 3 field rows added (right/left aligned)
-Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Mode is ForDuration (timer active)
+Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Mode is UntilTimestamp (timer active)
 Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Fields table remains visible (countdown info relevant)
-Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Timer details: Until=<none>, Duration=00:03:00
+Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Timer details: Until=2025-10-03 00:00:01, Duration=<none>
 Smart_Stay_Awake_2: UI.MainForm: Exiting BuildFieldsTable
 Smart_Stay_Awake_2: UI.MainForm: Entered BuildButtonsRow ...
 Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow: 2 buttons added (manual positioning)
@@ -123,9 +123,8 @@ Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Exiting Arm (success=True)
 Smart_Stay_Awake_2: UI.MainForm: OnShown: Keep-awake armed successfully
 Smart_Stay_Awake_2: UI.MainForm: OnShown: System sleep/hibernation now BLOCKED (IsArmed=True)
 Smart_Stay_Awake_2: UI.MainForm: OnShown: Exiting.
-Smart_Stay_Awake_2: UI.MainForm: OnFormClosing: Entered (CloseReason=UserClosing)
-Smart_Stay_Awake_2: UI.MainForm: OnFormClosing: User/system close => QuitApplication (CloseReason=UserClosing)
-Smart_Stay_Awake_2: UI.MainForm: Entered QuitApplication (source=FormClosing:UserClosing) ...
+Smart_Stay_Awake_2: UI.MainForm: Button 'Quit' clicked => QuitApplication
+Smart_Stay_Awake_2: UI.MainForm: Entered QuitApplication (source=Button.Quit) ...
 Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Guard flag set (_isClosing = true)
 Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Disarming keep-awake ...
 Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Entered Disarm ...
