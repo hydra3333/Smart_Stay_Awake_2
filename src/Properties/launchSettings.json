@@ -1,7 +1,8 @@
 ﻿{
   "profiles": {
     "Smart_Stay_Awake_2": {
-      "commandName": "Project"
+      "commandName": "Project",
+      
       //"commandLineArgs": "--help"
       //
       // "commandLineArgs": "--verbose --for 367d"
