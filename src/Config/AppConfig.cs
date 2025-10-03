@@ -7,8 +7,34 @@ using System.Collections.Generic;
 
 namespace Smart_Stay_Awake_2
 {
+    /// <summary>
+    /// Defines which power management implementation to use.
+    /// </summary>
+    internal enum PowerManagementStrategy
+    {
+        /// <summary>
+        /// Legacy: SetThreadExecutionState (fire-and-forget, thread-level flags).
+        /// Simpler but less robust. No handle cleanup needed.
+        /// </summary>
+        LegacyThreadExecutionState,
+
+        /// <summary>
+        /// Modern: Power Request APIs (handle-based, process-level requests).
+        /// More robust, better diagnostic support, explicit lifecycle management.
+        /// </summary>
+        ModernPowerRequests
+    }
+
     internal static class AppConfig
     {
+        // ---- Power management strategy ---------------------------------------
+        /// <summary>
+        /// Selects which power management implementation to use.
+        /// Default: ModernPowerRequests (recommended for Windows 7+).
+        /// Switch to LegacyThreadExecutionState for comparison or fallback testing.
+        /// </summary>
+        public static readonly PowerManagementStrategy POWER_STRATEGY = PowerManagementStrategy.ModernPowerRequests;
+
         // ---- App identity ----------------------------------------------------
         public const string APP_INTERNAL_NAME = "Smart_Stay_Awake_2";
         public const string APP_DISPLAY_NAME = "Smart Stay Awake 2";
@@ -56,7 +82,7 @@ namespace Smart_Stay_Awake_2
 
         // ---- Icon imaging knobs ---------------------------------------------------------
         public const int WINDOW_MAX_IMAGE_EDGE_PX = 768; // 512; // 768; // 1024; // Max edge length for loaded image in main window
-        // We’ll use TRAY_ICON_SIZES in the next sub-iteration when we switch to multi-size ICO:
+        // We'll use TRAY_ICON_SIZES in the next sub-iteration when we switch to multi-size ICO:
         public static readonly int[] TRAY_ICON_SIZES = new[] { 16, 20, 24, 32, 40, 48, 64, 128, 256 };
     }
 }

@@ -27,4 +27,3 @@ POWER_REQUEST_TYPE
 // unless you know you need more types:
 //
 // Windows.Win32.System.Power
-

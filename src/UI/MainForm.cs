@@ -140,7 +140,7 @@ namespace Smart_Stay_Awake_2.UI
             // Display monitor sleep is still allowed (ES_AWAYMODE_REQUIRED permits this).
             // CRITICAL: If arming fails, the app's entire purpose is defeated - this is FATAL.
             Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Arming keep-awake ...");
-            bool keepAwakeSuccess = PowerManagement.KeepAwakeManager.Arm();
+            bool keepAwakeSuccess = PowerManagement.KeepAwakeManager.Arm(_state);
             if (keepAwakeSuccess)
             {
                 Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Keep-awake armed successfully");
