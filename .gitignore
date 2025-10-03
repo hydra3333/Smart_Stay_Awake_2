@@ -2,18 +2,27 @@
 .vs/
 *.user
 *.suo
+*.userosscache
+*.sln.docstates
 
 # Build outputs
-bin/
-obj/
-[Bb]uild/
-[Ll]og/
-TestResults/
+**/[Bb]in/
+**/[Oo]bj/
+**/[Dd]eployment/
+**/[Bb]uild/
+**/[Ll]og/
+**/[Tt]estResults/
 *.nupkg
 
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
 # Publish outputs
-dist/
-artifacts/
+**/[Dd]ist/
+**/[Aa]rtifacts/
 
 # Rider / VS Code
 .idea/
