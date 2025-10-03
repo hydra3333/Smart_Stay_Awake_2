@@ -246,6 +246,10 @@ namespace Smart_Stay_Awake_2.UI
                     _countdownTimer.Interval = initialIntervalMs;
                     _countdownTimer.Start();
 
+                    // Update fields immediately (don't wait for first tick)
+                    UpdateCountdownFields();
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Countdown fields initialized immediately");
+
                     Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Countdown timer armed: initial interval=" + initialIntervalMs + "ms");
                     Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Timers armed successfully");
                 }
@@ -1480,9 +1484,9 @@ namespace Smart_Stay_Awake_2.UI
             sw.Stop();
             long memAfter = GC.GetTotalMemory(false);
             int threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
-
+            string localTime = DateTime.Now.ToString("HH:mm:ss.fff");
             Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: " + sw.ElapsedTicks + " ticks (" + sw.Elapsed.TotalMilliseconds.ToString("F3") + "ms), " +
-                            "Thread: " + threadId + ", Mem: " + (memAfter - memBefore) + " bytes, Visible: " + this.Visible);
+                            "Thread: " + threadId + ", Mem: " + (memAfter - memBefore) + " bytes, Visible: " + this.Visible + ", Time: " + localTime);
 #endif
         }
 

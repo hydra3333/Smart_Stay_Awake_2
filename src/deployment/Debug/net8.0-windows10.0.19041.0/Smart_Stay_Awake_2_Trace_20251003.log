@@ -1,13 +1,13 @@
 ==================================================
-[Init] Smart_Stay_Awake_2 start 2025-10-03 15:43:13
-[Init] Version: 1.0.0+c59f08bd70ec04244088870a71111d7bc3ea396f
-[Init] Args: --verbose --for 10s
+[Init] Smart_Stay_Awake_2 start 2025-10-03 16:03:37
+[Init] Version: 1.0.0+f50f0e2d7aa285c6dae067a8ac9c1db1ac51a01e
+[Init] Args: --verbose --for 3m
 [Init] Tracing enabled.
 [Init] Log file: E:\SOFTWARE-Win11\Smart_Stay_Awake_2\GITHUB\hydra3333\Smart_Stay_Awake_2\src\deployment\Debug\net8.0-windows10.0.19041.0\Smart_Stay_Awake_2_Trace_20251003.log
 Smart_Stay_Awake_2: Main: End of   tracing config TRY
 Entered AppState.Create ...
-AppState.Create: Version=1.0.0+c59f08bd70ec04244088870a71111d7bc3ea396f, TraceEnabled=True, LogPath=E:\SOFTWARE-Win11\Smart_Stay_Awake_2\GITHUB\hydra3333\Smart_Stay_Awake_2\src\deployment\Debug\net8.0-windows10.0.19041.0\Smart_Stay_Awake_2_Trace_20251003.log
-AppState.Create: Mode=ForDuration, Until=<none>, Total=00:00:10
+AppState.Create: Version=1.0.0+f50f0e2d7aa285c6dae067a8ac9c1db1ac51a01e, TraceEnabled=True, LogPath=E:\SOFTWARE-Win11\Smart_Stay_Awake_2\GITHUB\hydra3333\Smart_Stay_Awake_2\src\deployment\Debug\net8.0-windows10.0.19041.0\Smart_Stay_Awake_2_Trace_20251003.log
+AppState.Create: Mode=ForDuration, Until=<none>, Total=00:03:00
 AppState.Create: IconSource=None, IconPath=<none>
 Exiting AppState.Create.
 Smart_Stay_Awake_2: Main: Starting UI.MainForm ...
@@ -99,7 +99,7 @@ Smart_Stay_Awake_2: UI.MainForm: Entered BuildFieldsTable ...
 Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: 3 field rows added (right/left aligned)
 Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Mode is ForDuration (timer active)
 Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Fields table remains visible (countdown info relevant)
-Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Timer details: Until=<none>, Duration=00:00:10
+Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Timer details: Until=<none>, Duration=00:03:00
 Smart_Stay_Awake_2: UI.MainForm: Exiting BuildFieldsTable
 Smart_Stay_Awake_2: UI.MainForm: Entered BuildButtonsRow ...
 Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow: 2 buttons added (manual positioning)
@@ -124,24 +124,80 @@ Smart_Stay_Awake_2: UI.MainForm: OnShown: Keep-awake armed successfully
 Smart_Stay_Awake_2: UI.MainForm: OnShown: System sleep/hibernation now BLOCKED (IsArmed=True)
 Smart_Stay_Awake_2: UI.MainForm: OnShown: Timed mode detected, arming timers...
 Smart_Stay_Awake_2: UI.MainForm: OnShown: Mode=ForDuration
-Smart_Stay_Awake_2: UI.MainForm: OnShown: --for mode: nowCeil=1759471995.0, duration=10.0s, targetEpoch=1759472005.0
-Smart_Stay_Awake_2: UI.MainForm: OnShown: Two-stage ceiling Stage 2: nowCeil=1759471995.0, finalSeconds=10s
-Smart_Stay_Awake_2: UI.MainForm: OnShown: Monotonic deadline set: nowTicks=2323246163677, deadlineTicks=2323346163677
-Smart_Stay_Awake_2: UI.MainForm: OnShown: Wall-clock ETA: 2025-10-03 15:43:24
-Smart_Stay_Awake_2: UI.MainForm: OnShown: _fldUntil updated: 2025-10-03 15:43:24
-Smart_Stay_Awake_2: UI.MainForm: OnShown: Auto-quit timer armed: will fire in 10s (10000ms)
-Smart_Stay_Awake_2: UI.MainForm: OnShown: Countdown timer armed: initial interval=1000ms
+Smart_Stay_Awake_2: UI.MainForm: OnShown: --for mode: nowCeil=1759473218.0, duration=180.0s, targetEpoch=1759473398.0
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Two-stage ceiling Stage 2: nowCeil=1759473218.0, finalSeconds=180s
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Monotonic deadline set: nowTicks=2335478008382, deadlineTicks=2337278008382
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Wall-clock ETA: 2025-10-03 16:06:37
+Smart_Stay_Awake_2: UI.MainForm: OnShown: _fldUntil updated: 2025-10-03 16:06:37
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Auto-quit timer armed: will fire in 180s (180000ms)
+Smart_Stay_Awake_2: CountdownPlanner: Snap-to applied: remaining=179s, phase=9s, snap=9000ms
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Countdown fields initialized immediately
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Countdown timer armed: initial interval=9000ms
 Smart_Stay_Awake_2: UI.MainForm: OnShown: Timers armed successfully
 Smart_Stay_Awake_2: UI.MainForm: OnShown: Exiting.
-Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 25098 ticks (2.510ms), Thread: 1, Mem: 16408 bytes, Visible: True
-Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 8625 ticks (0.863ms), Thread: 1, Mem: 0 bytes, Visible: True
-Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7308 ticks (0.731ms), Thread: 1, Mem: 8144 bytes, Visible: True
-Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7657 ticks (0.766ms), Thread: 1, Mem: 8224 bytes, Visible: True
-Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7172 ticks (0.717ms), Thread: 1, Mem: 8160 bytes, Visible: True
-Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7974 ticks (0.797ms), Thread: 1, Mem: 8160 bytes, Visible: True
-Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7678 ticks (0.768ms), Thread: 1, Mem: 8224 bytes, Visible: True
-Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7892 ticks (0.789ms), Thread: 1, Mem: 8168 bytes, Visible: True
-Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 8317 ticks (0.832ms), Thread: 1, Mem: 8184 bytes, Visible: True
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 10791 ticks (1.079ms), Thread: 1, Mem: 0 bytes, Visible: True, Time: 16:03:46.992
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 13633 ticks (1.363ms), Thread: 1, Mem: 8192 bytes, Visible: True, Time: 16:03:56.991
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 9275 ticks (0.927ms), Thread: 1, Mem: 8168 bytes, Visible: True, Time: 16:04:06.990
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 11825 ticks (1.183ms), Thread: 1, Mem: 8200 bytes, Visible: True, Time: 16:04:17.003
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7611 ticks (0.761ms), Thread: 1, Mem: 8144 bytes, Visible: True, Time: 16:04:26.999
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 10726 ticks (1.073ms), Thread: 1, Mem: 16400 bytes, Visible: True, Time: 16:04:36.999
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 8102 ticks (0.810ms), Thread: 1, Mem: 7944 bytes, Visible: True, Time: 16:04:42.002
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 9196 ticks (0.920ms), Thread: 1, Mem: 8192 bytes, Visible: True, Time: 16:04:46.999
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 8193 ticks (0.819ms), Thread: 1, Mem: 8168 bytes, Visible: True, Time: 16:04:51.990
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7037 ticks (0.704ms), Thread: 1, Mem: 8176 bytes, Visible: True, Time: 16:04:57.006
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7167 ticks (0.717ms), Thread: 1, Mem: 8192 bytes, Visible: True, Time: 16:05:02.006
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7100 ticks (0.710ms), Thread: 1, Mem: 0 bytes, Visible: True, Time: 16:05:07.010
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 8024 ticks (0.802ms), Thread: 1, Mem: 8192 bytes, Visible: True, Time: 16:05:12.021
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 8698 ticks (0.870ms), Thread: 1, Mem: 8144 bytes, Visible: True, Time: 16:05:17.026
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7089 ticks (0.709ms), Thread: 1, Mem: 8192 bytes, Visible: True, Time: 16:05:22.029
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6340 ticks (0.634ms), Thread: 1, Mem: 0 bytes, Visible: True, Time: 16:05:27.026
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6660 ticks (0.666ms), Thread: 1, Mem: 8152 bytes, Visible: True, Time: 16:05:32.030
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 11025 ticks (1.103ms), Thread: 1, Mem: 16392 bytes, Visible: True, Time: 16:05:37.025
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6238 ticks (0.624ms), Thread: 1, Mem: 7944 bytes, Visible: True, Time: 16:05:39.029
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6577 ticks (0.658ms), Thread: 1, Mem: 8176 bytes, Visible: True, Time: 16:05:41.038
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6630 ticks (0.663ms), Thread: 1, Mem: 0 bytes, Visible: True, Time: 16:05:43.038
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7443 ticks (0.744ms), Thread: 1, Mem: 8192 bytes, Visible: True, Time: 16:05:45.046
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6381 ticks (0.638ms), Thread: 1, Mem: 8176 bytes, Visible: True, Time: 16:05:47.040
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6361 ticks (0.636ms), Thread: 1, Mem: 8160 bytes, Visible: True, Time: 16:05:49.045
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6272 ticks (0.627ms), Thread: 1, Mem: 7944 bytes, Visible: True, Time: 16:05:51.047
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6409 ticks (0.641ms), Thread: 1, Mem: 8192 bytes, Visible: True, Time: 16:05:53.053
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7352 ticks (0.735ms), Thread: 1, Mem: 8192 bytes, Visible: True, Time: 16:05:55.065
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6769 ticks (0.677ms), Thread: 1, Mem: 7944 bytes, Visible: True, Time: 16:05:57.069
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6688 ticks (0.669ms), Thread: 1, Mem: 8168 bytes, Visible: True, Time: 16:05:59.069
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6533 ticks (0.653ms), Thread: 1, Mem: 8192 bytes, Visible: True, Time: 16:06:01.089
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6957 ticks (0.696ms), Thread: 1, Mem: 7848 bytes, Visible: True, Time: 16:06:03.097
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5909 ticks (0.591ms), Thread: 1, Mem: 8152 bytes, Visible: True, Time: 16:06:05.100
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 9334 ticks (0.933ms), Thread: 1, Mem: 16416 bytes, Visible: True, Time: 16:06:07.109
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5522 ticks (0.552ms), Thread: 1, Mem: 0 bytes, Visible: True, Time: 16:06:08.100
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5874 ticks (0.587ms), Thread: 1, Mem: 8200 bytes, Visible: True, Time: 16:06:09.113
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5611 ticks (0.561ms), Thread: 1, Mem: 8224 bytes, Visible: True, Time: 16:06:10.109
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5348 ticks (0.535ms), Thread: 1, Mem: 8144 bytes, Visible: True, Time: 16:06:11.100
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5421 ticks (0.542ms), Thread: 1, Mem: 7912 bytes, Visible: True, Time: 16:06:12.112
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5536 ticks (0.554ms), Thread: 1, Mem: 8224 bytes, Visible: True, Time: 16:06:13.105
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5377 ticks (0.538ms), Thread: 1, Mem: 8176 bytes, Visible: True, Time: 16:06:14.109
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6112 ticks (0.611ms), Thread: 1, Mem: 8192 bytes, Visible: True, Time: 16:06:15.113
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 7489 ticks (0.749ms), Thread: 1, Mem: 7920 bytes, Visible: True, Time: 16:06:16.120
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5933 ticks (0.593ms), Thread: 1, Mem: 0 bytes, Visible: True, Time: 16:06:17.127
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5976 ticks (0.598ms), Thread: 1, Mem: 8160 bytes, Visible: True, Time: 16:06:18.121
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5899 ticks (0.590ms), Thread: 1, Mem: 8192 bytes, Visible: True, Time: 16:06:19.125
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6490 ticks (0.649ms), Thread: 1, Mem: 8224 bytes, Visible: True, Time: 16:06:20.120
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5945 ticks (0.595ms), Thread: 1, Mem: 0 bytes, Visible: True, Time: 16:06:21.125
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5860 ticks (0.586ms), Thread: 1, Mem: 8152 bytes, Visible: True, Time: 16:06:22.115
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5524 ticks (0.552ms), Thread: 1, Mem: 8168 bytes, Visible: True, Time: 16:06:23.120
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6213 ticks (0.621ms), Thread: 1, Mem: 8224 bytes, Visible: True, Time: 16:06:24.116
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5450 ticks (0.545ms), Thread: 1, Mem: 8168 bytes, Visible: True, Time: 16:06:25.125
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5555 ticks (0.555ms), Thread: 1, Mem: 0 bytes, Visible: True, Time: 16:06:26.124
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5923 ticks (0.592ms), Thread: 1, Mem: 8224 bytes, Visible: True, Time: 16:06:27.128
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5432 ticks (0.543ms), Thread: 1, Mem: 8184 bytes, Visible: True, Time: 16:06:28.124
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5384 ticks (0.538ms), Thread: 1, Mem: 8176 bytes, Visible: True, Time: 16:06:29.128
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6579 ticks (0.658ms), Thread: 1, Mem: 0 bytes, Visible: True, Time: 16:06:30.116
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6937 ticks (0.694ms), Thread: 1, Mem: 8224 bytes, Visible: True, Time: 16:06:31.124
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6301 ticks (0.630ms), Thread: 1, Mem: 8184 bytes, Visible: True, Time: 16:06:32.117
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6568 ticks (0.657ms), Thread: 1, Mem: 8192 bytes, Visible: True, Time: 16:06:33.128
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 5955 ticks (0.596ms), Thread: 1, Mem: 8224 bytes, Visible: True, Time: 16:06:34.123
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6976 ticks (0.698ms), Thread: 1, Mem: 0 bytes, Visible: True, Time: 16:06:35.129
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6477 ticks (0.648ms), Thread: 1, Mem: 8176 bytes, Visible: True, Time: 16:06:36.124
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 6501 ticks (0.650ms), Thread: 1, Mem: 7968 bytes, Visible: True, Time: 16:06:37.116
 Smart_Stay_Awake_2: UI.MainForm: OnAutoQuitCallback: Auto-quit timer expired, quitting application...
 Smart_Stay_Awake_2: UI.MainForm: OnAutoQuitCallback: Marshaling to UI thread via Invoke()
 Smart_Stay_Awake_2: UI.MainForm: Entered QuitApplication (source=Timer.AutoQuit) ...
