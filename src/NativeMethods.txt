@@ -16,6 +16,7 @@ PowerCreateRequest
 PowerSetRequest
 PowerClearRequest
 CloseHandle
+Windows.Win32.System.Power
 
 // Supporting types (force generation)
 REASON_CONTEXT
