@@ -1,2 +1,29 @@
+// ==============================
+// Core power keep-awake (legacy)
+// ==============================
 SetThreadExecutionState
+
+// ==============================
+// Time zone helper you already use
+// ==============================
 GetDynamicTimeZoneInformation
+
+// ==============================
+// Power Requests (modern, robust)
+// Create/Set/Clear + handle close
+// ==============================
+PowerCreateRequest
+PowerSetRequest
+PowerClearRequest
+CloseHandle
+
+// Supporting types (force generation)
+REASON_CONTEXT
+POWER_REQUEST_TYPE
+
+// (Optional) If you ever want *everything* in the power namespace generated,
+// you can add the namespace line below. It’s usually overkill, so leave it out
+// unless you know you need more types:
+//
+// Windows.Win32.System.Power
+

@@ -917,7 +917,7 @@ namespace Smart_Stay_Awake_2.UI
                 // Line 3: First description line (BOLD to match Python, taller to prevent clipping)
                 var lblDesc1 = new Label
                 {
-                    Text = "Prevents system sleep & hibernation while active.",
+                    Text = "Prevents system sleep and hibernation while active.",
                     TextAlign = ContentAlignment.MiddleCenter,
                     AutoSize = false,
                     Width = contentWidth,

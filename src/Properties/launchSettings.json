@@ -2,7 +2,7 @@
   "profiles": {
     "Smart_Stay_Awake_2": {
       "commandName": "Project",
-      
+
       //"commandLineArgs": "--help"
       //
       // "commandLineArgs": "--verbose --for 367d"
@@ -10,7 +10,8 @@
       // "commandLineArgs": "--verbose --for 367d --until \"2030-1-2 3:4:5\""
       // "commandLineArgs": "--icon \"C:\\Users\\u\\Desktop\\Smart_Stay_Awake_2_icon.png\""
       //
-      "commandLineArgs": "--verbose --for 3m"
+      // "commandLineArgs": "--verbose --for 3m",
+      "commandLineArgs": "--verbose --for 15m"
       // "commandLineArgs": "--verbose --until \"2025-10-03 0:0:1\""
       // "commandLineArgs": "--verbose --for 90m --until \"2025-10-03 0:0:2\""
       //
