@@ -47,7 +47,7 @@
   <ItemGroup>
     <Content Include="Assets\Smart_Stay_Awake_2_icon.ico" />
     <Content Include="Assets\Smart_Stay_Awake_2_icon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
