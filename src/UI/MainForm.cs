@@ -46,12 +46,24 @@ namespace Smart_Stay_Awake_2.UI
         private Label? _fldRemaining;       // Time remaining countdown
         private Label? _fldCadence;         // Timer update frequency
 
-        // COMMENTED OUT (iteration 2 - removed from UI to match Python layout):
-        // private Label? _fldMode;         // System mode
-        // private Label? _fldStatus;       // Current status
-        // private Label? _fldIconSource;   // Icon source info
-        // private Label? _fldVersion;      // App version
-        // private Label? _fldDpi;          // DPI/Scale percentage
+        // =====================================================================
+        // Timer infrastructure (Module C - Auto-quit and countdown display)
+        // =====================================================================
+
+        // Auto-quit timer (one-shot background timer, fires once at deadline)
+        private System.Threading.Timer? _autoQuitTimer;
+
+        // Countdown display timer (UI thread timer, updates fields at adaptive intervals)
+        private System.Windows.Forms.Timer? _countdownTimer;
+
+        // Monotonic deadline tracking (immune to clock changes, DST, NTP adjustments)
+        private long _autoQuitDeadlineTicks;
+
+        // Wall-clock ETA for display (human-readable target time)
+        private DateTime? _autoQuitWallClockEta;
+
+        // Cadence tracking (low-churn field updates - only update when value changes)
+        private int _lastCadenceSeconds = -1;
 
         // Constructor is lightweight: build controls, wire events, set fixed window policy.
         internal MainForm(AppState state)
@@ -151,6 +163,96 @@ namespace Smart_Stay_Awake_2.UI
                     "The application cannot continue without keep-awake functionality.",
                     exitCode: 10);
                 // Unreachable: FatalHelper.Fatal exits process
+            }
+
+            // =====================================================================
+            // Arm timers: Auto-quit and countdown display (Module C)
+            // =====================================================================
+            // Only arm timers if we're in a timed mode (ForDuration or UntilTimestamp)
+            if (_state.Mode != PlannedMode.Indefinite)
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Timed mode detected, arming timers...");
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Mode=" + _state.Mode);
+
+                // Calculate target epoch (two-stage ceiling - Stage 2)
+                double targetEpoch = 0;
+                bool hasValidTarget = false;
+
+                if (_state.Mode == PlannedMode.ForDuration && _state.PlannedTotal.HasValue)
+                {
+                    // --for: Calculate target from duration
+                    double nowCeil = Math.Ceiling(Time.TimezoneHelpers.GetCurrentEpochSeconds());
+                    double durationSeconds = _state.PlannedTotal.Value.TotalSeconds;
+                    targetEpoch = nowCeil + durationSeconds;
+                    hasValidTarget = true;
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: --for mode: nowCeil=" + nowCeil.ToString("F1") + ", duration=" + durationSeconds.ToString("F1") + "s, targetEpoch=" + targetEpoch.ToString("F1"));
+                }
+                else if (_state.Mode == PlannedMode.UntilTimestamp && _state.Options.UntilTargetEpoch.HasValue)
+                {
+                    // --until: Use pre-calculated epoch from CLI parser (Stage 1)
+                    targetEpoch = _state.Options.UntilTargetEpoch.Value;
+                    hasValidTarget = true;
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: --until mode: targetEpoch=" + targetEpoch.ToString("F1") + " (from CLI Stage 1)");
+                }
+                else
+                {
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: ERROR - Timed mode but no duration/epoch available, skipping timers");
+                }
+
+                // Only proceed if we have a valid target
+                if (hasValidTarget)
+                {
+                    // Re-calculate seconds from NOW to target (accounts for startup overhead - Stage 2)
+                    double nowCeil2 = Math.Ceiling(Time.TimezoneHelpers.GetCurrentEpochSeconds());
+                    int finalSeconds = (int)Math.Ceiling(targetEpoch - nowCeil2);
+
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Two-stage ceiling Stage 2: nowCeil=" + nowCeil2.ToString("F1") + ", finalSeconds=" + finalSeconds + "s");
+
+                    if (finalSeconds <= 0)
+                    {
+                        // Target already passed, quit immediately
+                        Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: WARNING - Target time already passed (finalSeconds=" + finalSeconds + "), quitting immediately");
+                        QuitApplication("Timer.AlreadyExpired");
+                        return;
+                    }
+
+                    // Set monotonic deadline for countdown calculations (immune to clock changes)
+                    long monotonicNow = Stopwatch.GetTimestamp();
+                    _autoQuitDeadlineTicks = monotonicNow + ((long)finalSeconds * Stopwatch.Frequency);
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Monotonic deadline set: nowTicks=" + monotonicNow + ", deadlineTicks=" + _autoQuitDeadlineTicks);
+
+                    // Set wall-clock ETA for display (human-readable)
+                    _autoQuitWallClockEta = DateTime.Now.AddSeconds(finalSeconds);
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Wall-clock ETA: " + _autoQuitWallClockEta.Value.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                    // Update "Auto-quit at" field (static, set once)
+                    if (_fldUntil != null)
+                    {
+                        _fldUntil.Text = _autoQuitWallClockEta.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: _fldUntil updated: " + _fldUntil.Text);
+                    }
+
+                    // Arm auto-quit timer (one-shot, fires once at deadline)
+                    int finalMilliseconds = finalSeconds * 1000;
+                    _autoQuitTimer = new System.Threading.Timer(OnAutoQuitCallback, null, finalMilliseconds, System.Threading.Timeout.Infinite);
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Auto-quit timer armed: will fire in " + finalSeconds + "s (" + finalMilliseconds + "ms)");
+
+                    // Arm countdown display timer (adaptive cadence, reschedules itself)
+                    _countdownTimer = new System.Windows.Forms.Timer();
+                    _countdownTimer.Tick += OnCountdownTick;
+
+                    // Set initial interval and start
+                    int initialIntervalMs = Time.CountdownPlanner.CalculateNextInterval(_autoQuitDeadlineTicks);
+                    _countdownTimer.Interval = initialIntervalMs;
+                    _countdownTimer.Start();
+
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Countdown timer armed: initial interval=" + initialIntervalMs + "ms");
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Timers armed successfully");
+                }
+            }
+            else
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Indefinite mode, no timers needed");
             }
 
             //------------------------------------
@@ -285,6 +387,48 @@ namespace Smart_Stay_Awake_2.UI
 
                 _isClosing = true;
                 Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Guard flag set (_isClosing = true)");
+
+                // =====================================================================
+                // Dispose timers: Stop and cleanup timer resources (Module C)
+                // =====================================================================
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Disposing timers...");
+
+                // Stop and dispose auto-quit timer
+                if (_autoQuitTimer != null)
+                {
+                    try
+                    {
+                        _autoQuitTimer.Dispose();
+                        Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Auto-quit timer disposed");
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Error disposing auto-quit timer: " + ex.Message);
+                    }
+                    finally
+                    {
+                        _autoQuitTimer = null;
+                    }
+                }
+                // Stop and dispose countdown timer
+                if (_countdownTimer != null)
+                {
+                    try
+                    {
+                        _countdownTimer.Stop();
+                        _countdownTimer.Tick -= OnCountdownTick;
+                        _countdownTimer.Dispose();
+                        Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Countdown timer disposed");
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Error disposing countdown timer: " + ex.Message);
+                    }
+                    finally
+                    {
+                        _countdownTimer = null;
+                    }
+                }
 
                 // =====================================================================
                 // Disarm keep-awake: Restore normal power management
@@ -1269,7 +1413,108 @@ namespace Smart_Stay_Awake_2.UI
 
         private void MainForm_Load_1(object sender, EventArgs e)
         {
+        }
 
+        // =====================================================================
+        // Timer Callbacks (Module C - Auto-quit and countdown display)
+        // =====================================================================
+
+        /// <summary>
+        /// Auto-quit timer callback - fires once when timer expires (runs on ThreadPool thread).
+        /// Marshals to UI thread to call QuitApplication() safely.
+        /// </summary>
+        /// <param name="state">Timer state (unused)</param>
+        private void OnAutoQuitCallback(object? state)
+        {
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnAutoQuitCallback: Auto-quit timer expired, quitting application...");
+
+            // Marshal to UI thread (callback runs on ThreadPool thread)
+            if (this.InvokeRequired)
+            {
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnAutoQuitCallback: Marshaling to UI thread via Invoke()");
+                this.Invoke(new Action(() => QuitApplication("Timer.AutoQuit")));
+            }
+            else
+            {
+                // Already on UI thread (shouldn't happen, but defensive)
+                Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnAutoQuitCallback: Already on UI thread (unexpected)");
+                QuitApplication("Timer.AutoQuit");
+            }
+        }
+
+        /// <summary>
+        /// Countdown display timer tick - fires at adaptive intervals (runs on UI thread).
+        /// Updates countdown fields if window visible, recalculates next interval, reschedules timer.
+        /// </summary>
+        /// <param name="sender">Timer object</param>
+        /// <param name="e">Event args</param>
+        private void OnCountdownTick(object? sender, EventArgs e)
+        {
+            // 1. Stop current timer
+            _countdownTimer?.Stop();
+
+#if DEBUG
+            // Performance metrics (debug builds only)
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            long memBefore = GC.GetTotalMemory(false);
+#endif
+
+            // 2. Do work (update fields if visible)
+            if (this.Visible)
+            {
+                UpdateCountdownFields();
+            }
+
+            // 3. Calculate next interval
+            int nextIntervalMs = Time.CountdownPlanner.CalculateNextInterval(_autoQuitDeadlineTicks);
+
+            // 4. Restart with new interval
+            if (_countdownTimer != null)
+            {
+                _countdownTimer.Interval = nextIntervalMs;
+                _countdownTimer.Start();
+            }
+
+#if DEBUG
+            // Log performance metrics
+            sw.Stop();
+            long memAfter = GC.GetTotalMemory(false);
+            int threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+
+            Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: " + sw.ElapsedTicks + " ticks (" + sw.Elapsed.TotalMilliseconds.ToString("F3") + "ms), " +
+                            "Thread: " + threadId + ", Mem: " + (memAfter - memBefore) + " bytes, Visible: " + this.Visible);
+#endif
+        }
+
+        /// <summary>
+        /// Update countdown display fields with current remaining time and cadence.
+        /// Updates _fldRemaining every tick, _fldCadence only when value changes (low-churn).
+        /// </summary>
+        private void UpdateCountdownFields()
+        {
+            // Calculate remaining time (monotonic clock)
+            long nowTicks = Stopwatch.GetTimestamp();
+            long remainingTicks = Math.Max(0, _autoQuitDeadlineTicks - nowTicks);
+            int remainingSeconds = (int)(remainingTicks / Stopwatch.Frequency);
+
+            // Update "Time remaining" (every tick)
+            if (_fldRemaining != null)
+            {
+                _fldRemaining.Text = Time.CountdownPlanner.FormatDHMS(remainingSeconds);
+            }
+
+            // Update "Timer update frequency" (only when changed)
+            int baseCadenceMs = Time.CountdownPlanner.GetBaseCadenceMs(remainingSeconds);
+            int cadenceSeconds = Math.Max(1, baseCadenceMs / 1000);
+
+            if (cadenceSeconds != _lastCadenceSeconds)
+            {
+                if (_fldCadence != null)
+                {
+                    _fldCadence.Text = Time.CountdownPlanner.FormatHMS(cadenceSeconds);
+                }
+                _lastCadenceSeconds = cadenceSeconds;
+            }
         }
     }
 }
