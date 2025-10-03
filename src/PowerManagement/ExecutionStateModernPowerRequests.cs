@@ -266,7 +266,7 @@ namespace Smart_Stay_Awake_2.PowerManagement
         {
             Trace.WriteLine("Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: Entered GenerateReasonString ...");
 
-            const string baseMessage = "Preventing automatic sleep & hibernation (display monitor may sleep) as requested";
+            const string baseMessage = "Preventing automatic sleep & hibernation (display monitor may sleep) as requested.";
 
             if (appState.Mode == PlannedMode.Indefinite)
             {
@@ -289,7 +289,7 @@ namespace Smart_Stay_Awake_2.PowerManagement
             }
 
             string formattedTime = autoQuitTime.ToString("yyyy-MM-dd HH:mm:ss");
-            string resultTimed = $"{appState.AppDisplayName}: {baseMessage} (auto-quit at {formattedTime}).";
+            string resultTimed = $"{appState.AppDisplayName}: {baseMessage} Auto-quit at {formattedTime}.";
 
             Trace.WriteLine($"Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: GenerateReasonString: Mode={appState.Mode}, autoQuitTime={formattedTime}, result={resultTimed}");
             Trace.WriteLine("Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: Exiting GenerateReasonString (timed)");

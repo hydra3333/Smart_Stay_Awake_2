@@ -1,0 +1,195 @@
+==================================================
+[Init] Smart_Stay_Awake_2 start 2025-10-03 23:21:08
+[Init] Version: 1.0.0+cbac39043d10a0c61432bc20c60f41815e13c790
+[Init] Args: --verbose --for 15m
+[Init] Tracing enabled.
+[Init] Log file: E:\SOFTWARE-Win11\Smart_Stay_Awake_2\GITHUB\hydra3333\Smart_Stay_Awake_2\src\deployment\Debug\net8.0-windows10.0.19041.0\Smart_Stay_Awake_2_Trace_20251003.log
+Smart_Stay_Awake_2: Main: End of   tracing config TRY
+Entered AppState.Create ...
+AppState.Create: Version=1.0.0+cbac39043d10a0c61432bc20c60f41815e13c790, TraceEnabled=True, LogPath=E:\SOFTWARE-Win11\Smart_Stay_Awake_2\GITHUB\hydra3333\Smart_Stay_Awake_2\src\deployment\Debug\net8.0-windows10.0.19041.0\Smart_Stay_Awake_2_Trace_20251003.log
+AppState.Create: Mode=ForDuration, Until=<none>, Total=00:15:00
+AppState.Create: IconSource=None, IconPath=<none>
+Exiting AppState.Create.
+Smart_Stay_Awake_2: Main: Starting UI.MainForm ...
+Smart_Stay_Awake_2: UI.MainForm: Entered MainForm ctor ...
+Smart_Stay_Awake_2: TrayManager: Entered ctor ...
+TrayManager: Exiting ctor (success).
+Smart_Stay_Awake_2: TrayManager: Initialize: Entered ...
+Smart_Stay_Awake_2: TrayManager: Context menu built (3 items: Show Window, Help, Quit)
+Smart_Stay_Awake_2: TrayManager: Left-click handler registered
+Smart_Stay_Awake_2: TrayManager: Initialize: Exiting (success).
+UI.MainForm: Using TraceEnabled=True
+Smart_Stay_Awake_2: UI.MainForm: Exiting MainForm ctor.
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Entered.
+UI.MainForm: Entered TryLoadPrepareAndApplyImageAndIcon ...
+Base64ImageLoader: HasEmbeddedImage = True
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Using embedded base64 image (2/embedded).
+Base64ImageLoader: Entered LoadEmbeddedBitmap ...
+Base64ImageLoader: Decoded 1911452 bytes from embedded base64.
+Base64ImageLoader: Loaded embedded image 1024x857.
+Base64ImageLoader: Exiting LoadEmbeddedBitmap (success).
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Retrieved embedded image. Size=1024x857
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [WINDOW] Source image: 1024x857
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [WINDOW] Resizing from 1024x857 to 768x643 (scale=0.750)
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [WINDOW] Final display size: 768x643
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [WINDOW] PictureBox.Image set
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [WINDOW] ClientSize set to 768x643
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [TRAY] Starting icon pipeline from original source
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [TRAY] Source BEFORE SQUARE: 1024x857
+ImageSquareReplicator: Entered MakeSquareByEdgeReplication ...
+ImageSquareReplicator: Source size = 1024x857
+ImageSquareReplicator: target=1024, leftPad=0, rightPad=0, topPad=83, bottomPad=84
+ImageSquareReplicator: Final size = 1024x1024 (already even).
+ImageSquareReplicator: Exiting MakeSquareByEdgeReplication (success).
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [TRAY] Result AFTER SQUARE (guaranteed even): 1024x1024
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [TRAY] Building multi-size ICO from 1024x1024 square
+IcoBuilder: Entered BuildMultiSizePngIco ...
+ImageSquareReplicator: Entered ResizeSquareExact to 16 ...
+ImageSquareReplicator: Exiting ResizeSquareExact (success).
+IcoBuilder: Prepared 16x16 PNG frame: 1048 bytes.
+ImageSquareReplicator: Entered ResizeSquareExact to 20 ...
+ImageSquareReplicator: Exiting ResizeSquareExact (success).
+IcoBuilder: Prepared 20x20 PNG frame: 1509 bytes.
+ImageSquareReplicator: Entered ResizeSquareExact to 24 ...
+ImageSquareReplicator: Exiting ResizeSquareExact (success).
+IcoBuilder: Prepared 24x24 PNG frame: 2037 bytes.
+ImageSquareReplicator: Entered ResizeSquareExact to 32 ...
+ImageSquareReplicator: Exiting ResizeSquareExact (success).
+IcoBuilder: Prepared 32x32 PNG frame: 3295 bytes.
+ImageSquareReplicator: Entered ResizeSquareExact to 40 ...
+ImageSquareReplicator: Exiting ResizeSquareExact (success).
+IcoBuilder: Prepared 40x40 PNG frame: 4767 bytes.
+ImageSquareReplicator: Entered ResizeSquareExact to 48 ...
+ImageSquareReplicator: Exiting ResizeSquareExact (success).
+IcoBuilder: Prepared 48x48 PNG frame: 6442 bytes.
+ImageSquareReplicator: Entered ResizeSquareExact to 64 ...
+ImageSquareReplicator: Exiting ResizeSquareExact (success).
+IcoBuilder: Prepared 64x64 PNG frame: 10658 bytes.
+ImageSquareReplicator: Entered ResizeSquareExact to 128 ...
+ImageSquareReplicator: Exiting ResizeSquareExact (success).
+IcoBuilder: Prepared 128x128 PNG frame: 36911 bytes.
+ImageSquareReplicator: Entered ResizeSquareExact to 256 ...
+ImageSquareReplicator: Exiting ResizeSquareExact (success).
+IcoBuilder: Prepared 256x256 PNG frame: 136299 bytes.
+IcoBuilder: Wrote 16x16 at +150, 1048 bytes.
+IcoBuilder: Wrote 20x20 at +1198, 1509 bytes.
+IcoBuilder: Wrote 24x24 at +2707, 2037 bytes.
+IcoBuilder: Wrote 32x32 at +4744, 3295 bytes.
+IcoBuilder: Wrote 40x40 at +8039, 4767 bytes.
+IcoBuilder: Wrote 48x48 at +12806, 6442 bytes.
+IcoBuilder: Wrote 64x64 at +19248, 10658 bytes.
+IcoBuilder: Wrote 128x128 at +29906, 36911 bytes.
+IcoBuilder: Wrote 256x256 at +66817, 136299 bytes.
+IcoBuilder: Exiting BuildMultiSizePngIco (success).
+Smart_Stay_Awake_2: TrayManager: SetIcon ...
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: [TRAY] Multi-size ICO applied to Form and Tray
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Disposed source bitmap
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Disposed squared bitmap
+UI.MainForm: TryLoadPrepareAndApplyImageAndIcon: Disposed display bitmap
+UI.MainForm: Exiting TryLoadPrepareAndApplyImageAndIcon (success).
+Smart_Stay_Awake_2: UI.MainForm: Entered BuildBelowImageLayout ...
+Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Width calculation: formClient=768, padding=12+12, contentWidth=744
+Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Image converted to Dock=Top, Height=643
+Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Z-order BEFORE fix: Picture=0, Panel=1
+Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Z-order AFTER fix: Picture=1, Panel=0
+Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Z-order corrected for proper dock processing (Top before Fill)
+Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Text blurb (5 lines) and separator added
+Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Status hint label added
+Smart_Stay_Awake_2: UI.MainForm: Entered BuildFieldsTable ...
+Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: 3 field rows added (right/left aligned)
+Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Mode is ForDuration (timer active)
+Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Fields table remains visible (countdown info relevant)
+Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: Timer details: Until=<none>, Duration=00:15:00
+Smart_Stay_Awake_2: UI.MainForm: Exiting BuildFieldsTable
+Smart_Stay_Awake_2: UI.MainForm: Entered BuildButtonsRow ...
+Smart_Stay_Awake_2: UI.MainForm: BuildButtonsRow: 2 buttons added (manual positioning)
+Smart_Stay_Awake_2: UI.MainForm: Exiting BuildButtonsRow
+Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Controls added to main stack
+Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Height calculation: image=643, panel=362, margin=20, total=1025
+Smart_Stay_Awake_2: UI.MainForm: BuildBelowImageLayout: Form resized to 768x1025
+Smart_Stay_Awake_2: UI.MainForm: Exiting BuildBelowImageLayout
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Arming keep-awake ...
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Entered Arm ...
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Power management strategy: ModernPowerRequests
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Arm: Not armed yet, dispatching to strategy implementation ...
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Arm: Using MODERN strategy (Power Request APIs)
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Arm: Creating new ExecutionStateModernPowerRequests instance ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: Entered ArmKeepAwake ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: ArmKeepAwake: Not armed yet, creating power request ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: Entered GenerateReasonString ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: GenerateReasonString: Mode=ForDuration, autoQuitTime=2025-10-03 23:36:09, result=Smart Stay Awake 2: Preventing automatic sleep & hibernation (display monitor may sleep) as requested. Auto-quit at 2025-10-03 23:36:09.
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: Exiting GenerateReasonString (timed)
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: ArmKeepAwake: REASON_CONTEXT prepared: "Smart Stay Awake 2: Preventing automatic sleep & hibernation (display monitor may sleep) as requested. Auto-quit at 2025-10-03 23:36:09."
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: ArmKeepAwake: Version=0, Flags=POWER_REQUEST_CONTEXT_SIMPLE_STRING
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: ArmKeepAwake: Calling PowerCreateRequest ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: ArmKeepAwake: SUCCESS - PowerCreateRequest returned valid SafeFileHandle
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: ArmKeepAwake: Calling PowerSetRequest (PowerRequestSystemRequired) ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: ArmKeepAwake: SUCCESS - PowerSetRequest succeeded
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: ArmKeepAwake: System sleep/hibernation now BLOCKED (process-level power request active)
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: ArmKeepAwake: Display sleep is ALLOWED (PowerRequestDisplayRequired NOT set)
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: ArmKeepAwake: State changed: _isArmed=false -> true
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: Exiting ArmKeepAwake (success=true)
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Arm: SUCCESS - Keep-awake is now ARMED
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Arm: State changed: _isArmed=false -> true
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Exiting Arm (success=True)
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Keep-awake armed successfully
+Smart_Stay_Awake_2: UI.MainForm: OnShown: System sleep/hibernation now BLOCKED (IsArmed=True)
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Timed mode detected, arming timers...
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Mode=ForDuration
+Smart_Stay_Awake_2: UI.MainForm: OnShown: --for mode: nowCeil=1759499470.0, duration=900.0s, targetEpoch=1759500370.0
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Two-stage ceiling Stage 2: nowCeil=1759499470.0, finalSeconds=900s
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Monotonic deadline set: nowTicks=2597996058425, deadlineTicks=2606996058425
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Wall-clock ETA: 2025-10-03 23:36:09
+Smart_Stay_Awake_2: UI.MainForm: OnShown: _fldUntil updated: 2025-10-03 23:36:09
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Auto-quit timer armed: will fire in 900s (900000ms)
+Smart_Stay_Awake_2: CountdownPlanner: Snap-to applied: remaining=899s, phase=29s, snap=29000ms
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Countdown fields initialized immediately
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Countdown timer armed: initial interval=29000ms
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Timers armed successfully
+Smart_Stay_Awake_2: UI.MainForm: OnShown: Exiting.
+Smart_Stay_Awake_2: UI.MainForm: [PERF] Tick: 10452 ticks (1.045ms), Thread: 1, Mem: 8160 bytes, Visible: True, Time: 23:21:38.819
+Smart_Stay_Awake_2: UI.MainForm: Button 'Quit' clicked => QuitApplication
+Smart_Stay_Awake_2: UI.MainForm: Entered QuitApplication (source=Button.Quit) ...
+Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Guard flag set (_isClosing = true)
+Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Disposing timers...
+Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Auto-quit timer disposed
+Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Countdown timer disposed
+Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Disarming keep-awake ...
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Entered Disarm ...
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Disarm: Currently armed, dispatching to strategy implementation ...
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Disarm: Using MODERN strategy (Power Request APIs)
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: Entered DisarmKeepAwake ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: DisarmKeepAwake: Currently armed, clearing power request ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: DisarmKeepAwake: Calling PowerClearRequest (PowerRequestSystemRequired) ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: DisarmKeepAwake: SUCCESS - PowerClearRequest succeeded
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: DisarmKeepAwake: Disposing SafeFileHandle (will call CloseHandle internally) ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: DisarmKeepAwake: SUCCESS - SafeFileHandle disposed (handle closed)
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: DisarmKeepAwake: Keep-awake is now DISARMED
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: DisarmKeepAwake: State changed: _isArmed=true -> false
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: DisarmKeepAwake: System sleep/hibernation now ALLOWED
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: Exiting DisarmKeepAwake (success=True)
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Disarm: Disposing ExecutionStateModernPowerRequests instance ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: Dispose called - cleaning up ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: Entered DisarmKeepAwake ...
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: DisarmKeepAwake: Already disarmed (no-op)
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: Exiting DisarmKeepAwake (already disarmed, returning true)
+Smart_Stay_Awake_2: PowerManagement.ExecutionStateModernPowerRequests: Dispose completed
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Disarm: SUCCESS - Keep-awake is now DISARMED
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Disarm: State changed: _isArmed=true -> false
+Smart_Stay_Awake_2: PowerManagement.KeepAwakeManager: Exiting Disarm (success=True)
+Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Keep-awake disarmed successfully
+Smart_Stay_Awake_2: UI.MainForm: QuitApplication: System sleep/hibernation now ALLOWED (IsArmed=False)
+Smart_Stay_Awake_2: TrayManager: Hide: Entered ...
+Smart_Stay_Awake_2: TrayManager: Hide: Exiting.
+Smart_Stay_Awake_2: TrayManager: Dispose: Entered ...
+Smart_Stay_Awake_2: TrayManager: MouseClick event handler unsubscribed
+Smart_Stay_Awake_2: TrayManager: Dispose: Exiting.
+Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Tray disposed
+Smart_Stay_Awake_2: UI.MainForm: QuitApplication: Calling this.Close()
+Smart_Stay_Awake_2: UI.MainForm: OnFormClosing: Entered (CloseReason=UserClosing)
+Smart_Stay_Awake_2: UI.MainForm: OnFormClosing: Already closing; allowing default close
+Smart_Stay_Awake_2: UI.MainForm: Entered MainForm_FormClosed ...
+Smart_Stay_Awake_2: UI.MainForm: Exiting MainForm_FormClosed ...
+Smart_Stay_Awake_2: UI.MainForm: Exiting QuitApplication
+Smart_Stay_Awake_2: Main: UI.MainForm exited normally.
+Smart_Stay_Awake_2: Main: Exiting Program.Main (success).
