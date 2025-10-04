@@ -6,12 +6,13 @@
 ![License](https://img.shields.io/badge/license-AGPL--3.0-green)
 ![Language](https://img.shields.io/badge/language-C%23-239120)
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)
-![Status](https://img.shields.io/badge/status-Under%20Development-orange)
+![Status](https://img.shields.io/badge/status-stable-green)
 </h1>
 
 <!--
 ![Status](https://img.shields.io/badge/status-stable-green)
 ![Status](https://img.shields.io/badge/status-Initial%20Release-green)
+![Status](https://img.shields.io/badge/status-Under%20Development-orange)
 
 Common Statuses
 ![Status: Active](https://img.shields.io/badge/status-active-brightgreen)
