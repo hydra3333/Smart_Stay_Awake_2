@@ -130,7 +130,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
-          dotnet restore ..\Smart_Stay_Awake_2.sln --verbosity minimal
+          dotnet restore ..\Smart_Stay_Awake_2.sln -r win-x64 --verbosity minimal
 
       # ----------------------------------------------------------------------
       # 7) Publish (Release, Self-Contained, SingleFile, win-x64)
