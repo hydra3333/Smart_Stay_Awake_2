@@ -142,6 +142,22 @@ python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
 | **≤ 30 seconds** | Every **1 second** | Final countdown; maximum precision |
 
 
+## Visibility in Power Management queries
+When Smart Stay Awake 2 is running, the Windows (Admin) command `powercfg /requests` shows, for example:
+```
+SYSTEM:
+[PROCESS] \Device\HarddiskVolume3\Path\To\Smart_Stay_Awake_2.exe
+Smart Stay Awake 2: Preventing automatic sleep & hibernation (display monitor may sleep) as requested (auto-quit at 2025-10-04 15:30:00).
+```
+
+This ensures IT administrators and Admin/Power users can see exactly what's preventing system hibernation and sleep and when it will release.
+
+
+
+
+
+
+
 
 
 ---
