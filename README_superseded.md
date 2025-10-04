@@ -23,7 +23,7 @@ A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hib
   2. Embedded base64 in the pythin script which may be empty)
   3. A file named **`Smart_Stay_Awake_icon.*`** next to the EXE/script (PNG/JPG/JPEG/WEBP/BMP/GIF/ICO)
   4. A small internal fallback glyph (so it never crashes)
-- **Auto-scaling image:** in the window into a square (by edge replication): longest side ≤ **512 px** .
+- **Auto-scaling image:** in the window into a square (by edge replication): longest side <= **512 px** .
 - **Three operating modes:** keep awake indefinitely, or for a fixed duration using `--for` or `--until`
   - **Indefinite:** Runs until you manually quit
   - **For Duration:** Auto-quits the application after a specified time (e.g., 2 hours 90 minutes `2h90m`)
@@ -130,7 +130,7 @@ python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
 
 ## Smart Auto-quit Timer
 - **Adaptive time remaining update frequency** that balances accuracy with CPU resource usage:
-- **Smooth time boundary snapping** for a polished user experience
+- **Smooth time boundary snapping** for a cleaner easier-to-read display
 - **Monotonic deadline tracking** to prevent timer drift
 
 | Time remaining update frequency | Update Frequency | Reason |
@@ -143,7 +143,7 @@ python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
 | **2 to 5 minutes** | Every **10 seconds** | Very close; frequent updates for accuracy |
 | **1 to 2 minutes** | Every **5 seconds** | Almost there; high-frequency updates |
 | **30 seconds to 1 minute** | Every **2 seconds** | Final approach; near real-time updates |
-| **≤ 30 seconds** | Every **1 second** | Final countdown; maximum precision |
+| **<= 30 seconds** | Every **1 second** | Final countdown |
 
 
 ## Visibility in Power Management queries
