@@ -312,13 +312,29 @@ Visual Studio will automatically restore packages on first build. Packages inclu
 ** Build it in the usual way**
 You will need to learn to use Visual Studio. ClaudeAI or ChatGPT can help with that, leading you through the steps.
 
-> The `solution` targets only x64 (of course)
-> There's an inbuilt (jpg) image in base64 (2.5 Mb), one of the AIs can help you replace it with another if you want
+> The `solution` targets only x64 (of course).
+> There's an inbuilt image (jpg) and and icon (jpg), both in base64 format (~3Mb), one of the AIs can help you replace them with others if you want.
 
-### License AGPL-3.0
-This software is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+### License Summary
 
-If you want to modify/distribute, then you must comply with the (quite open) license conditions.
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+
+**Summary of Key Features:**
+✅ **Freedom to use** - You can use this software for any purpose, commercial or personal  
+✅ **Freedom to study and modify** - Full access to source code; you can adapt it to your needs  
+✅ **Freedom to distribute** - You can share copies of the original or modified versions  
+✅ **Copyleft protection** - Modified versions must also be released under AGPL-3.0  
+✅ **Network use clause** - If you run a modified version on a server/network, you must make the source code available to users  
+❌ **No warranty** - Software is provided "as is" without warranties of any kind  
+❌ **No liability** - Authors are not liable for damages arising from use of the software  
+
+**⚠️ LEGAL DISCLAIMER:**  
+*This summary is provided for informational purposes only and does not replace, modify, 
+or alter the terms and conditions of the GNU Affero General Public License v3.0 in any way.
+The full license text is the sole legally binding document governing the use, modification,
+distribution, No warranty, No liability, of this software.
+In case of any conflict between this summary and the full license, the full license terms shall prevail.
+For complete terms and conditions, please read the [full AGPL-3.0 license](LICENSE).*
 
 ---
 
