@@ -64,7 +64,7 @@ A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hib
     Mutually exclusive with --for.
 
 --help
-    Display this help and stays awake according to the other commandlne parameters
+    Display this help and stays awake according to the other commandlne parameters.
 ```
 
 > **Notes**
@@ -121,6 +121,10 @@ python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
   - Show Window
   - Help
   - Quit
+  
+<h3 align="center">
+  <img src="./Smart_Stay_Awake_2_main_window.jpg" width="256" alt="Smart Stay Awake main window">
+</h3>
 
 ---
 
