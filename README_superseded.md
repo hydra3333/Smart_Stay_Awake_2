@@ -128,7 +128,8 @@ python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
 
 ---
 
-## Smart Auto-quit Timer
+## Smart Auto-quit Timer and Time remaining update frequency
+- **Coundown** to Auto-quit, shows ETA for Auto-quit and time remaining countdown
 - **Adaptive time remaining update frequency** that balances accuracy with CPU resource usage:
 - **Smooth time boundary snapping** for a cleaner easier-to-read display
 - **Monotonic deadline tracking** to prevent timer drift
