@@ -1,13 +1,46 @@
 ﻿<h1 align="center">
   <img src="./Smart_Stay_Awake_2_icon.png" width="256" alt="Smart Stay Awake icon">
   <br>Smart_Stay_Awake_2
-  <br>![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-lightgrey)
+</h1>
+![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-lightgrey)
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)
 ![License](https://img.shields.io/badge/license-AGPL--3.0-green)
 ![Language](https://img.shields.io/badge/language-C%23-239120)
-![Status](https://img.shields.io/badge/status-Under%20Development-orange)
+![Status](https://img.shields.io/badge/status-Under%20Development-orange) 
+
+
+<!--
+![Status](https://img.shields.io/badge/status-stable-green)
+
 ![Status](https://img.shields.io/badge/status-Initial%20Release-green)
-</h1>
+
+Common Statuses
+![Status: Active](https://img.shields.io/badge/status-active-brightgreen)
+![Status: Beta](https://img.shields.io/badge/status-beta-blue)
+![Status: Experimental](https://img.shields.io/badge/status-experimental-orange)
+![Status: Deprecated](https://img.shields.io/badge/status-deprecated-red)
+![Status: Inactive](https://img.shields.io/badge/status-inactive-lightgrey)
+![Status](https://img.shields.io/badge/status-Under%20Development-orange) 
+
+Common status labels
+active, maintained, stable
+alpha, beta, experimental
+deprecated, legacy, archived, inactive
+
+Typical named colors
+Greens: brightgreen, green, yellowgreen
+Yellows/Oranges: yellow, orange
+Reds: red, crimson, firebrick
+Blues/Purples: blue, navy, blueviolet
+Neutrals: lightgrey, grey/gray, black
+
+Semantic: 
+success (brightgreen), informational (blue), critical (red), inactive (lightgrey), important (orange) 
+
+How to craft your own
+https://img.shields.io/badge/<LABEL>-<MESSAGE>-<COLOR>
+Replace <LABEL>, <MESSAGE>, and <COLOR> with whatever text and named color you like. (Spaces become %20)
+-->
 
 A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Built with C# in Visual Studio Community.
 
