@@ -45,24 +45,24 @@ A lightweight Windows tray utility that keeps your computer **awake** (blocks sl
 while still allowing the **display monitor to sleep**. 
 
 Event-driven architecture means zero CPU polling - the app simply waits for OS timer events to fire,
-consuming virtually no resources during idle periods.
+consuming virtually no resources.
 
 
 Here are some variations combining both points:
 
-**Option 1 (Clean and direct):**
-Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources during idle periods. Countdown window updates execute in under 1ms, ensuring a responsive UI without measurable performance impact.
+**Option 1 (Clean and direct):**    
+Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources. Countdown window updates execute in under 1ms, ensuring a responsive UI without measurable performance impact.
+ 
+**Option 2 (More technical):**    
+Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources. When updates do occur, UI refreshes complete in sub-millisecond time (<1ms), maintaining fluid responsiveness with negligible overhead.
 
-**Option 2 (More technical):**
-Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources during idle periods. When updates do occur, UI refreshes complete in sub-millisecond time (<1ms), maintaining fluid responsiveness with negligible overhead.
+**Option 3 (Emphasizes efficiency):**    
+Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources. Even during active countdown updates, UI refreshes take less than 1ms—fast enough to be imperceptible to both user and system.
 
-**Option 3 (Emphasizes efficiency):**
-Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources during idle periods. Even during active countdown updates, UI refreshes take less than 1ms—fast enough to be imperceptible to both user and system.
+**Option 4 (My recommendation - balanced):**    
+Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources. Countdown updates execute in sub-millisecond time (<1ms), delivering responsive UI feedback without performance cost.
 
-**Option 4 (My recommendation - balanced):**
-Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources during idle periods. Countdown updates execute in sub-millisecond time (<1ms), delivering responsive UI feedback without performance cost.
-
-**Option 5 (Concise):**
+**Option 5 (Concise):**    
 Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources. Countdown updates complete in <1ms, ensuring zero-impact responsiveness.
 
 ---
