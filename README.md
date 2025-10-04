@@ -1,5 +1,5 @@
 ﻿<h1 align="center">
-  <img src="./Smart_Stay_Awake_icon.png" width="256" alt="Smart Stay Awake icon">
+  <img src="./Smart_Stay_Awake_2_icon.png" width="256" alt="Smart Stay Awake icon">
   <br>Smart_Stay_Awake_2
   <br>** UNDER DEVELOPMENT **
 </h1>
@@ -244,5 +244,6 @@ powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -Sta -NonInteractive -Comm
 ```
 
 > The official CI workflow under `.github/workflows/` automates all of this on creating a new Release.
+
 
 
