@@ -148,7 +148,7 @@ jobs:
           Write-Host "Publishing Smart_Stay_Awake_2 as SINGLE FILE (self-contained, win-x64)..." -ForegroundColor Yellow
 
           # Force specific output directory
-          $outputPath = ".\publish-output"
+          $publishPath = ".\publish-output"
           
           # The -c Release flag sometimes gets overridden by project files, 
           # but -p:Configuration=Release is a direct MSBuild property that takes precedence.
@@ -167,35 +167,89 @@ jobs:
             -p:GenerateDocumentationFile=false `
             -p:ContinuousIntegrationBuild=true `
             --no-restore `
-            -o $outputPath `
+            -o $publishPath `
             -v minimal
 
+          # >>> Make $publishPath available to later steps
+          "PUBLISH_ROOT=$publishPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
       # ----------------------------------------------------------------------
-      # 8) Locate publish output (TFM can vary; we search for publish folder)
+      # 8) Discover/Verify publish output folder (explicit -o .\publish-output)
+      #    With solution publishing + -o, the SDK creates per-project subfolders:
+      #      .\publish-output\<ProjectName>\Smart_Stay_Awake_2.exe
+      #    We first check the expected path, then fall back to a safe search.
       # ----------------------------------------------------------------------
-      - name: 🔍 Discover publish output folder
+      - name: 🔍 Discover/Verify publish output folder
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
 
-          $publishDir = Get-ChildItem ".\bin\Release\net8.0-windows*\win-x64\publish" -Directory `
-                        | Sort-Object LastWriteTime -Descending `
-                        | Select-Object -First 1
-
-          if (-not $publishDir) {
-            Write-Host "❌ No publish output under .\bin\Release\net8.0-windows*\win-x64\publish" -ForegroundColor Red
-            Get-ChildItem ".\bin\Release" -Recurse -Directory | Select-Object -ExpandProperty FullName
-            exit 1
+          # Respect the value exported by Step 7; fall back if missing.
+          $publishRoot = $env:PUBLISH_ROOT
+          if ([string]::IsNullOrWhiteSpace($publishRoot)) {
+            # Fallback to the default you expect
+            $publishRoot = ".\publish-output"
           }
 
-          $BUILD_DIR = $publishDir.FullName
-          $TFM_NAME  = ($BUILD_DIR -replace '.*\\bin\\Release\\([^\\]+)\\.*', '$1')
+          $expectedProjectDir = Join-Path $publishRoot "Smart_Stay_Awake_2"
+          $expectedExe        = Join-Path $expectedProjectDir "Smart_Stay_Awake_2.exe"
 
-          "BUILD_DIR=$BUILD_DIR" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
-          "TFM_NAME=$TFM_NAME"   | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+          function Show-PublishTree {
+            param([string]$root)
+            if (-not (Test-Path $root)) {
+              Write-Host ("{0} does not exist." -f $root) -ForegroundColor Red
+              return
+            }
+            Write-Host ("Contents of {0} (top 40 entries):" -f $root) -ForegroundColor Yellow
+            Get-ChildItem $root -Recurse | Select-Object -First 40 | ForEach-Object {
+              $rel = $_.FullName.Substring((Resolve-Path $root).Path.Length).TrimStart('\')
+              if ($_.PSIsContainer) { Write-Host ("  📁 " + $rel) -ForegroundColor Blue }
+              else                  { Write-Host ("  📄 " + $rel) -ForegroundColor Gray }
+            }
+          }
 
-          Write-Host "TFM:       $TFM_NAME"
-          Write-Host "BUILD_DIR: $BUILD_DIR"
+          if (Test-Path $expectedExe) {
+            # Happy path: solution publish created <publishRoot>\Smart_Stay_Awake_2\Smart_Stay_Awake_2.exe
+            $BUILD_DIR = (Resolve-Path $expectedProjectDir).Path
+            $TFM_NAME  = ("explicit-output (solution -o -> {0})" -f $publishRoot)
+            "BUILD_DIR=$BUILD_DIR" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+            "TFM_NAME=$TFM_NAME"   | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+            Write-Host "✅ Found expected publish dir:" -ForegroundColor Green
+            Write-Host ("   {0}" -f $BUILD_DIR) -ForegroundColor Cyan
+          }
+          else {
+            Write-Host ("Expected path not found: {0}" -f $expectedExe) -ForegroundColor Yellow
+            Write-Host ("Falling back to search under {0} ..." -f $publishRoot) -ForegroundColor Yellow
+
+            if (-not (Test-Path $publishRoot)) {
+              Write-Host ("❌ Publish root does not exist: {0}" -f $publishRoot) -ForegroundColor Red
+              Show-PublishTree -root $publishRoot
+              exit 1
+            }
+
+            $exe = Get-ChildItem -Path $publishRoot -Recurse -File -Filter "Smart_Stay_Awake_2.exe" |
+                   Select-Object -First 1
+
+            if (-not $exe) {
+              Write-Host ("❌ Could not find Smart_Stay_Awake_2.exe under {0}" -f $publishRoot) -ForegroundColor Red
+              Show-PublishTree -root $publishRoot
+              exit 1
+            }
+
+            $BUILD_DIR = (Resolve-Path (Split-Path -Parent $exe.FullName)).Path
+            $TFM_NAME  = ("explicit-output (fallback search in {0})" -f $publishRoot)
+            "BUILD_DIR=$BUILD_DIR" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+            "TFM_NAME=$TFM_NAME"   | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+
+            Write-Host "✅ Found publish dir via fallback search:" -ForegroundColor Green
+            Write-Host ("   {0}" -f $BUILD_DIR) -ForegroundColor Cyan
+          }
+
+          # Surface contents so we can see what (if any) sidecar DLLs rode along.
+          Write-Host "Publish directory contents:" -ForegroundColor Yellow
+          Get-ChildItem $BUILD_DIR -File | ForEach-Object {
+            "{0,-40} {1,10:N0} bytes" -f $_.Name, $_.Length
+          } | Write-Host
 
       # ----------------------------------------------------------------------
       # 9) Verify publish output contains the EXE we care about
