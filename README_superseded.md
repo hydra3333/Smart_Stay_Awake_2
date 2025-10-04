@@ -278,6 +278,8 @@ for the application to work.
 
 > Apparently Microsoft's idea of a C# *standalone .exe* includes keeping .DLL files etc in the same folder with the .exe.
 
+---
+
 ## Building it yourself (BIY) from Source
 
 ### Prerequisites
@@ -316,64 +318,89 @@ Visual Studio will automatically restore packages on first build. Packages inclu
 
 This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.    
 
-For a human-readable summary of the AGPL-3.0 license,
+For a human-readable summary of the AGPL-3.0 license
 see [choosealicense.com/licenses/agpl-3.0](https://choosealicense.com/licenses/agpl-3.0/).
 
-**Summary of Key Features:**    
-✅ **Freedom to use** - You can use this software for any purpose, commercial or personal  
-✅ **Freedom to study and modify** - Full access to source code; you can adapt it to your needs  
-✅ **Freedom to distribute** - You can share copies of the original or modified versions  
-✅ **Copyleft protection** - Modified versions must also be released under AGPL-3.0  
-✅ **Network use clause** - If you run a modified version on a server/network, you must make the source code available to users  
-❌ **No warranty** - Software is provided "as is" without warranties of any kind  
-❌ **No liability** - Authors are not liable for damages arising from use of the software  
 
-**⚠️ LEGAL DISCLAIMER:**  
-*This summary is provided for informational purposes only and does not replace, modify, 
-or alter the terms and conditions of the GNU Affero General Public License v3.0 in any way.
-The full license text is the sole legally binding document governing the use, modification,
-distribution, No warranty, No liability, of this software.
-In case of any conflict between this summary and the full license, the full license terms shall prevail.
-For complete terms and conditions, please read the [full AGPL-3.0 license](LICENSE).*
+**Why AGPL-3.0?**
+
+The AGPL-3.0 license ensures that improvements and modifications to this application
+remain open source and benefit the community, even when used in network/server environments.
 
 ---
 
+## Troubleshooting
 
+### Common Issues
 
+**Application won't start:**
+- Ensure all 7 items are in the same folder (exe + 5 DLLs + Assets folder)
+- Verify Windows 10 version 2004+ (run `winver` to check)
+- Try running from Command Prompt to see error messages:
+  ```cmd
+  cd C:\Path\To\Smart_Stay_Awake_2
+  Smart_Stay_Awake_2.exe
+  ```
 
+**No tray icon appears:**
+- Check the system tray overflow area (click the `^` arrow)
+- Enable "Always show all icons in the taskbar" in Windows settings:
+  1. Right-click taskbar → Taskbar settings
+  2. Scroll to "System tray" → "Select which icons appear on the taskbar"
+  3. Enable Smart_Stay_Awake_2 or toggle "Always show all icons"
 
+**System still sleeps:**
+- Verify the app is running: Check `powercfg /requests` in Command Prompt
+  ```cmd
+  powercfg /requests
+  ```
+  You should see Smart Stay Awake 2 listed under "SYSTEM"
+- Another power policy or OEM tool may override system requests
+- Some laptops have hardware sleep buttons that bypass software blocks
+- Check Windows power plan advanced settings for conflicting policies
 
+**Auto-quit timer didn't fire exactly on time:**
+- Minor drift (±1 second) is normal due to Windows scheduler granularity
+- The app uses monotonic timers to maintain accuracy over long durations
+- If the timer is off by more than 2-3 seconds, please file a bug report
 
+**SmartScreen or antivirus blocks the exe:**
+- Unsigned binaries may trigger SmartScreen on first run
+- Click "More info → Run anyway" after reviewing the source code yourself
+- Add an exclusion in Windows Defender if you trust the application
+- Submit false positive reports to Microsoft to improve reputation
 
+**Want more detailed logging:**
+- The application writes trace logs to the Windows Event Viewer (Application log)
+- You can also run the app from Command Prompt with debug output:
+  ```cmd
+  Smart_Stay_Awake_2.exe --verbose
+  ```
+  (if --verbose mode is implemented in your version)
 
+### Verifying Power Request Status
 
+To confirm the app is working:
 
+**Open Command Prompt or PowerShell as an Admin:**
+```cmd
+powercfg /requests
+```
 
+**Look for output like:**
+```
+SYSTEM:
+[PROCESS] \Device\HarddiskVolume3\Path\To\Smart_Stay_Awake_2.exe
+Smart Stay Awake 2: Preventing automatic sleep & hibernation (display monitor may sleep) as requested (indefinitely).
+```
+or
+```
+SYSTEM:
+[PROCESS] \Device\HarddiskVolume3\Path\To\Smart_Stay_Awake_2.exe
+Smart Stay Awake 2: Preventing automatic sleep & hibernation (display monitor may sleep) as requested (auto-quit a yyyy-MM-dd hh:mm:ss ).
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-## Behavior & Tips
-
-* **Tray icon hidden?** It may be in the overflow area; show hidden icons or set “Always show all icons in the taskbar.”
-* **Why didn’t my PC sleep?** While Smart\_Stay\_Awake runs, DOS command `powercfg -requests` shows it under **SYSTEM**. Quit the app to release the block.
-* **Minimize didn’t hide to windows system-tray?** Ensure you’re on the latest release; both **“\_”** and **Minimize to System Tray** hide to the windows system-tray.
-* **ETA alignment & countdown:** the ETA shown in the window is computed from the exact target epoch (from `--until` or internally from `--for`). The countdown updates at low cadence far out (minutes), then faster as it nears the end, throttling further when the window is hidden to minimise CPU.
-* **Exit codes:** normal exit returns 0; argument validation errors use a non-zero exit.
-* **No tray icon?** Show hidden icons or allow all icons in the taskbar.
-* **Sleeps anyway?** Another power manager may override; check your power plan or OEM tools.
-* **Auto-quit didn’t trigger exactly on the second?** A tiny (±1s) drift can occur due to timer jitter; the app uses a monotonic deadline to stay accurate overall.
+If you see this, a power request is active and working correctly.
 
 ---
 
