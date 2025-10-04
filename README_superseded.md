@@ -8,31 +8,31 @@ A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hib
 
 ## What it does
 
-* While Smart\_Stay\_Awake runs, it requests the OS to **not sleep/hibernate**. Your **display monitor can still sleep** normally if your power plan allows it.
-* When you **quit** (or when an **auto-quit** timer fires), the app **releases** the request and your PC can sleep again.
-* A small **windows system-tray icon** provides **Show Window** and **Quit**.
-* The main window uses native-looking **ttk** controls; buttons are at the bottom.
+- While Smart\_Stay\_Awake runs, it requests the OS to **not sleep/hibernate**. Your **display monitor can still sleep** normally if your power plan allows it.
+- When you **quit** (or when an **auto-quit** timer fires), the app **releases** the request and your PC can sleep again.
+- A small **windows system-tray icon** provides **Show Window** and **Quit**.
 
 ## Key Features
 
-* **Prevents system sleep/hibernation** while running; auto-restores normal behavior on exit.
-* **System tray** icon with a simple menu (Show Window / Quit).
-* **Minimize behavior:** both the title-bar **“\_”** and the **Minimize to System Tray** button minimise the app to the system-tray.
-* **Close (X)** in the main window exits the app completely.
-* **Icon / image priority** (for both the window and tray):
-
+- **Prevents system sleep/hibernation** while running; auto-restores normal behavior on exit.
+- **System tray** icon with a simple menu (Show Window / Quit).
+- **Minimize behavior:** both the title-bar **“\_”** and the **Minimize to System Tray** button minimise the app to the system-tray.
+- **Close (X)** in the main window exits the app completely.
+- **Icon / image priority** (for both the window and tray):
   1. `--icon PATH`** (explicit override)
   2. Embedded base64 in the pythin script which may be empty)
   3. A file named **`Smart_Stay_Awake_icon.*`** next to the EXE/script (PNG/JPG/JPEG/WEBP/BMP/GIF/ICO)
   4. A small internal fallback glyph (so it never crashes)
-
-* **Auto-scaling image:** in the window into a square (by edge replication): longest side ≤ **512 px** .
-* **Auto-quit:** keep awake for a fixed duration (`--for`) **or** until a specific local date/time (`--until`). The window shows:
-* **Low-resource-use countdown:** updates window display less often when plenty of time remains; updates faster as it nears zero; **throttles** updates when the window is hidden; and **“snaps”** to neat time boundaries so it feels calm and rounded.
-* **Display countdown shown:**
-  * **Auto-quit at:** local ETA
-  * **Time remaining:** `Xd HH:MM:SS` (days appear when applicable)
-  * **Update cadence:** displays current update frequency of the timer in the window
+- **Auto-scaling image:** in the window into a square (by edge replication): longest side ≤ **512 px** .
+- **Three operating modes:** keep awake indefinitely, or for a fixed duration using `--for` or `--until`
+  - **Indefinite:** Runs until you manually quit
+  - **For Duration:** Auto-quits the application after a specified time (e.g., 2 hours 90 minutes `2h90m`)
+  - **Until Timestamp:** Auto-quits the application at a specific date/time (e.g., `2025-12-31 23:59:59`)
+- **Low-resource-use countdown:** updates window display less often when plenty of time remains; updates faster as it nears zero; and **“snaps”** to neat time boundaries so it feels calm and rounded.
+- **Display countdown shown:**
+  - **Auto-quit at:** local ETA
+  - **Time remaining:** `Xd HH:MM:SS` (days appear when applicable)
+  - **Time remaining update frequency:** displays current update frequency for the 'Time remaining'
 
 ---
 
