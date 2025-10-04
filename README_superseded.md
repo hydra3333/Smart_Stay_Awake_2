@@ -122,8 +122,8 @@ python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
   - Help
   - Quit
   
-<h3 align="center">
-  <img src="./Smart_Stay_Awake_2_main_window.jpg" width="256" alt="Smart Stay Awake main window">
+<h3 align="left">
+  <img src="./Smart_Stay_Awake_2_main_window.jpg" alt="Smart Stay Awake main window">
 </h3>
 
 ---
