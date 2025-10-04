@@ -1,0 +1,644 @@
+# ============================================================================
+# GitHub Actions Workflow: Build and Release Smart Stay Awake 2
+# ============================================================================
+# 
+# PURPOSE:
+#   This workflow automatically builds the Smart Stay Awake 2 application
+#   when a new GitHub Release is published, creates a distributable ZIP file,
+#   generates a SHA256 checksum, and uploads both to the release assets.
+#
+# TRIGGER:
+#   Runs when you publish a new release in GitHub UI (Releases → Draft new release)
+#   The release tag (e.g., v001.001) determines the version in the ZIP filename.
+#
+# WHAT IT DOES:
+#   1. Checks out the repository code
+#   2. Sets up .NET 8 build environment
+#   3. Restores NuGet packages
+#   4. Builds the project in Release configuration
+#   5. Copies build output files and icon to staging directory
+#   6. Creates a ZIP file with versioned filename
+#   7. Generates SHA256 checksum file
+#   8. Uploads both ZIP and checksum to the GitHub release
+#
+# REQUIREMENTS:
+#   - Repository must have a valid Smart_Stay_Awake_2.csproj project file
+#   - Assets/Smart_Stay_Awake_2_icon.png must exist in the repository
+#   - Release tag must follow format: v###.### (e.g., v001.001)
+#   - Repository Settings → Actions → General → Workflow permissions:
+#     Must have "Read and write permissions" enabled
+#
+# ============================================================================
+
+name: Build and Release
+
+# ----------------------------------------------------------------------------
+# WORKFLOW TRIGGER
+# ----------------------------------------------------------------------------
+# This workflow runs automatically when a new GitHub Release is published.
+# To create a release:
+#   1. Go to your GitHub repo → Releases → "Draft a new release"
+#   2. Create a tag (e.g., v001.001)
+#   3. Add title and description
+#   4. Click "Publish release"
+#   5. This workflow will automatically start
+# ----------------------------------------------------------------------------
+on:
+  release:
+    types: [published]
+
+# ----------------------------------------------------------------------------
+# PERMISSIONS
+# ----------------------------------------------------------------------------
+# The workflow needs write access to upload files to the release.
+# If this fails, check: Settings → Actions → General → Workflow permissions
+# ----------------------------------------------------------------------------
+permissions:
+  contents: write  # Required to upload release assets
+
+# ----------------------------------------------------------------------------
+# JOBS
+# ----------------------------------------------------------------------------
+# A workflow can have multiple jobs that run in parallel or sequence.
+# This workflow has one job called "build" that runs on Windows.
+# ----------------------------------------------------------------------------
+jobs:
+  build:
+    # ----------------------------------------------------------------------
+    # RUNNER CONFIGURATION
+    # ----------------------------------------------------------------------
+    # "windows-latest" = Windows Server 2022 (as of early 2025)
+    # This is required because we're building a Windows Desktop .NET app
+    # ----------------------------------------------------------------------
+    runs-on: windows-latest
+    
+    # ----------------------------------------------------------------------
+    # BUILD STEPS
+    # ----------------------------------------------------------------------
+    # Each step runs sequentially. If any step fails, the workflow stops
+    # and the release will not have the ZIP attached.
+    # ----------------------------------------------------------------------
+    steps:
+    
+    # ======================================================================
+    # STEP 1: Checkout Repository Code
+    # ======================================================================
+    # Downloads the repository code to the runner's workspace.
+    # This gives us access to the .csproj, source files, and Assets/.
+    # Uses the latest stable checkout action (v4).
+    # ======================================================================
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      
+    # ======================================================================
+    # STEP 2: Display Workflow Context (for debugging)
+    # ======================================================================
+    # Logs important information about the release that triggered this build.
+    # Helps with troubleshooting if something goes wrong.
+    # ======================================================================
+    - name: 🔍 Display build information
+      shell: pwsh
+      run: |
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host "  GITHUB ACTIONS BUILD INFORMATION" -ForegroundColor Cyan
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host "Release Tag:        ${{ github.ref_name }}" -ForegroundColor Green
+        Write-Host "Release Name:       ${{ github.event.release.name }}" -ForegroundColor Green
+        Write-Host "Repository:         ${{ github.repository }}" -ForegroundColor Green
+        Write-Host "Triggered By:       ${{ github.actor }}" -ForegroundColor Green
+        Write-Host "Workflow Run ID:    ${{ github.run_id }}" -ForegroundColor Green
+        Write-Host "Runner OS:          ${{ runner.os }}" -ForegroundColor Green
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 3: Setup .NET 8 SDK
+    # ======================================================================
+    # Installs the .NET 8 SDK on the runner.
+    # '8.0.x' means "latest patch version of .NET 8.0"
+    # Uses the latest stable setup-dotnet action (v4).
+    # ======================================================================
+    - name: 🔧 Setup .NET 8 SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    # ======================================================================
+    # STEP 4: Verify .NET Installation
+    # ======================================================================
+    # Confirms .NET 8 was installed correctly and displays the version.
+    # This helps catch environment issues early.
+    # ======================================================================
+    - name: ✅ Verify .NET installation
+      shell: pwsh
+      run: |
+        Write-Host "Verifying .NET SDK installation..." -ForegroundColor Yellow
+        dotnet --version
+        dotnet --list-sdks
+        Write-Host "✅ .NET SDK verified successfully" -ForegroundColor Green
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 5: Restore NuGet Packages
+    # ======================================================================
+    # Downloads all NuGet package dependencies defined in the .csproj file.
+    # This includes CsWin32 and any other packages.
+    # The --verbosity minimal flag reduces log spam.
+    # ======================================================================
+    - name: 📦 Restore NuGet packages
+      shell: pwsh
+      run: |
+        Write-Host "Restoring NuGet packages..." -ForegroundColor Yellow
+        dotnet restore --verbosity minimal
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ NuGet restore failed!" -ForegroundColor Red
+            exit 1
+        }
+        
+        Write-Host "✅ NuGet packages restored successfully" -ForegroundColor Green
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 6: Build the Project
+    # ======================================================================
+    # Compiles the C# project in Release configuration.
+    # --configuration Release = optimized build (no debug symbols)
+    # --no-restore = skip restore since we already did it
+    # --verbosity minimal = reduce log output
+    # 
+    # Build output goes to: bin/Release/net8.0-windows/
+    # ======================================================================
+    - name: 🔨 Build project (Release configuration)
+      shell: pwsh
+      run: |
+        Write-Host "Building Smart_Stay_Awake_2 in Release mode..." -ForegroundColor Yellow
+        dotnet build `
+            --configuration Release `
+            --no-restore `
+            --verbosity minimal
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Build failed!" -ForegroundColor Red
+            exit 1
+        }
+        
+        Write-Host "✅ Build completed successfully" -ForegroundColor Green
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 7: Verify Build Output
+    # ======================================================================
+    # Checks that the expected output directory and .exe exist.
+    # This catches issues before we try to create the ZIP.
+    # ======================================================================
+    - name: 🔍 Verify build output
+      shell: pwsh
+      run: |
+        Write-Host "Verifying build output files..." -ForegroundColor Yellow
+        
+        $buildDir = ".\bin\Release\net8.0-windows"
+        $exePath = Join-Path $buildDir "Smart_Stay_Awake_2.exe"
+        
+        # Check if build directory exists
+        if (-not (Test-Path $buildDir)) {
+            Write-Host "❌ Build output directory not found: $buildDir" -ForegroundColor Red
+            exit 1
+        }
+        
+        # Check if .exe exists
+        if (-not (Test-Path $exePath)) {
+            Write-Host "❌ Executable not found: $exePath" -ForegroundColor Red
+            exit 1
+        }
+        
+        # List all files in build directory
+        Write-Host "Build output directory contents:" -ForegroundColor Cyan
+        Get-ChildItem $buildDir -Recurse | ForEach-Object {
+            $indent = "  " * ($_.FullName.Split([IO.Path]::DirectorySeparatorChar).Count - $buildDir.Split([IO.Path]::DirectorySeparatorChar).Count - 1)
+            if ($_.PSIsContainer) {
+                Write-Host "$indent📁 $($_.Name)/" -ForegroundColor Blue
+            } else {
+                $size = "{0:N2}" -f ($_.Length / 1KB)
+                Write-Host "$indent📄 $($_.Name) ($size KB)" -ForegroundColor Gray
+            }
+        }
+        
+        Write-Host "✅ Build output verified successfully" -ForegroundColor Green
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 8: Verify Icon File Exists
+    # ======================================================================
+    # Confirms the icon file is present before we try to copy it.
+    # This prevents failures during staging.
+    # ======================================================================
+    - name: 🖼️ Verify icon file
+      shell: pwsh
+      run: |
+        Write-Host "Verifying icon file..." -ForegroundColor Yellow
+        
+        $iconPath = ".\Assets\Smart_Stay_Awake_2_icon.png"
+        
+        if (-not (Test-Path $iconPath)) {
+            Write-Host "❌ Icon file not found: $iconPath" -ForegroundColor Red
+            Write-Host "Please ensure Assets/Smart_Stay_Awake_2_icon.png exists in the repository" -ForegroundColor Red
+            exit 1
+        }
+        
+        $iconSize = (Get-Item $iconPath).Length
+        Write-Host "✅ Icon file found: $iconPath ($iconSize bytes)" -ForegroundColor Green
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 9: Create Staging Directory
+    # ======================================================================
+    # Creates a temporary directory where we'll collect all files for the ZIP.
+    # -Force ensures it's created even if it already exists.
+    # ======================================================================
+    - name: 📁 Create staging directory
+      shell: pwsh
+      run: |
+        Write-Host "Creating staging directory..." -ForegroundColor Yellow
+        
+        $stagingDir = ".\release-staging"
+        New-Item -ItemType Directory -Path $stagingDir -Force | Out-Null
+        
+        if (-not (Test-Path $stagingDir)) {
+            Write-Host "❌ Failed to create staging directory" -ForegroundColor Red
+            exit 1
+        }
+        
+        Write-Host "✅ Staging directory created: $stagingDir" -ForegroundColor Green
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 10: Copy Build Output Files
+    # ======================================================================
+    # Copies all files from bin/Release/net8.0-windows/ to staging directory.
+    # 
+    # EXCLUDES:
+    #   - .pdb files (debug symbols, not needed for release)
+    #   - .xml files (XML documentation, not needed for runtime)
+    #   - ref/ folder (reference assemblies, not needed)
+    # 
+    # INCLUDES everything else:
+    #   - .exe (the application)
+    #   - All .dll files (dependencies)
+    #   - Any other runtime files
+    # ======================================================================
+    - name: 📋 Copy build output to staging
+      shell: pwsh
+      run: |
+        Write-Host "Copying build output files..." -ForegroundColor Yellow
+        
+        $buildDir = ".\bin\Release\net8.0-windows"
+        $stagingDir = ".\release-staging"
+        
+        # Get all files recursively, excluding .pdb, .xml, and ref/ folder
+        $filesToCopy = Get-ChildItem -Path $buildDir -Recurse -File | 
+            Where-Object { 
+                $_.Extension -notin @('.pdb', '.xml') -and
+                $_.FullName -notlike "*\ref\*"
+            }
+        
+        $copiedCount = 0
+        foreach ($file in $filesToCopy) {
+            # Calculate relative path to preserve directory structure if needed
+            $relativePath = $file.FullName.Substring($buildDir.Length + 1)
+            $destPath = Join-Path $stagingDir $relativePath
+            
+            # Create destination directory if it doesn't exist
+            $destDir = Split-Path $destPath -Parent
+            if (-not (Test-Path $destDir)) {
+                New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+            }
+            
+            # Copy the file
+            Copy-Item -Path $file.FullName -Destination $destPath -Force
+            
+            $size = "{0:N2}" -f ($file.Length / 1KB)
+            Write-Host "  ✓ Copied: $($file.Name) ($size KB)" -ForegroundColor Gray
+            $copiedCount++
+        }
+        
+        Write-Host "✅ Copied $copiedCount files to staging directory" -ForegroundColor Green
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 11: Copy Icon to Staging Root
+    # ======================================================================
+    # Copies the icon file to the root of the staging directory.
+    # This places it next to the .exe in the final ZIP.
+    # We don't copy the Assets/ folder - just the icon file.
+    # ======================================================================
+    - name: 🖼️ Copy icon to staging root
+      shell: pwsh
+      run: |
+        Write-Host "Copying icon to staging directory root..." -ForegroundColor Yellow
+        
+        $iconPath = ".\Assets\Smart_Stay_Awake_2_icon.png"
+        $stagingDir = ".\release-staging"
+        $destPath = Join-Path $stagingDir "Smart_Stay_Awake_2_icon.png"
+        
+        Copy-Item -Path $iconPath -Destination $destPath -Force
+        
+        if (-not (Test-Path $destPath)) {
+            Write-Host "❌ Failed to copy icon to staging directory" -ForegroundColor Red
+            exit 1
+        }
+        
+        $iconSize = (Get-Item $destPath).Length
+        Write-Host "✅ Icon copied to staging root ($iconSize bytes)" -ForegroundColor Green
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 12: List Staging Directory Contents
+    # ======================================================================
+    # Displays everything that will be included in the ZIP.
+    # This is useful for verification and debugging.
+    # ======================================================================
+    - name: 📝 List staging directory contents
+      shell: pwsh
+      run: |
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host "  FILES TO BE INCLUDED IN RELEASE ZIP" -ForegroundColor Cyan
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        
+        $stagingDir = ".\release-staging"
+        $allFiles = Get-ChildItem -Path $stagingDir -Recurse
+        
+        foreach ($item in $allFiles) {
+            if ($item.PSIsContainer) {
+                Write-Host "📁 $($item.FullName.Substring($stagingDir.Length + 1))/" -ForegroundColor Blue
+            } else {
+                $size = "{0:N2}" -f ($item.Length / 1KB)
+                Write-Host "📄 $($item.FullName.Substring($stagingDir.Length + 1)) - $size KB" -ForegroundColor Gray
+            }
+        }
+        
+        $totalSize = ($allFiles | Where-Object { -not $_.PSIsContainer } | Measure-Object -Property Length -Sum).Sum
+        $totalSizeMB = "{0:N2}" -f ($totalSize / 1MB)
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host "Total: $($allFiles.Count) items, $totalSizeMB MB" -ForegroundColor Cyan
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 13: Create Release ZIP
+    # ======================================================================
+    # Creates a ZIP file from the staging directory contents.
+    # 
+    # ZIP FILENAME FORMAT:
+    #   Smart_Stay_Awake_2_v{version}_x64_win10_win11.zip
+    #   Example: Smart_Stay_Awake_2_v001.001_x64_win10_win11.zip
+    # 
+    # The version is extracted from the release tag (e.g., v001.001)
+    # Files are placed at the root of the ZIP (no nested folder)
+    # ======================================================================
+    - name: 📦 Create release ZIP
+      shell: pwsh
+      run: |
+        Write-Host "Creating release ZIP file..." -ForegroundColor Yellow
+        
+        # Extract version from release tag (e.g., "v001.001" → "v001.001")
+        $version = "${{ github.ref_name }}"
+        Write-Host "Release version: $version" -ForegroundColor Cyan
+        
+        # Build ZIP filename
+        $zipFileName = "Smart_Stay_Awake_2_${version}_x64_win10_win11.zip"
+        Write-Host "ZIP filename: $zipFileName" -ForegroundColor Cyan
+        
+        # Create the ZIP file
+        $stagingDir = ".\release-staging"
+        Compress-Archive `
+            -Path "$stagingDir\*" `
+            -DestinationPath $zipFileName `
+            -CompressionLevel Optimal `
+            -Force
+        
+        # Verify ZIP was created
+        if (-not (Test-Path $zipFileName)) {
+            Write-Host "❌ Failed to create ZIP file" -ForegroundColor Red
+            exit 1
+        }
+        
+        $zipSize = (Get-Item $zipFileName).Length
+        $zipSizeMB = "{0:N2}" -f ($zipSize / 1MB)
+        Write-Host "✅ ZIP created successfully: $zipFileName ($zipSizeMB MB)" -ForegroundColor Green
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 14: Verify ZIP Contents
+    # ======================================================================
+    # Opens the ZIP and lists its contents to verify everything is correct.
+    # This catches issues like empty ZIPs or incorrect file placement.
+    # ======================================================================
+    - name: 🔍 Verify ZIP contents
+      shell: pwsh
+      run: |
+        Write-Host "Verifying ZIP file contents..." -ForegroundColor Yellow
+        
+        $version = "${{ github.ref_name }}"
+        $zipFileName = "Smart_Stay_Awake_2_${version}_x64_win10_win11.zip"
+        
+        # Use .NET to read ZIP contents
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        $zip = [System.IO.Compression.ZipFile]::OpenRead($zipFileName)
+        
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host "  ZIP FILE CONTENTS" -ForegroundColor Cyan
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        
+        $totalUncompressedSize = 0
+        foreach ($entry in $zip.Entries) {
+            $size = "{0:N2}" -f ($entry.Length / 1KB)
+            Write-Host "  📄 $($entry.FullName) - $size KB" -ForegroundColor Gray
+            $totalUncompressedSize += $entry.Length
+        }
+        
+        $zip.Dispose()
+        
+        $totalSizeMB = "{0:N2}" -f ($totalUncompressedSize / 1MB)
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host "Total entries: $($zip.Entries.Count)" -ForegroundColor Cyan
+        Write-Host "Uncompressed size: $totalSizeMB MB" -ForegroundColor Cyan
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        
+        # Verify critical files are present
+        $criticalFiles = @(
+            "Smart_Stay_Awake_2.exe",
+            "Smart_Stay_Awake_2_icon.png"
+        )
+        
+        Write-Host ""
+        Write-Host "Checking for critical files..." -ForegroundColor Yellow
+        $zip = [System.IO.Compression.ZipFile]::OpenRead($zipFileName)
+        $missingFiles = @()
+        
+        foreach ($file in $criticalFiles) {
+            $found = $zip.Entries | Where-Object { $_.Name -eq $file }
+            if ($found) {
+                Write-Host "  ✅ Found: $file" -ForegroundColor Green
+            } else {
+                Write-Host "  ❌ Missing: $file" -ForegroundColor Red
+                $missingFiles += $file
+            }
+        }
+        
+        $zip.Dispose()
+        
+        if ($missingFiles.Count -gt 0) {
+            Write-Host "❌ ZIP is missing critical files!" -ForegroundColor Red
+            exit 1
+        }
+        
+        Write-Host "✅ ZIP verified successfully" -ForegroundColor Green
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 15: Generate SHA256 Checksum
+    # ======================================================================
+    # Creates a SHA256 hash of the ZIP file for integrity verification.
+    # Users can verify their downloaded ZIP hasn't been tampered with.
+    # 
+    # OUTPUT FILE FORMAT:
+    #   Smart_Stay_Awake_2_v{version}_x64_win10_win11_SHA256.txt
+    #   
+    # CONTENT FORMAT:
+    #   <hash>  <filename>
+    #   Example:
+    #   A1B2C3D4...  Smart_Stay_Awake_2_v001.001_x64_win10_win11.zip
+    # ======================================================================
+    - name: 🔐 Generate SHA256 checksum
+      shell: pwsh
+      run: |
+        Write-Host "Generating SHA256 checksum..." -ForegroundColor Yellow
+        
+        $version = "${{ github.ref_name }}"
+        $zipFileName = "Smart_Stay_Awake_2_${version}_x64_win10_win11.zip"
+        $checksumFileName = "Smart_Stay_Awake_2_${version}_x64_win10_win11_SHA256.txt"
+        
+        # Calculate SHA256 hash
+        $hash = Get-FileHash -Path $zipFileName -Algorithm SHA256
+        
+        # Format output: <hash>  <filename>
+        # (Two spaces between hash and filename is standard for SHA256 checksum files)
+        $checksumContent = $hash.Hash.ToLower() + "  " + $zipFileName
+        
+        # Write to file
+        $checksumContent | Out-File -FilePath $checksumFileName -Encoding ASCII -NoNewline
+        
+        # Verify checksum file was created
+        if (-not (Test-Path $checksumFileName)) {
+            Write-Host "❌ Failed to create checksum file" -ForegroundColor Red
+            exit 1
+        }
+        
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host "  SHA256 CHECKSUM" -ForegroundColor Cyan
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host "File: $zipFileName" -ForegroundColor Gray
+        Write-Host "Hash: $($hash.Hash.ToLower())" -ForegroundColor Green
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "✅ Checksum file created: $checksumFileName" -ForegroundColor Green
+        Write-Host ""
+        
+        # Display file content
+        Write-Host "Checksum file content:" -ForegroundColor Yellow
+        Get-Content $checksumFileName
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 16: Verify Checksum File Integrity
+    # ======================================================================
+    # Tests that the checksum file can be used to verify the ZIP.
+    # This ensures the checksum file is correctly formatted.
+    # ======================================================================
+    - name: ✅ Verify checksum integrity
+      shell: pwsh
+      run: |
+        Write-Host "Verifying checksum file integrity..." -ForegroundColor Yellow
+        
+        $version = "${{ github.ref_name }}"
+        $zipFileName = "Smart_Stay_Awake_2_${version}_x64_win10_win11.zip"
+        $checksumFileName = "Smart_Stay_Awake_2_${version}_x64_win10_win11_SHA256.txt"
+        
+        # Read checksum from file
+        $checksumContent = Get-Content $checksumFileName -Raw
+        $expectedHash = ($checksumContent -split '\s+')[0].Trim()
+        
+        # Calculate actual hash
+        $actualHash = (Get-FileHash -Path $zipFileName -Algorithm SHA256).Hash.ToLower()
+        
+        # Compare
+        if ($expectedHash -eq $actualHash) {
+            Write-Host "✅ Checksum verification PASSED" -ForegroundColor Green
+            Write-Host "   Expected: $expectedHash" -ForegroundColor Gray
+            Write-Host "   Actual:   $actualHash" -ForegroundColor Gray
+        } else {
+            Write-Host "❌ Checksum verification FAILED!" -ForegroundColor Red
+            Write-Host "   Expected: $expectedHash" -ForegroundColor Red
+            Write-Host "   Actual:   $actualHash" -ForegroundColor Red
+            exit 1
+        }
+        Write-Host ""
+    
+    # ======================================================================
+    # STEP 17: Upload Release Assets
+    # ======================================================================
+    # Uploads both the ZIP file and SHA256 checksum to the GitHub release.
+    # Uses the latest stable action for uploading release assets (v2).
+    # 
+    # Users will see both files in the release's "Assets" section:
+    #   - Smart_Stay_Awake_2_v{version}_x64_win10_win11.zip
+    #   - Smart_Stay_Awake_2_v{version}_x64_win10_win11_SHA256.txt
+    # ======================================================================
+    - name: 🚀 Upload release assets
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          Smart_Stay_Awake_2_${{ github.ref_name }}_x64_win10_win11.zip
+          Smart_Stay_Awake_2_${{ github.ref_name }}_x64_win10_win11_SHA256.txt
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    # ======================================================================
+    # STEP 18: Build Summary
+    # ======================================================================
+    # Displays a final summary of the build with links and file information.
+    # This appears in the GitHub Actions run summary page.
+    # ======================================================================
+    - name: 📊 Build summary
+      shell: pwsh
+      run: |
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host "  BUILD COMPLETE - SUCCESS! ✅" -ForegroundColor Green
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "Release version:    ${{ github.ref_name }}" -ForegroundColor Green
+        Write-Host "Repository:         ${{ github.repository }}" -ForegroundColor Gray
+        Write-Host ""
+        
+        $version = "${{ github.ref_name }}"
+        $zipFileName = "Smart_Stay_Awake_2_${version}_x64_win10_win11.zip"
+        $checksumFileName = "Smart_Stay_Awake_2_${version}_x64_win10_win11_SHA256.txt"
+        
+        $zipSize = (Get-Item $zipFileName).Length
+        $zipSizeMB = "{0:N2}" -f ($zipSize / 1MB)
+        
+        Write-Host "Artifacts created:" -ForegroundColor Yellow
+        Write-Host "  📦 $zipFileName ($zipSizeMB MB)" -ForegroundColor White
+        Write-Host "  🔐 $checksumFileName" -ForegroundColor White
+        Write-Host ""
+        Write-Host "These files have been uploaded to the release assets." -ForegroundColor Cyan
+        Write-Host "View release: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}" -ForegroundColor Blue
+        Write-Host ""
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
+        Write-Host "  Next Steps:" -ForegroundColor Yellow
+        Write-Host "  1. Go to the release page (link above)" -ForegroundColor Gray
+        Write-Host "  2. Verify the ZIP and SHA256 files are attached" -ForegroundColor Gray
+        Write-Host "  3. Download and test the release build" -ForegroundColor Gray
+        Write-Host "  4. Update release notes if needed" -ForegroundColor Gray
+        Write-Host "════════════════════════════════════════════════════════" -ForegroundColor Cyan
