@@ -1210,7 +1210,7 @@ namespace Smart_Stay_Awake_2.UI
                 // Python field order and exact label text
                 AddRow("Auto-quit at", _fldUntil);
                 AddRow("Time remaining", _fldRemaining);
-                AddRow("Timer update frequency", _fldCadence);
+                AddRow("Time remaining update frequency", _fldCadence);
                 Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: BuildFieldsTable: 3 field rows added (right/left aligned)");
 
                 // =====================================================================
