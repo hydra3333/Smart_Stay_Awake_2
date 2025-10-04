@@ -185,9 +185,9 @@ jobs:
           }
       
           Write-Host ""
-          Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Cyan
+          Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Cyan
           Write-Host "  Smart_Stay_Awake_2 PUBLISH OUTPUT VERIFICATION" -ForegroundColor Cyan
-          Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Cyan
+          Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Cyan
       
           # Locate the EXE we expect in publish-output
           $exePath = Join-Path $publishPath "Smart_Stay_Awake_2.exe"
@@ -235,9 +235,9 @@ jobs:
             Write-Host "⚠️ publish.diag.log missing (unexpected). Continuing, but please investigate this issue." -ForegroundColor Yellow
           }
       
-          Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Cyan
+          Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Cyan
           Write-Host "✅ Published Smart_Stay_Awake_2 RELEASE build successfully" -ForegroundColor Green
-          Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Cyan
+          Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Cyan
           Write-Host ""
       
           # >>> Make $publishPath available to later steps
@@ -420,7 +420,7 @@ jobs:
           $ProgressPreference = 'SilentlyContinue'
 
           $version     = "${{ github.ref_name }}"
-          $zipFileName = "Smart_Stay_Awake_2_${version}_x64_win10_win11.zip"
+          $zipFileName = "Smart_Stay_Awake_2_x64_Win10_Win11_${version}.zip"
           Compress-Archive -Path ".\release-staging\*" -DestinationPath $zipFileName -CompressionLevel Optimal -Force
           if (-not (Test-Path $zipFileName)) { throw "ZIP not created: $zipFileName" }
           $sz = (Get-Item $zipFileName).Length
@@ -474,9 +474,9 @@ jobs:
           "SHA_PATH=$shaFile" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
 
       # ----------------------------------------------------------------------
-      # 15) Upload as workflow artifacts (debug/fallback)
+      # 15) Upload as workflow artifacts
       # ----------------------------------------------------------------------
-      - name: ⬆️ Upload artifacts (debug)
+      - name: ⬆️ Upload artifacts
         # uses: actions/upload-artifact@<UPLOAD_ARTIFACT_SHA_FOR_v4>  # <- PIN ME
         uses: actions/upload-artifact@v4
         with:
@@ -501,9 +501,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # ----------------------------------------------------------------------
-      # 17) Build summary
+      # 17) Final Build summary
       # ----------------------------------------------------------------------
-      - name: 📊 Build summary
+      - name: 📊 Final Build summary
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
