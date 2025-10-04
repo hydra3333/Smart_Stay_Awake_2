@@ -1,153 +1,147 @@
-# Smart Stay Awake 2
+﻿<h1 align="center">
+  <img src="./Smart_Stay_Awake_2_icon.png" width="256" alt="Smart Stay Awake icon">
+  <br>Smart_Stay_Awake_2
 
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-lightgrey)
-![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)
 ![License](https://img.shields.io/badge/license-AGPL--3.0-green)
 ![Language](https://img.shields.io/badge/language-C%23-239120)
+![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)
 ![Status](https://img.shields.io/badge/status-Under%20Development-orange)
+</h1>
 
-<p align="center">
-  <img src="./Assets/Smart_Stay_Awake_2_icon.png" width="256" alt="Smart Stay Awake 2 - Eye of Horus icon">
-</p>
+<!--
+![Status](https://img.shields.io/badge/status-stable-green)
+![Status](https://img.shields.io/badge/status-Initial%20Release-green)
 
-<p align="center">
-  <strong>A lightweight Windows system tray utility that prevents your computer from sleeping or hibernating while allowing your display monitor to sleep normally.</strong>
-</p>
+Common Statuses
+![Status: Active](https://img.shields.io/badge/status-active-brightgreen)
+![Status: Beta](https://img.shields.io/badge/status-beta-blue)
+![Status: Experimental](https://img.shields.io/badge/status-experimental-orange)
+![Status: Deprecated](https://img.shields.io/badge/status-deprecated-red)
+![Status: Inactive](https://img.shields.io/badge/status-inactive-lightgrey)
+![Status](https://img.shields.io/badge/status-Under%20Development-orange) 
+
+Common status labels
+active, maintained, stable
+alpha, beta, experimental
+deprecated, legacy, archived, inactive
+
+Typical named colors
+Greens: brightgreen, green, yellowgreen
+Yellows/Oranges: yellow, orange
+Reds: red, crimson, firebrick
+Blues/Purples: blue, navy, blueviolet
+Neutrals: lightgrey, grey/gray, black
+
+Semantic: 
+success (brightgreen), informational (blue), critical (red), inactive (lightgrey), important (orange) 
+
+How to craft your own
+https://img.shields.io/badge/<LABEL>-<MESSAGE>-<COLOR>
+Replace <LABEL>, <MESSAGE>, and <COLOR> with whatever text and named color you like. (Spaces become %20)
+-->
+
+A lightweight Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation)
+while still allowing the **display monitor to sleep**. 
+
+Event-driven architecture means zero CPU polling - the app simply waits for OS timer events to fire,
+consuming virtually no resources.
+
+Event-driven architecture means zero CPU polling - the app simply waits for OS timer events to fire,
+consuming virtually no resources. Countdown updates execute in sub-millisecond time (<1ms),
+delivering responsive UI feedback without performance cost.
 
 ---
 
-## Table of Contents
+## What it does
 
-- [Overview](#overview)
-- [Features](#features)
-- [Requirements](#requirements)
-- [Download & Installation](#download--installation)
-- [Usage](#usage)
-  - [Command-line Options](#command-line-options)
-  - [Examples](#examples)
-- [How It Works](#how-it-works)
-  - [Power Request API](#power-request-api)
-  - [Timer Update Frequency](#timer-update-frequency)
-- [Architecture](#architecture)
-- [Building from Source](#building-from-source)
-- [Troubleshooting](#troubleshooting)
-- [The Eye of Horus](#the-eye-of-horus)
-- [License](#license)
-- [Contributing](#contributing)
-- [Acknowledgments](#acknowledgments)
+- While Smart\_Stay\_Awake\_2 runs, it requests the OS to **not sleep/hibernate**. Your **display monitor can still sleep** normally if your power plan allows it.
+- When you **quit** (or when an **auto-quit** timer fires), the app **releases** the request and your PC can sleep again.
+- A small **windows system-tray icon** provides **Show Window** and **Quit**.
 
 ---
 
-## Overview
+## Key Features
 
-Smart Stay Awake 2 is a modern .NET 8 Windows Forms application that uses the Windows Power Request API to prevent system sleep and hibernation while you work. Unlike simple execution state toggles, this application uses the proper Windows power management APIs (`PowerCreateRequest`, `PowerSetRequest`) to politely request that the system stays awake.
-
-**What makes it different:**
-- Uses modern Windows Power Request APIs (not the legacy `SetThreadExecutionState`)
-- Prevents **system sleep/hibernation** only—your **display can still sleep** to save power
-- Shows up properly in `powercfg /requests` for IT admin visibility
-- Lightweight system tray app with minimal resource usage
-- Smart countdown timer with adaptive update frequency
-- Clean auto-quit behavior with no lingering processes
-
----
-
-## Features
-
-### Core Functionality
-- **Blocks system sleep & hibernation** while running, using Windows Power Request API
-- **Allows display monitor to sleep** normally according to your power plan
-- **Three operating modes:**
+- **Prevents system sleep/hibernation** while running; auto-restores normal behavior on exit.
+- **System tray** icon with a simple menu (Show Window / Quit).
+- **Three operating modes:** keep awake indefinitely, or for a fixed duration using `--for` or `--until`
   - **Indefinite:** Runs until you manually quit
-  - **For Duration:** Auto-quits after a specified time (e.g., 2 hours, 90 minutes)
-  - **Until Timestamp:** Auto-quits at a specific date/time (e.g., "2025-12-31 23:59:59")
+  - **For Duration:** Auto-quits the application after a specified time (e.g., 2 hours 90 minutes `2h90m`)
+  - **Until Timestamp:** Auto-quits the application at a specific date/time (e.g., `2025-12-31 23:59:59`)
+- **Display countdown shown:**
+  - **Auto-quit at:** local ETA
+  - **Time remaining:** `Xd HH:MM:SS` (days appear when applicable)
+  - **Time remaining update frequency:** displays current update frequency for the 'Time remaining'
+- **Low-resource-use countdown:** updates window display less often when plenty of time remains; updates faster as it nears zero; and **“snaps”** to neat time boundaries so it feels calm and rounded.
+- **Minimize behavior:** both the title-bar **“\_”** and the **Minimize to System Tray** button minimise the app to the system-tray.
+- **Close (X)** in the main window exits the app completely.
+- **Icon / image priority** (for both the window and tray):
+  1. `--icon PATH`** (explicit override)
+  2. Embedded base64 in the pythin script which may be empty)
+  3. A file named **`Smart_Stay_Awake_icon.*`** next to the EXE/script (PNG/JPG/JPEG/WEBP/BMP/GIF/ICO)
+  4. A small internal fallback glyph (so it never crashes)
+- **Auto-scaling image:** in the window into a square (by edge replication): longest side <= **512 px** .
 
-### User Interface
-- **System tray icon** with right-click menu:
-  - Show Window
-  - Quit
+---
+
+## User Interface
 - **Main window features:**
-  - Eye of Horus icon display
-  - Current mode indicator
-  - Real-time countdown display (for timed modes)
-  - Auto-quit timestamp (local time)
-  - Time remaining (formatted as days, hours, minutes, seconds)
-  - Live update frequency indicator
+  - Eye of Horus image display
+  - Real-time countdown display (for timed auto-quit modes)
+  - Auto-quit timestamp (local time)  (for timed auto-quit modes)
+  - Time remaining (formatted as days, hours, minutes, seconds)  (for timed auto-quit modes)
+  - Live `Time remaining update frequency` (for timed auto-quit modes)
   - Minimize to system tray button
   - Quit button
 - **Window behavior:**
-  - Minimize (titlebar `-` button) → hides to system tray
-  - Close (titlebar `X` button) → exits application completely
-  - Minimize to System Tray button → hides to system tray
+  - Minimize (titlebar `-` button) -> hides to system tray
+  - Close (titlebar `X` button) -> exits application completely
+  - Minimize to System Tray button -> hides to system tray
+- **System tray icon** (when minimised to the windows system tray) using right-click on the icon:
+  - Show Window
+  - Help
+  - Quit
+  
+<h3 align="left">
+  <img src="./Smart_Stay_Awake_2_main_window.jpg" width="512" alt="Smart Stay Awake main window">
+</h3>
 
-### Smart Countdown Timer
-- **Adaptive update frequency** that balances accuracy with CPU efficiency:
-  - Updates every **5 minutes** when more than 2 hours remain
-  - Updates every **1 minute** when 30 minutes to 2 hours remain
-  - Updates every **10 seconds** when 1 to 30 minutes remain
-  - Updates every **1 second** when less than 1 minute remains
-- **Throttled updates when minimized** to reduce CPU usage
-- **Smooth time boundary snapping** for a polished user experience
-- **Monotonic deadline tracking** to prevent timer drift
+---
 
-### Power Management Visibility
-When Smart Stay Awake 2 is running, the Windows command `powercfg /requests` shows:
+## Command-line options
+
+```text
+--icon PATH
+    Use a specific image file for the window/tray icon.
+    Supports: PNG, JPG/JPEG, WEBP, BMP, GIF, ICO.
+
+--for DURATION
+    Keep awake for a fixed time, then quit gracefully.
+    DURATION accepts days/hours/minutes/seconds in the form of a single string (no spaces):
+      3d4h5s, 2h, 90m, 3600s, 1h30m
+    A bare number means minutes. Use 0 to disable the timer for maximum duration.
+    Bounds: at least MIN_AUTO_QUIT_SECS (default 10s), at most MAX_AUTO_QUIT_SECS (default ~365 days).
+    The app re-ceils the remaining time right before arming the timer, for accuracy.
+    Mutually exclusive with --until.
+
+--until "YYYY-MM-DD HH:MM:SS"
+    DATETIME in the form of a single quoted string, all field parts must be present.
+    Keep awake until the given local **24-hour** timestamp, then quit gracefully.
+    Examples (relaxed spacing & 1–2 digit parts accepted):
+      "2025-01-02 23:22:21"
+      "2025- 1- 2  3: 2: 1"
+      "2025-1-2 3:2:1"
+    Daylight Saving Time and local windows timezone are honored.
+    Bounds: at least MIN_AUTO_QUIT_SECS in the future, at most MAX_AUTO_QUIT_SECS from now.
+    Mutually exclusive with --for.
+
+--help
+    Display this help and stays awake according to the other commandlne parameters.
 ```
-SYSTEM:
-[PROCESS] \Device\HarddiskVolume3\Path\To\Smart_Stay_Awake_2.exe
-Smart Stay Awake 2: Preventing automatic sleep & hibernation (display monitor may sleep) as requested (auto-quit at 2025-10-04 15:30:00).
-```
 
-This ensures IT administrators and power users can see exactly what's preventing sleep and when it will release.
-
----
-
-## Requirements
-
-### Operating System
-- **Windows 10** version 2004 (May 2020 Update) or later
-- **Windows 11** (all versions)
-
-To check your Windows version:
-1. Press `Win + R`
-2. Type `winver` and press Enter
-3. Look for "Version 2004" or higher
-
-### Runtime
-- **.NET 8 Desktop Runtime** (x64)
-  - Download: [https://dotnet.microsoft.com/download/dotnet/8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
-  - The installer will prompt you if the runtime is missing
-
-### Permissions
-- **No administrator rights required** for normal operation
-- Standard user permissions are sufficient
-
----
-
-## Download & Installation
-
-### Option 1: Standalone Executable (Recommended)
-
-1. Download the latest release ZIP from the [Releases](../../releases) page
-2. Extract all files to a folder of your choice:
-   - `Smart_Stay_Awake_2.exe`
-   - `Microsoft.Windows.CsWin32.dll`
-   - `System.Memory.dll`
-   - `System.Runtime.CompilerServices.Unsafe.dll`
-   - `Microsoft.Bcl.AsyncInterfaces.dll`
-   - `Assets/` folder (contains icon resources)
-3. **Keep all files together** in the same folder
-4. Run `Smart_Stay_Awake_2.exe`
-
-**Important:** All 7 items (exe + 5 DLLs + Assets folder) must remain in the same directory for the application to work.
-
-### Option 2: Build from Source
-
-See [Building from Source](#building-from-source) section below.
-
----
-
-## Usage
+> **Notes**
+> * A small (±1s) variation near the very end can occur due to Windows timer jitter - this is normal.
 
 ### Basic Usage
 
@@ -155,7 +149,7 @@ See [Building from Source](#building-from-source) section below.
 ```cmd
 Smart_Stay_Awake_2.exe
 ```
-The app starts in Indefinite mode and runs until you quit it manually.
+The app starts in Indefinite mode and runs until you quit it manually or the system restarts.
 
 **Run for a specific duration:**
 ```cmd
@@ -169,7 +163,7 @@ Smart_Stay_Awake_2.exe --for 3d4h30m15s
 Smart_Stay_Awake_2.exe --until "2025-10-04 23:59:59"
 ```
 
-### Command-line Options
+### Parameter formats explained
 
 #### `--for <duration>`
 
@@ -215,48 +209,13 @@ Smart_Stay_Awake_2.exe --until "2025-1-2 3:2:1"        # Relaxed format
 
 ---
 
-## How It Works
+## Smart Auto-quit timer and Time remaining update frequency
+- **Countdown to Auto-quit** shows ETA for Auto-quit and a time remaining countdown
+- **Adaptive time remaining update frequency** that balances accuracy with CPU resource usage
+- **Smooth time boundary snapping** for a cleaner easier-to-read display
+- **Monotonic deadline tracking** to prevent timer drift
 
-### Power Request API
-
-Smart Stay Awake 2 uses the modern Windows Power Request API instead of the legacy `SetThreadExecutionState` function. This approach provides:
-
-**Better system integration:**
-- Appears in `powercfg /requests` with a descriptive reason string
-- Allows IT administrators to monitor what's preventing sleep
-- Properly releases power requests when the app exits
-- Cooperates cleanly with other power management tools
-
-**How it works internally:**
-
-1. **On startup**, the app calls `PowerCreateRequest()` with a `REASON_CONTEXT` containing:
-   ```
-   "Smart Stay Awake 2: Preventing automatic sleep & hibernation (display monitor may sleep) as requested (auto-quit at 2025-10-04 15:30:00)."
-   ```
-
-2. **The app sets the power request** using `PowerSetRequest()` with the `PowerRequestSystemRequired` flag:
-   - This blocks **system sleep/hibernation**
-   - This does **NOT** block display sleep (`PowerRequestDisplayRequired` is not used)
-
-3. **On exit** (manual quit or auto-quit), the app:
-   - Calls `PowerClearRequest()` to release the system power request
-   - Calls `CloseHandle()` to clean up the power request handle
-   - Returns control to Windows, allowing normal sleep behavior to resume
-
-**Why the display can still sleep:**
-
-The app only requests `PowerRequestSystemRequired`, not `PowerRequestDisplayRequired`. This means:
-- Your **CPU, disk, network** stay active
-- Your **display** can sleep according to your power plan settings
-- Energy-efficient for long-running tasks that don't need the screen
-
-### Timer Update Frequency
-
-To balance **visual responsiveness** with **CPU efficiency**, the countdown timer uses an adaptive update strategy. The update frequency depends on how much time remains until auto-quit.
-
-#### Update Frequency Table
-
-| Time Remaining | Update Frequency | Reason |
+| Time remaining update frequency | Update Frequency | Reason |
 |----------------|------------------|--------|
 | **> 60 minutes** | Every **10 minutes** | Far from deadline; high precision not needed |
 | **30 to 60 minutes** | Every **5 minutes** | Distant deadline; minimal updates conserve resources |
@@ -266,94 +225,67 @@ To balance **visual responsiveness** with **CPU efficiency**, the countdown time
 | **2 to 5 minutes** | Every **10 seconds** | Very close; frequent updates for accuracy |
 | **1 to 2 minutes** | Every **5 seconds** | Almost there; high-frequency updates |
 | **30 seconds to 1 minute** | Every **2 seconds** | Final approach; near real-time updates |
-| **≤ 30 seconds** | Every **1 second** | Final countdown; maximum precision |
-
-**Additional optimizations:**
-
-- **When minimized to system tray:** Updates are throttled further to reduce CPU usage (updates every 30-60 seconds regardless of time remaining)
-- **Boundary snapping:** The timer "snaps" to neat time boundaries (e.g., exactly on the minute mark) for a polished feel
-- **Monotonic deadline:** The app uses a monotonic clock to calculate the deadline, preventing timer drift even if the system clock changes
-
-#### Why this matters
-
-Consider a scenario where you run `Smart_Stay_Awake_2.exe --for 8h`:
-
-- **First 7 hours (420 min):** Updates every 10 minutes = 42 updates
-- **Hour 7-7.5 (30 min):** Updates every 5 minutes = 6 updates
-- **Minutes 450-465 (15 min):** Updates every 1 minute = 15 updates
-- **Minutes 465-470 (5 min):** Updates every 30 seconds = 10 updates
-- **Minutes 470-475 (5 min):** Updates every 15 seconds = 20 updates
-- **Minutes 475-478 (3 min):** Updates every 10 seconds = 18 updates
-- **Minutes 478-479 (1 min):** Updates every 5 seconds = 12 updates
-- **Seconds 479:00-479:30 (30 sec):** Updates every 2 seconds = 15 updates
-- **Final 30 seconds:** Updates every 1 second = 30 updates
-
-**Total updates:** ~168 updates over 8 hours instead of 28,800 updates (if updated every second the whole time)
-
-This reduces CPU wake-ups by **99.4%** while still providing a responsive countdown display when it matters most.
-
-#### What the user sees
-
-In the main window, you'll see a line like:
-
-```
-Update cadence: Every 10 minutes
-```
-
-This tells you how frequently the countdown is being refreshed right now. As the deadline approaches, you'll see this dynamically change to progressively faster update rates:
-- "Every 10 minutes" → "Every 5 minutes" → "Every 1 minute" → "Every 30 seconds" → "Every 15 seconds" → "Every 10 seconds" → "Every 5 seconds" → "Every 2 seconds" → "Every 1 second"
-
-The transition is smooth and automatic, giving you precise feedback when you need it most without wasting CPU cycles when time is plentiful.
+| **<= 30 seconds** | Every **1 second** | Final countdown |
 
 ---
 
-## Architecture
-
-### Project Structure
-
+## Visibility in Power Management queries
+When Smart Stay Awake 2 is running, the Windows (Admin) command `powercfg /requests` shows, for example:
 ```
-Smart_Stay_Awake_2/
-├── Smart_Stay_Awake_2.csproj          # .NET 8 Windows Forms project file
-├── Program.cs                          # Application entry point
-├── MainForm.cs                         # Main window UI and logic
-├── AppState.cs                         # Application state model
-├── PowerManagement/
-│   ├── PowerRequestManager.cs          # Power Request API wrapper
-│   └── ExecutionStateManager.cs        # Execution state management
-├── Utilities/
-│   ├── CommandLineParser.cs            # CLI argument parsing
-│   ├── DurationParser.cs               # Duration string parsing (3d4h5m)
-│   ├── DateTimeParser.cs               # Datetime string parsing
-│   └── TimeFormatter.cs                # Human-friendly time formatting
-├── Assets/
-│   └── Smart_Stay_Awake_2_icon.png     # Application icon
-├── NativeMethods.txt                   # CsWin32 API surface area
-└── README.md                           # This file
+SYSTEM:
+[PROCESS] \Device\HarddiskVolume3\Path\To\Smart_Stay_Awake_2.exe
+Smart Stay Awake 2: Preventing automatic sleep & hibernation (display monitor may sleep) as requested (auto-quit at 2025-10-04 15:30:00).
 ```
 
-### Key Technologies
-
-- **.NET 8** (Windows Desktop Framework)
-- **Windows Forms** (UI framework)
-- **CsWin32** (source-generated P/Invoke bindings)
-  - Generates type-safe Windows API calls from metadata
-  - No manual P/Invoke declarations needed
-- **Windows Power Request API**
-  - `PowerCreateRequest()`
-  - `PowerSetRequest()`
-  - `PowerClearRequest()`
-  - `CloseHandle()`
-
-### Design Patterns
-
-- **Singleton pattern** for `PowerRequestManager` (ensures only one active power request)
-- **Dispose pattern** for proper cleanup of native resources (power request handles)
-- **MVC-style separation** between UI (`MainForm`), state (`AppState`), and business logic (`PowerRequestManager`)
-- **Immutable configuration** via `AppState` to prevent accidental state corruption
+This ensures that IT administrators and Admin/Power users can see exactly what's preventing system hibernation and sleep and when it will release.
 
 ---
 
-## Building from Source
+## Requirements
+
+### Supported Operating System
+- **Windows 10** version 2004 (May 2020 Update) or later
+- **Windows 11** (all versions)
+
+To check your Windows version:
+1. Press `Win + R`
+2. Type `winver` and press Enter
+3. Look for "Version 2004" or higher
+
+### Runtime
+- **Microtosft .NET 8+ Desktop Runtime** (x64)
+  - Ask your system administrator, this is a 'normal' thing to have on any PC ...
+  - Download: [https://dotnet.microsoft.com/download/dotnet/8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
+  - The installer will prompt you if the runtime is missing
+
+### Permissions to run
+- **No administrator rights required** for normal operation
+- Standard user permissions are sufficient
+
+---
+
+## Download & Installation
+
+1. Download the latest release ZIP from the [Releases](../../releases) page
+2. Extract all files to a folder of your choice:
+   - `Smart_Stay_Awake_2.exe`
+   - `Microsoft.Windows.CsWin32.dll`
+   - `System.Memory.dll`
+   - `System.Runtime.CompilerServices.Unsafe.dll`
+   - `Microsoft.Bcl.AsyncInterfaces.dll`
+   - `Assets/` folder (contains icon resources)
+   - etc
+3. **Keep all extracted files together** in the same folder
+4. Run `Smart_Stay_Awake_2.exe` as described under **Basic Usage** above.
+
+**Important:** All items (exe + DLLs + Assets folder) **must** remain in the same directory
+for the application to work.
+
+> Apparently Microsoft's idea of a C# *standalone .exe* includes keeping .DLL files etc in the same folder with the .exe.
+
+---
+
+## Building it yourself (BIY) from Source
 
 ### Prerequisites
 
@@ -376,35 +308,44 @@ start Smart_Stay_Awake_2.sln
 ```
 
 **Restore NuGet packages:**
-
 Visual Studio will automatically restore packages on first build. Packages include:
 - `Microsoft.Windows.CsWin32`
 - Supporting libraries for CsWin32
 
-**Build the project:**
+**Build it in the usual way:**    
+- You will need to learn to use Visual Studio.    
+- ClaudeAI or ChatGPT can help with that, leading you through the steps.
 
-- Press `Ctrl + Shift + B` or
-- Menu: Build → Build Solution
+> The `solution` targets only x64 (of course).    
+> There's an inbuilt image (jpg) and and icon (jpg), both in base64 format (~3Mb), one of the AIs can help you replace them with others if you want.
 
-**Run/Debug:**
 
-- Press `F5` to run with debugging, or
-- Press `Ctrl + F5` to run without debugging
+### Acknowledgments
 
-### Output Location
+- Built with [.NET 8](https://dotnet.microsoft.com/) and [Windows Forms](https://docs.microsoft.com/en-us/dotnet/desktop/winforms/)
+- Windows API bindings generated by [CsWin32](https://github.com/microsoft/CsWin32)
+- Icon inspired by the ancient Egyptian Eye of Horus (Wadjet)
+- ClaudeAI and ChatGPT AI for providing learning and assistance
 
-After building, the compiled executable and dependencies are in:
-```
-Smart_Stay_Awake_2\bin\Debug\net8.0-windows\
-```
+### Additional Resources
 
-or for Release builds:
-```
-Smart_Stay_Awake_2\bin\Release\net8.0-windows\
-```
+- [Windows Power Management API Documentation](https://docs.microsoft.com/en-us/windows/win32/power/power-management-portal)
+- [CsWin32 GitHub Repository](https://github.com/microsoft/CsWin32)
+- [.NET 8 Documentation](https://docs.microsoft.com/en-us/dotnet/core/whats-new/dotnet-8)
+- [Windows Forms Documentation](https://docs.microsoft.com/en-us/dotnet/desktop/winforms/)
 
-**Deployment bundle:**
-- Copy the entire folder contents (exe + DLLs + Assets folder) together to deploy
+### License Summary
+
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.    
+
+For a human-readable summary of the AGPL-3.0 license
+see [choosealicense.com/licenses/agpl-3.0](https://choosealicense.com/licenses/agpl-3.0/).
+
+
+**Why AGPL-3.0?**
+
+The AGPL-3.0 license ensures that improvements and modifications to this application
+remain open source and benefit the community, even when used in network/server environments.
 
 ---
 
@@ -455,13 +396,13 @@ Smart_Stay_Awake_2\bin\Release\net8.0-windows\
   ```cmd
   Smart_Stay_Awake_2.exe --verbose
   ```
-  (if verbose mode is implemented in your version)
+  (if --verbose mode is implemented in your version)
 
 ### Verifying Power Request Status
 
 To confirm the app is working:
 
-**Open Command Prompt or PowerShell:**
+**Open Command Prompt or PowerShell as an Admin:**
 ```cmd
 powercfg /requests
 ```
@@ -472,123 +413,47 @@ SYSTEM:
 [PROCESS] \Device\HarddiskVolume3\Path\To\Smart_Stay_Awake_2.exe
 Smart Stay Awake 2: Preventing automatic sleep & hibernation (display monitor may sleep) as requested (indefinitely).
 ```
+or
+```
+SYSTEM:
+[PROCESS] \Device\HarddiskVolume3\Path\To\Smart_Stay_Awake_2.exe
+Smart Stay Awake 2: Preventing automatic sleep & hibernation (display monitor may sleep) as requested (auto-quit a yyyy-MM-dd hh:mm:ss ).
+```
 
-If you see this, the power request is active and working correctly.
+If you see this, a power request is active and working correctly.
 
 ---
 
-## The Eye of Horus
+## Tech stuff
+
+### Key Technologies
+
+- **.NET 8** (Windows Desktop Framework)
+- **Windows Forms** (UI framework)
+- **Visual Studio** (to build the application)
+- **CsWin32** (source-generated P/Invoke bindings)
+  - Generates type-safe Windows API calls from metadata
+  - No manual P/Invoke declarations needed
+- **Windows Power Request API**
+  - `PowerCreateRequest()`
+  - `PowerSetRequest()`
+  - `PowerClearRequest()`
+  - `CloseHandle()`
+
+### Design Patterns
+
+- **Singleton pattern** for `PowerRequestManager` (ensures only one active power request)
+- **Dispose pattern** for proper cleanup of native resources (power request handles)
+- **MVC-style separation** between UI (`MainForm`), state (`AppState`), and business logic (`PowerRequestManager`)
+- **Immutable configuration** via `AppState` to prevent accidental state corruption
+
+---
+
+## The EYE OF HORUS
 
 <p align="center">
-  <img src="./Assets/Smart_Stay_Awake_2_icon.png" width="256" alt="Eye of Horus - Wadjet">
+  <em>The ancient Egyptian "Eye of Horus" (aka "Wadjet") is a symbol of protection, healing, and restoration—an eye that, metaphorically, never sleeps.</em>
 </p>
 
-<p align="center">
-  <em>The ancient Egyptian "Eye of Horus" (Wadjet) symbolizes protection, healing, and restoration—an eye that, metaphorically, never sleeps.</em>
-</p>
-
-The Eye of Horus was worn as an amulet to provide protection and health to the wearer. In the context of this application, it represents vigilant protection of your work by preventing unwanted system sleep. Just as the Eye of Horus never closes, Smart Stay Awake 2 keeps your system alert and ready.
-
 ---
 
-## License
-
-This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
-
-See [LICENSE](LICENSE) for full license text.
-
-### Summary
-
-You are free to:
-- **Use** this software for any purpose
-- **Modify** the source code
-- **Distribute** copies of the original or modified software
-
-Under the following conditions:
-- **Same license:** If you distribute modified versions, you must release the source code under AGPL-3.0
-- **Network use:** If you run a modified version on a server and let others interact with it, you must make the source code available to those users
-- **State changes:** You must clearly indicate what changes were made
-- **No warranty:** The software is provided "as is" without warranty
-
-**Why AGPL-3.0?**
-
-The AGPL license ensures that improvements and modifications to this tool remain open source and benefit the community, even when used in network/server environments.
-
----
-
-## Contributing
-
-Contributions are welcome and appreciated! Here's how you can help:
-
-### Reporting Issues
-
-Found a bug or have a feature request?
-
-1. Check [existing issues](../../issues) to avoid duplicates
-2. Create a new issue with:
-   - Clear, descriptive title
-   - Steps to reproduce (for bugs)
-   - Expected vs actual behavior
-   - Your Windows version and .NET version
-   - Screenshots if applicable
-
-### Submitting Code
-
-1. **Fork** the repository
-2. **Create a feature branch:**
-   ```cmd
-   git checkout -b feature/your-feature-name
-   ```
-3. **Make your changes** with clear, descriptive commits:
-   ```cmd
-   git commit -m "Add feature: descriptive message"
-   ```
-4. **Push to your fork:**
-   ```cmd
-   git push origin feature/your-feature-name
-   ```
-5. **Open a Pull Request** with:
-   - Description of changes
-   - Reference to related issues (if any)
-   - Screenshots for UI changes
-
-### Code Style
-
-- Follow standard C# naming conventions (PascalCase for public members, camelCase for private fields)
-- Add XML documentation comments for public APIs
-- Keep methods focused and single-purpose
-- Write self-documenting code with clear variable names
-- Add comments for complex logic or non-obvious behavior
-
-### Testing
-
-Before submitting a PR:
-- Build and test on Windows 10 and Windows 11 if possible
-- Test all three modes (Indefinite, For Duration, Until Timestamp)
-- Verify power request shows up in `powercfg /requests`
-- Check that auto-quit works correctly
-- Ensure no memory leaks or unclosed handles
-
----
-
-## Acknowledgments
-
-- Built with [.NET 8](https://dotnet.microsoft.com/) and [Windows Forms](https://docs.microsoft.com/en-us/dotnet/desktop/winforms/)
-- Windows API bindings generated by [CsWin32](https://github.com/microsoft/CsWin32)
-- Icon inspired by the ancient Egyptian Eye of Horus (Wadjet) symbol
-- Thanks to the open-source community for feedback and contributions
-
----
-
-## Additional Resources
-
-- [Windows Power Management API Documentation](https://docs.microsoft.com/en-us/windows/win32/power/power-management-portal)
-- [CsWin32 GitHub Repository](https://github.com/microsoft/CsWin32)
-- [.NET 8 Documentation](https://docs.microsoft.com/en-us/dotnet/core/whats-new/dotnet-8)
-- [Windows Forms Documentation](https://docs.microsoft.com/en-us/dotnet/desktop/winforms/)
-
----
-
-<p align="center">
-  Made with ☕ and ❤️ for the Windows community
-</p>
