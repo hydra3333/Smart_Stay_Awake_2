@@ -176,7 +176,7 @@ jobs:
             -p:ContinuousIntegrationBuild=true `
             --no-restore `
             -bl:publish.binlog `
-            -flp:logfile=publish.diag.log;verbosity=diagnostic `
+            -flp:"logfile=publish.diag.log;verbosity=diagnostic" `
             -o $publishPath `
             -v minimal
           if ($LASTEXITCODE -ne 0) {
