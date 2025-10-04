@@ -75,7 +75,7 @@ delivering responsive feedback without performance cost.
 - **Close (X)** in the main window exits the app completely.
 - **Icon / image priority** (for both the window and tray):
   1. `--icon PATH`** (explicit override)
-  2. Embedded base64 in the pythin script which may be empty)
+  2. Embedded base64 in the python script which may be empty)
   3. A file named **`Smart_Stay_Awake_icon.*`** next to the EXE/script (PNG/JPG/JPEG/WEBP/BMP/GIF/ICO)
   4. A small internal fallback glyph (so it never crashes)
 - **Auto-scaling image:** in the window into a square (by edge replication): longest side <= **512 px** .
