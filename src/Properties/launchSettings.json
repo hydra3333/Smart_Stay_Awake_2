@@ -7,7 +7,7 @@
       // "commandLineArgs": "--verbose"
 
       // for 15 secs
-      // "commandLineArgs": "--verbose --for 15s"
+      "commandLineArgs": "--verbose --for 15s"
 
       // for 1m 5 secs
       //"commandLineArgs": "--verbose --for 1m5s",
@@ -22,7 +22,7 @@
       // "commandLineArgs": "--verbose --until \"2025-10-04 14:30:00\"",
 
       // Until timestamp no verbose
-      "commandLineArgs": "--until \"2025-10-04 14:30:00\""
+      //"commandLineArgs": "--until \"2025-10-04 14:30:00\""
 
       // Custom icon
       // "commandLineArgs": "--verbose --icon \"C:\\path\\to\\icon.png\""
