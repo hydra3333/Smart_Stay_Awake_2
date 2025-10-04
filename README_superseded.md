@@ -42,13 +42,15 @@ https://img.shields.io/badge/<LABEL>-<MESSAGE>-<COLOR>
 Replace <LABEL>, <MESSAGE>, and <COLOR> with whatever text and named color you like. (Spaces become %20)
 -->
 
-A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Built with C# in Visual Studio Community.
+A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while
+still allowing the **display monitor to sleep**. 
+Built with C# and /NET 8+ in Visual Studio Community.
 
 ---
 
 ## What it does
 
-- While Smart\_Stay\_Awake runs, it requests the OS to **not sleep/hibernate**. Your **display monitor can still sleep** normally if your power plan allows it.
+- While Smart\_Stay\_Awake\_2 runs, it requests the OS to **not sleep/hibernate**. Your **display monitor can still sleep** normally if your power plan allows it.
 - When you **quit** (or when an **auto-quit** timer fires), the app **releases** the request and your PC can sleep again.
 - A small **windows system-tray icon** provides **Show Window** and **Quit**.
 
@@ -203,7 +205,7 @@ Smart_Stay_Awake_2.exe --until "2025-1-2 3:2:1"        # Relaxed format
 ---
 
 ## Smart Auto-quit timer and Time remaining update frequency
-- **Coundown** to Auto-quit, shows ETA for Auto-quit and a time remaining countdown
+- **Countdown to Auto-quit** shows ETA for Auto-quit and a time remaining countdown
 - **Adaptive time remaining update frequency** that balances accuracy with CPU resource usage:
 - **Smooth time boundary snapping** for a cleaner easier-to-read display
 - **Monotonic deadline tracking** to prevent timer drift
@@ -236,7 +238,7 @@ This ensures that IT administrators and Admin/Power users can see exactly what's
 
 ## Requirements
 
-### Operating System
+### Supported Operating System
 - **Windows 10** version 2004 (May 2020 Update) or later
 - **Windows 11** (all versions)
 
@@ -247,7 +249,7 @@ To check your Windows version:
 
 ### Runtime
 - **Microtosft .NET 8+ Desktop Runtime** (x64)
-  - Ask your system administrator, this is a 'normal' thing ...
+  - Ask your system administrator, this is a 'normal' thing to have on any PC ...
   - Download: [https://dotnet.microsoft.com/download/dotnet/8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
   - The installer will prompt you if the runtime is missing
 
@@ -257,48 +259,92 @@ To check your Windows version:
 
 ---
 
+## Download & Installation
 
+### Option 1: Standalone Executable (Recommended)
 
+1. Download the latest release ZIP from the [Releases](../../releases) page
+2. Extract all files to a folder of your choice:
+   - `Smart_Stay_Awake_2.exe`
+   - `Microsoft.Windows.CsWin32.dll`
+   - `System.Memory.dll`
+   - `System.Runtime.CompilerServices.Unsafe.dll`
+   - `Microsoft.Bcl.AsyncInterfaces.dll`
+   - `Assets/` folder (contains icon resources)
+   - etc
+3. **Keep all extracted files together** in the same folder
+4. Run `Smart_Stay_Awake_2.exe` as described under **Basic Usage** above.
 
+**Important:** All items (exe + DLLs + Assets folder) **must** remain in the same directory
+for the application to work.
 
+> Apparently Microsoft's idea of C# *standalone* .exe includes keeping .DLL files etc in the same folder with the .exe.
 
+### Option 2: Build it yourself (BIY) from Source
 
+## Building it yourself from Source
 
+### Prerequisites
 
+1. **Visual Studio 2022** (Community Edition or higher)
+   - Workload: ".NET Desktop Development"
+   - Component: ".NET 8 SDK"
+2. **Git** (for cloning the repository)
 
+### Build Steps
 
+**Clone the repository:**
+```cmd
+git clone https://github.com/yourusername/Smart_Stay_Awake_2.git
+cd Smart_Stay_Awake_2
+```
 
+**Open in Visual Studio:**
+```cmd
+start Smart_Stay_Awake_2.sln
+```
 
+**Restore NuGet packages:**
+Visual Studio will automatically restore packages on first build. Packages include:
+- `Microsoft.Windows.CsWin32`
+- Supporting libraries for CsWin32
 
+** Build it in the usual way**
+You will need to learn to use Visual Studio. ClaudeAI or ChatGPT can help with that, leading you through the steps.
 
+> The `solution` targets only x64 (of course)
+> There's an inbuilt (jpg) image in base64 (2.5 Mb), one of the AIs can help you replace it with another if you want
 
+### License AGPL-3.0
+This software is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
-
-
-
-
-
-
-
-
-
+If you want to modify/distribute, then you must comply with the (quite open) license conditions.
 
 ---
 
-## **Interesting example one-liner using .bat and powershell (doable via `--for`)**
 
-> NOTE: a .BAT (needs to double the % signs in `for`)
 
-```bat
-@echo off
-@setlocal ENABLEDELAYEDEXPANSION
-@setlocal enableextensions
-set "minutes_from_now=5"
-for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "(Get-Date).AddMinutes(!minutes_from_now!).ToString('yyyy-MM-dd HH:mm:ss')"`) do (
-    set "datetime_ahead=%%T"
-)
-python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
-```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ---
 
