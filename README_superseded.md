@@ -41,25 +41,29 @@ https://img.shields.io/badge/<LABEL>-<MESSAGE>-<COLOR>
 Replace <LABEL>, <MESSAGE>, and <COLOR> with whatever text and named color you like. (Spaces become %20)
 -->
 
-A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while
-still allowing the **display monitor to sleep**.    
+A lightweight Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation)
+while still allowing the **display monitor to sleep**. 
 
-Here are a few options you could use:
+Event-driven architecture means zero CPU polling - the app simply waits for OS timer events to fire,
+consuming virtually no resources during idle periods.
 
-**Option 1 (Technical but accessible):**
-A lightweight Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Uses event-driven timers instead of polling loops—consuming virtually no resources while idle.
 
-**Option 2 (More intellectual):**
-A lightweight Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Leverages OS-level event notifications rather than busy-wait loops, ensuring negligible CPU and memory footprint during operation.
+Here are some variations combining both points:
 
-**Option 3 (Balanced):**
-A lightweight Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Event-driven architecture with adaptive timers ensures near-zero resource consumption while waiting—no polling, no waste.
+**Option 1 (Clean and direct):**
+Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources during idle periods. Countdown window updates execute in under 1ms, ensuring a responsive UI without measurable performance impact.
 
-**Option 4 (Concise and punchy):**
-A lightweight Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Event-driven design with zero-overhead idle behavior—waits efficiently without consuming CPU cycles.
+**Option 2 (More technical):**
+Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources during idle periods. When updates do occur, UI refreshes complete in sub-millisecond time (<1ms), maintaining fluid responsiveness with negligible overhead.
 
-**Option 5 (My favorite - technical but clear):**
-A lightweight Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Event-driven architecture means zero CPU polling—the app simply waits for OS timer events, consuming virtually no resources during idle periods.
+**Option 3 (Emphasizes efficiency):**
+Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources during idle periods. Even during active countdown updates, UI refreshes take less than 1ms—fast enough to be imperceptible to both user and system.
+
+**Option 4 (My recommendation - balanced):**
+Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources during idle periods. Countdown updates execute in sub-millisecond time (<1ms), delivering responsive UI feedback without performance cost.
+
+**Option 5 (Concise):**
+Event-driven architecture means zero CPU polling—the app simply waits for OS timer events to fire, consuming virtually no resources. Countdown updates complete in <1ms, ensuring zero-impact responsiveness.
 
 ---
 
