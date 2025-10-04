@@ -72,26 +72,73 @@ A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hib
 ```
 
 > **Notes**
-> * `--for` and `--until` are **mutually exclusive**; provide only **one or the other**.
 > * A small (±1s) variation near the very end can occur due to Windows timer jitter - this is normal.
 
-### Examples
+### Basic Usage
 
-**Run for a fixed time**
-
+**Double-click to run indefinitely:**
 ```cmd
-.\Smart_Stay_Awake.exe --for 2h
-.\Smart_Stay_Awake.exe --for 45m
-.\Smart_Stay_Awake.exe --for 3d4h5s
+Smart_Stay_Awake_2.exe
+```
+The app starts in Indefinite mode and runs until you quit it manually or the system restarts.
+
+**Run for a specific duration:**
+```cmd
+Smart_Stay_Awake_2.exe --for 2h
+Smart_Stay_Awake_2.exe --for 90m
+Smart_Stay_Awake_2.exe --for 3d4h30m15s
 ```
 
-**Run until a local date/time**
-
+**Run until a specific date/time:**
 ```cmd
-.\Smart_Stay_Awake.exe --until "2026-01-02 23:22:21"
+Smart_Stay_Awake_2.exe --until "2025-10-04 23:59:59"
 ```
 
-**Interesting one-liner using powershell (better doable via `--for`)**
+### Command-line Options in mroe detail
+
+#### `--for <duration>`
+
+Keep the system awake for a fixed duration, then quit gracefully.
+
+**Duration format:**
+- Combine days (`d`), hours (`h`), minutes (`m`), and seconds (`s`)
+- Examples: `3d`, `2h`, `90m`, `3600s`, `1h30m`, `3d4h5m10s`
+- A bare number (no unit) is treated as **minutes**
+- Minimum: 10 seconds
+- Maximum: ~365 days
+
+**Examples:**
+```cmd
+Smart_Stay_Awake_2.exe --for 2h          # 2 hours
+Smart_Stay_Awake_2.exe --for 45m         # 45 minutes
+Smart_Stay_Awake_2.exe --for 90          # 90 minutes (bare number)
+Smart_Stay_Awake_2.exe --for 3d4h5s      # 3 days, 4 hours, 5 seconds
+```
+
+#### `--until <datetime>`
+
+Keep the system awake until a specific local date/time, then quit gracefully.
+
+**Datetime format:**
+- Must be enclosed in quotes
+- Format: `"YYYY-MM-DD HH:MM:SS"` (24-hour time)
+- Relaxed spacing and 1-2 digit parts are accepted
+- Honors local timezone and Daylight Saving Time
+- Must be at least 10 seconds in the future
+- Must be no more than ~365 days in the future
+
+**Examples:**
+```cmd
+Smart_Stay_Awake_2.exe --until "2025-10-04 23:30:00"
+Smart_Stay_Awake_2.exe --until "2025-12-31 23:59:59"
+Smart_Stay_Awake_2.exe --until "2025-1-2 3:2:1"        # Relaxed format
+```
+
+#### Mutual Exclusivity
+
+**`--for` and `--until` are mutually exclusive.** Provide only one or the other, not both.
+
+### **Interesting one-liner using powershell (better doable via `--for`)**
 
 > NOTE: a .BAT (needs to double the % signs in `for`)
 
@@ -162,6 +209,30 @@ Smart Stay Awake 2: Preventing automatic sleep & hibernation (display monitor ma
 
 This ensures that IT administrators and Admin/Power users can see exactly what's preventing system hibernation and sleep and when it will release.
 
+---
+
+## Requirements
+
+### Operating System
+- **Windows 10** version 2004 (May 2020 Update) or later
+- **Windows 11** (all versions)
+
+To check your Windows version:
+1. Press `Win + R`
+2. Type `winver` and press Enter
+3. Look for "Version 2004" or higher
+
+### Runtime
+- **Microtosft .NET 8+ Desktop Runtime** (x64)
+  - Ask your system administrator, this is a 'normal' thing ...
+  - Download: [https://dotnet.microsoft.com/download/dotnet/8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
+  - The installer will prompt you if the runtime is missing
+
+### Permissions to run
+- **No administrator rights required** for normal operation
+- Standard user permissions are sufficient
+
+---
 
 
 
