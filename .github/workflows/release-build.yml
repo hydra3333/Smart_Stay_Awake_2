@@ -147,10 +147,16 @@ jobs:
 
           Write-Host "Publishing Smart_Stay_Awake_2 as SINGLE FILE (self-contained, win-x64)..." -ForegroundColor Yellow
 
+          # Force specific output directory
+          $outputPath = ".\publish-output"
+          
+          # The -c Release flag sometimes gets overridden by project files, 
+          # but -p:Configuration=Release is a direct MSBuild property that takes precedence.
           dotnet publish ..\Smart_Stay_Awake_2.sln `
             -c Release `
             -r win-x64 `
             --self-contained true `
+            -p:Configuration=Release `
             -p:PublishSingleFile=true `
             -p:PublishReadyToRun=false `
             -p:InvariantGlobalization=false `
@@ -161,6 +167,7 @@ jobs:
             -p:GenerateDocumentationFile=false `
             -p:ContinuousIntegrationBuild=true `
             --no-restore `
+            -o $outputPath `
             -v minimal
 
       # ----------------------------------------------------------------------
