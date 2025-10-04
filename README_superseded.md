@@ -261,8 +261,6 @@ To check your Windows version:
 
 ## Download & Installation
 
-### Option 1: Standalone Executable (Recommended)
-
 1. Download the latest release ZIP from the [Releases](../../releases) page
 2. Extract all files to a folder of your choice:
    - `Smart_Stay_Awake_2.exe`
@@ -278,11 +276,9 @@ To check your Windows version:
 **Important:** All items (exe + DLLs + Assets folder) **must** remain in the same directory
 for the application to work.
 
-> Apparently Microsoft's idea of C# *standalone* .exe includes keeping .DLL files etc in the same folder with the .exe.
+> Apparently Microsoft's idea of a C# *standalone .exe* includes keeping .DLL files etc in the same folder with the .exe.
 
-### Option 2: Build it yourself (BIY) from Source
-
-## Building it yourself from Source
+## Building it yourself (BIY) from Source
 
 ### Prerequisites
 
@@ -309,17 +305,21 @@ Visual Studio will automatically restore packages on first build. Packages inclu
 - `Microsoft.Windows.CsWin32`
 - Supporting libraries for CsWin32
 
-** Build it in the usual way**
-You will need to learn to use Visual Studio. ClaudeAI or ChatGPT can help with that, leading you through the steps.
+**Build it in the usual way:**    
+- You will need to learn to use Visual Studio.    
+- ClaudeAI or ChatGPT can help with that, leading you through the steps.
 
-> The `solution` targets only x64 (of course).
+> The `solution` targets only x64 (of course).    
 > There's an inbuilt image (jpg) and and icon (jpg), both in base64 format (~3Mb), one of the AIs can help you replace them with others if you want.
 
 ### License Summary
 
-This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.    
 
-**Summary of Key Features:**
+For a human-readable summary of the AGPL-3.0 license,
+see [choosealicense.com/licenses/agpl-3.0](https://choosealicense.com/licenses/agpl-3.0/).
+
+**Summary of Key Features:**    
 ✅ **Freedom to use** - You can use this software for any purpose, commercial or personal  
 ✅ **Freedom to study and modify** - Full access to source code; you can adapt it to your needs  
 ✅ **Freedom to distribute** - You can share copies of the original or modified versions  
