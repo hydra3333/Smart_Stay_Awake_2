@@ -1,23 +1,25 @@
-﻿{
+{
   "profiles": {
     "Smart_Stay_Awake_2": {
       "commandName": "Project",
 
-      //"commandLineArgs": "--help"
-      //
-      // "commandLineArgs": "--verbose --for 367d"
-      // "commandLineArgs": "--verbose --until \"2030-1-2 3:4:5\""
-      // "commandLineArgs": "--verbose --for 367d --until \"2030-1-2 3:4:5\""
-      // "commandLineArgs": "--icon \"C:\\Users\\u\\Desktop\\Smart_Stay_Awake_2_icon.png\""
-      //
-      // "commandLineArgs": "--verbose --for 3m",
-      "commandLineArgs": "--verbose --for 15m"
-      // "commandLineArgs": "--verbose --until \"2025-10-03 0:0:1\""
-      // "commandLineArgs": "--verbose --for 90m --until \"2025-10-03 0:0:2\""
-      //
-      // "commandLineArgs": "--icon \"Smart_Stay_Awake_2_icon.png\""
+      // Indefinite mode with verbose
+      // "commandLineArgs": "--verbose",
 
-      // "commandLineArgs": "--verbose --for 10s"
+      // for 15 secs
+      // "commandLineArgs": "--verbose --for 15s"
+
+      // Timed with specific duration
+      // "commandLineArgs": "--verbose --for 2h30m",
+
+      // Until timestamp
+      "commandLineArgs": "--verbose --until \"2025-10-04 14:30:00\"",
+
+      // Custom icon
+      // "commandLineArgs": "--verbose --icon \"C:\\path\\to\\icon.png\"",
+
+      // Help test
+      //"commandLineArgs": "--help"
     }
   }
 }
