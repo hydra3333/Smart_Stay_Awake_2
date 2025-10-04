@@ -1,7 +1,12 @@
 ﻿<h1 align="center">
   <img src="./Smart_Stay_Awake_2_icon.png" width="256" alt="Smart Stay Awake icon">
   <br>Smart_Stay_Awake_2
-  <br>** UNDER DEVELOPMENT **
+  <br>![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-lightgrey)
+![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)
+![License](https://img.shields.io/badge/license-AGPL--3.0-green)
+![Language](https://img.shields.io/badge/language-C%23-239120)
+![Status](https://img.shields.io/badge/status-Under%20Development-orange)
+![Status](https://img.shields.io/badge/status-Initial%20Release-green)
 </h1>
 
 A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Built with C# in Visual Studio Community.
@@ -274,6 +279,12 @@ python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
 * **No tray icon?** Show hidden icons or allow all icons in the taskbar.
 * **Sleeps anyway?** Another power manager may override; check your power plan or OEM tools.
 * **Auto-quit didn’t trigger exactly on the second?** A tiny (±1s) drift can occur due to timer jitter; the app uses a monotonic deadline to stay accurate overall.
+
+---
+
+## Tech stuff
+
+
 
 ---
 
