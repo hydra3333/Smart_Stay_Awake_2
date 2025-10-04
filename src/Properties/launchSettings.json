@@ -4,19 +4,25 @@
       "commandName": "Project",
 
       // Indefinite mode with verbose
-      // "commandLineArgs": "--verbose",
+      // "commandLineArgs": "--verbose"
 
       // for 15 secs
       // "commandLineArgs": "--verbose --for 15s"
 
+      // for 1m 5 secs
+      //"commandLineArgs": "--verbose --for 1m5s",
+
+      // for 1m 15 secs
+      // "commandLineArgs": "--verbose --for 1m15s"
+
       // Timed with specific duration
-      // "commandLineArgs": "--verbose --for 2h30m",
+      // "commandLineArgs": "--verbose --for 2h30m"
 
       // Until timestamp
-      "commandLineArgs": "--verbose --until \"2025-10-04 14:30:00\"",
+      "commandLineArgs": "--verbose --until \"2025-10-04 14:30:00\""
 
       // Custom icon
-      // "commandLineArgs": "--verbose --icon \"C:\\path\\to\\icon.png\"",
+      // "commandLineArgs": "--verbose --icon \"C:\\path\\to\\icon.png\""
 
       // Help test
       //"commandLineArgs": "--help"

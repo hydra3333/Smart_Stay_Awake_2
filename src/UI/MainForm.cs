@@ -181,11 +181,16 @@ namespace Smart_Stay_Awake_2.UI
                 if (_state.Mode == PlannedMode.ForDuration && _state.PlannedTotal.HasValue)
                 {
                     // --for: Calculate target from duration
-                    double nowCeil = Math.Ceiling(Time.TimezoneHelpers.GetCurrentEpochSeconds());
+                    // double nowCeil = Math.Ceiling(Time.TimezoneHelpers.GetCurrentEpochSeconds());
+                    // double durationSeconds = _state.PlannedTotal.Value.TotalSeconds;
+                    // targetEpoch = nowCeil + durationSeconds;
+                    // Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: --for mode: nowCeil=" + nowCeil.ToString("F1") + ", duration=" + durationSeconds.ToString("F1") + "s, targetEpoch=" + targetEpoch.ToString("F1"));
+                    // CORRECTED CODE:
+                    double now2 = Time.TimezoneHelpers.GetCurrentEpochSeconds();
                     double durationSeconds = _state.PlannedTotal.Value.TotalSeconds;
-                    targetEpoch = nowCeil + durationSeconds;
+                    targetEpoch = now2 + durationSeconds;
                     hasValidTarget = true;
-                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: --for mode: nowCeil=" + nowCeil.ToString("F1") + ", duration=" + durationSeconds.ToString("F1") + "s, targetEpoch=" + targetEpoch.ToString("F1"));
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: --for mode: now=" + now2.ToString("F1") + ", duration=" + durationSeconds.ToString("F1") + "s, targetEpoch=" + targetEpoch.ToString("F1"));
                 }
                 else if (_state.Mode == PlannedMode.UntilTimestamp && _state.Options.UntilTargetEpoch.HasValue)
                 {
@@ -203,10 +208,13 @@ namespace Smart_Stay_Awake_2.UI
                 if (hasValidTarget)
                 {
                     // Re-calculate seconds from NOW to target (accounts for startup overhead - Stage 2)
-                    double nowCeil2 = Math.Ceiling(Time.TimezoneHelpers.GetCurrentEpochSeconds());
-                    int finalSeconds = (int)Math.Ceiling(targetEpoch - nowCeil2);
-
-                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Two-stage ceiling Stage 2: nowCeil=" + nowCeil2.ToString("F1") + ", finalSeconds=" + finalSeconds + "s");
+                    // double nowCeil2 = Math.Ceiling(Time.TimezoneHelpers.GetCurrentEpochSeconds());
+                    // int finalSeconds = (int)Math.Ceiling(targetEpoch - nowCeil2);
+                    // Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Two-stage ceiling Stage 2: nowCeil=" + nowCeil2.ToString("F1") + ", finalSeconds=" + finalSeconds + "s");
+                    // CORRECTED CODE:
+                    double now2 = Time.TimezoneHelpers.GetCurrentEpochSeconds();
+                    int finalSeconds = (int)Math.Ceiling(targetEpoch - now2);
+                    Trace.WriteLine("Smart_Stay_Awake_2: UI.MainForm: OnShown: Two-stage ceiling Stage 2: now=" + now2.ToString("F1") + ", finalSeconds=" + finalSeconds + "s");
 
                     if (finalSeconds <= 0)
                     {
