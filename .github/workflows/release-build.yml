@@ -76,12 +76,16 @@ jobs:
       # ----------------------------------------------------------------------
       # 2) Enable long paths (defensive; harmless) + show PS version
       # ----------------------------------------------------------------------
+      # Use --global for long-paths config (avoid privilege issues)
+      # Step 2 originally used git config --system core.longpaths true with $ErrorActionPreference='Stop'.
+      #   On GitHub’s hosted runners, --system can fail due to permissions and would hard-fail the job.
+      #   Using --global instead is safer and achieves the same effect for this workspace.
       - name: ⚙️ Configure Git for long paths & show PowerShell version
         shell: pwsh
         working-directory: .
         run: |
           $ErrorActionPreference = 'Stop'
-          git config --system core.longpaths true
+          git config --global core.longpaths true
           Write-Host "PowerShell version:" -ForegroundColor Yellow
           $PSVersionTable.PSVersion
 
