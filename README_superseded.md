@@ -123,7 +123,7 @@ python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
   - Quit
   
 <h3 align="left">
-  <img src="./Smart_Stay_Awake_2_main_window.jpg" alt="Smart Stay Awake main window">
+  <img src="./Smart_Stay_Awake_2_main_window.jpg" width="512" alt="Smart Stay Awake main window">
 </h3>
 
 ---
