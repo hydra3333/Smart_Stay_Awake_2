@@ -45,11 +45,8 @@ A lightweight Windows tray utility that keeps your computer **awake** (blocks sl
 while still allowing the **display monitor to sleep**. 
 
 Event-driven architecture means zero CPU polling - the app simply waits for OS timer events to fire,
-consuming virtually no resources.
-
-Event-driven architecture means zero CPU polling - the app simply waits for OS timer events to fire,
-consuming virtually no resources. Countdown updates execute in sub-millisecond time (<1ms),
-delivering responsive UI feedback without performance cost.
+consuming virtually no resources. Adaptive countdown UI updates execute in sub-millisecond time (<1ms),
+delivering responsive feedback without performance cost.
 
 ---
 
