@@ -258,10 +258,15 @@ To balance **visual responsiveness** with **CPU efficiency**, the countdown time
 
 | Time Remaining | Update Frequency | Reason |
 |----------------|------------------|--------|
-| **> 2 hours** | Every **5 minutes** | Far from deadline; high precision not needed |
-| **30 min to 2 hours** | Every **1 minute** | Approaching deadline; moderate precision |
-| **1 min to 30 min** | Every **10 seconds** | Close to deadline; higher precision needed |
-| **< 1 minute** | Every **1 second** | Very close; maximum precision for accuracy |
+| **> 60 minutes** | Every **10 minutes** | Far from deadline; high precision not needed |
+| **30 to 60 minutes** | Every **5 minutes** | Distant deadline; minimal updates conserve resources |
+| **15 to 30 minutes** | Every **1 minute** | Approaching deadline; moderate precision |
+| **10 to 15 minutes** | Every **30 seconds** | Getting closer; increased update rate |
+| **5 to 10 minutes** | Every **15 seconds** | Close to deadline; higher precision needed |
+| **2 to 5 minutes** | Every **10 seconds** | Very close; frequent updates for accuracy |
+| **1 to 2 minutes** | Every **5 seconds** | Almost there; high-frequency updates |
+| **30 seconds to 1 minute** | Every **2 seconds** | Final approach; near real-time updates |
+| **≤ 30 seconds** | Every **1 second** | Final countdown; maximum precision |
 
 **Additional optimizations:**
 
@@ -273,27 +278,32 @@ To balance **visual responsiveness** with **CPU efficiency**, the countdown time
 
 Consider a scenario where you run `Smart_Stay_Awake_2.exe --for 8h`:
 
-- **First 6 hours:** The display updates every 5 minutes (only 72 updates)
-- **Hours 6-7.5:** Updates every 1 minute (90 updates)
-- **Minutes 90-98:** Updates every 10 seconds (48 updates)
-- **Last minute:** Updates every 1 second (60 updates)
+- **First 7 hours (420 min):** Updates every 10 minutes = 42 updates
+- **Hour 7-7.5 (30 min):** Updates every 5 minutes = 6 updates
+- **Minutes 450-465 (15 min):** Updates every 1 minute = 15 updates
+- **Minutes 465-470 (5 min):** Updates every 30 seconds = 10 updates
+- **Minutes 470-475 (5 min):** Updates every 15 seconds = 20 updates
+- **Minutes 475-478 (3 min):** Updates every 10 seconds = 18 updates
+- **Minutes 478-479 (1 min):** Updates every 5 seconds = 12 updates
+- **Seconds 479:00-479:30 (30 sec):** Updates every 2 seconds = 15 updates
+- **Final 30 seconds:** Updates every 1 second = 30 updates
 
-**Total updates:** ~270 updates over 8 hours instead of 28,800 updates (if updated every second the whole time)
+**Total updates:** ~168 updates over 8 hours instead of 28,800 updates (if updated every second the whole time)
 
-This reduces CPU wake-ups by **98.5%** while still providing a responsive countdown display when it matters most.
+This reduces CPU wake-ups by **99.4%** while still providing a responsive countdown display when it matters most.
 
 #### What the user sees
 
 In the main window, you'll see a line like:
 
 ```
-Update cadence: Every 5 minutes
+Update cadence: Every 10 minutes
 ```
 
-This tells you how frequently the countdown is being refreshed right now. As the deadline approaches, you'll see this change to:
-- "Every 1 minute"
-- "Every 10 seconds"  
-- "Every 1 second"
+This tells you how frequently the countdown is being refreshed right now. As the deadline approaches, you'll see this dynamically change to progressively faster update rates:
+- "Every 10 minutes" → "Every 5 minutes" → "Every 1 minute" → "Every 30 seconds" → "Every 15 seconds" → "Every 10 seconds" → "Every 5 seconds" → "Every 2 seconds" → "Every 1 second"
+
+The transition is smooth and automatic, giving you precise feedback when you need it most without wasting CPU cycles when time is plentiful.
 
 ---
 

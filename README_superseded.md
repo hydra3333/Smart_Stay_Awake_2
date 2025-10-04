@@ -62,10 +62,12 @@ A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hib
     Daylight Saving Time and local windows timezone are honored.
     Bounds: at least MIN_AUTO_QUIT_SECS in the future, at most MAX_AUTO_QUIT_SECS from now.
     Mutually exclusive with --for.
+
+--help
+    Display this help and stays awake according to the other commandlne parameters
 ```
 
 > **Notes**
->
 > * `--for` and `--until` are **mutually exclusive**; provide only **one or the other**.
 > * A small (±1s) variation near the very end can occur due to Windows timer jitter - this is normal.
 
@@ -77,7 +79,6 @@ A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hib
 .\Smart_Stay_Awake.exe --for 2h
 .\Smart_Stay_Awake.exe --for 45m
 .\Smart_Stay_Awake.exe --for 3d4h5s
-.\Smart_Stay_Awake.exe --icon ".\Smart_Stay_Awake_icon.png" --for 90m
 ```
 
 **Run until a local date/time**
@@ -88,7 +89,7 @@ A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hib
 
 **Interesting one-liner using powershell (better doable via `--for`)**
 
-* NOTE: .BAT (needs to double the % signs in `for`)
+> NOTE: a .BAT (needs to double the % signs in `for`)
 
 ```bat
 @echo off
@@ -100,6 +101,48 @@ for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "(Get-Date).Ad
 )
 python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
 ```
+
+---
+
+## User Interface
+- **Main window features:**
+  - Eye of Horus image display
+  - Real-time countdown display (for timed auto-quit modes)
+  - Auto-quit timestamp (local time)  (for timed auto-quit modes)
+  - Time remaining (formatted as days, hours, minutes, seconds)  (for timed auto-quit modes)
+  - Live `Time remaining update frequency` (for timed auto-quit modes)
+  - Minimize to system tray button
+  - Quit button
+- **Window behavior:**
+  - Minimize (titlebar `-` button) -> hides to system tray
+  - Close (titlebar `X` button) -> exits application completely
+  - Minimize to System Tray button -> hides to system tray
+- **System tray icon** (when minimised to the windows system tray) using right-click on the icon:
+  - Show Window
+  - Help
+  - Quit
+
+---
+
+## Smart Auto-quit Timer
+- **Adaptive time remaining update frequency** that balances accuracy with CPU resource usage:
+- **Smooth time boundary snapping** for a polished user experience
+- **Monotonic deadline tracking** to prevent timer drift
+
+| Time remaining update frequency | Update Frequency | Reason |
+|----------------|------------------|--------|
+| **> 60 minutes** | Every **10 minutes** | Far from deadline; high precision not needed |
+| **30 to 60 minutes** | Every **5 minutes** | Distant deadline; minimal updates conserve resources |
+| **15 to 30 minutes** | Every **1 minute** | Approaching deadline; moderate precision |
+| **10 to 15 minutes** | Every **30 seconds** | Getting closer; increased update rate |
+| **5 to 10 minutes** | Every **15 seconds** | Close to deadline; higher precision needed |
+| **2 to 5 minutes** | Every **10 seconds** | Very close; frequent updates for accuracy |
+| **1 to 2 minutes** | Every **5 seconds** | Almost there; high-frequency updates |
+| **30 seconds to 1 minute** | Every **2 seconds** | Final approach; near real-time updates |
+| **≤ 30 seconds** | Every **1 second** | Final countdown; maximum precision |
+
+
+
 
 ---
 
