@@ -11,7 +11,6 @@
 
 <!--
 ![Status](https://img.shields.io/badge/status-stable-green)
-
 ![Status](https://img.shields.io/badge/status-Initial%20Release-green)
 
 Common Statuses
@@ -43,8 +42,24 @@ Replace <LABEL>, <MESSAGE>, and <COLOR> with whatever text and named color you l
 -->
 
 A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while
-still allowing the **display monitor to sleep**. 
-Built with C# and /NET 8+ in Visual Studio Community.
+still allowing the **display monitor to sleep**.    
+
+Here are a few options you could use:
+
+**Option 1 (Technical but accessible):**
+A lightweight Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Uses event-driven timers instead of polling loops—consuming virtually no resources while idle.
+
+**Option 2 (More intellectual):**
+A lightweight Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Leverages OS-level event notifications rather than busy-wait loops, ensuring negligible CPU and memory footprint during operation.
+
+**Option 3 (Balanced):**
+A lightweight Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Event-driven architecture with adaptive timers ensures near-zero resource consumption while waiting—no polling, no waste.
+
+**Option 4 (Concise and punchy):**
+A lightweight Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Event-driven design with zero-overhead idle behavior—waits efficiently without consuming CPU cycles.
+
+**Option 5 (My favorite - technical but clear):**
+A lightweight Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Event-driven architecture means zero CPU polling—the app simply waits for OS timer events, consuming virtually no resources during idle periods.
 
 ---
 
@@ -206,7 +221,7 @@ Smart_Stay_Awake_2.exe --until "2025-1-2 3:2:1"        # Relaxed format
 
 ## Smart Auto-quit timer and Time remaining update frequency
 - **Countdown to Auto-quit** shows ETA for Auto-quit and a time remaining countdown
-- **Adaptive time remaining update frequency** that balances accuracy with CPU resource usage:
+- **Adaptive time remaining update frequency** that balances accuracy with CPU resource usage
 - **Smooth time boundary snapping** for a cleaner easier-to-read display
 - **Monotonic deadline tracking** to prevent timer drift
 
