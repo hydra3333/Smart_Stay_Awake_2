@@ -19,7 +19,10 @@
       // "commandLineArgs": "--verbose --for 2h30m"
 
       // Until timestamp
-      "commandLineArgs": "--verbose --until \"2025-10-04 14:30:00\""
+      // "commandLineArgs": "--verbose --until \"2025-10-04 14:30:00\"",
+
+      // Until timestamp no verbose
+      "commandLineArgs": "--until \"2025-10-04 14:30:00\""
 
       // Custom icon
       // "commandLineArgs": "--verbose --icon \"C:\\path\\to\\icon.png\""

@@ -41,7 +41,7 @@ namespace Smart_Stay_Awake_2
 
         // ---- Tracing defaults -------------------------------------------------
         // Developer-only hard override (forces tracing even without --verbose).
-        public const bool FORCED_TRACE_DEFAULT = true;
+        public const bool FORCED_TRACE_DEFAULT = false;
 
         // Where/how trace logs are written when tracing is ON.
         public const string LOG_FILE_BASENAME_PREFIX = "Smart_Stay_Awake_2_Trace_";

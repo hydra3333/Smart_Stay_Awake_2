@@ -113,7 +113,7 @@ namespace Smart_Stay_Awake_2
                         Trace.WriteLine("[Init] Log file: " + logFullPath);
 #if DEBUG
                         // Uncomment this line to open the log folder in Explorer automatically on startup (debug convenience).
-                        //try { System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + logFullPath + "\""); } catch { }
+                        try { System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + logFullPath + "\""); } catch { }
 #endif
 
                     }
