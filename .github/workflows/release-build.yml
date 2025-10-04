@@ -148,15 +148,15 @@ jobs:
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
           $ProgressPreference = 'SilentlyContinue'
-
           Write-Host "Publishing Smart_Stay_Awake_2 as SINGLE FILE (self-contained, win-x64)..." -ForegroundColor Yellow
-
           # Force specific output directory
           $publishPath = ".\publish-output"
-          
           # The -c Release flag sometimes gets overridden by project files, 
           # but -p:Configuration=Release is a direct MSBuild property that takes precedence.
-          dotnet publish ..\Smart_Stay_Awake_2.sln `
+          # Changed to pubish the Projecvt rather than the solution to avoid '-o' errors
+          # For your current goal (1 single project, deterministic single EXE + known companions),
+          #   'project' publish is the least surprising and keeps Step 8 simple.
+          dotnet publish .\Smart_Stay_Awake_2.csproj `
             -c Release `
             -r win-x64 `
             --self-contained true `
@@ -173,7 +173,6 @@ jobs:
             --no-restore `
             -o $publishPath `
             -v minimal
-
           # >>> Make $publishPath available to later steps
           "PUBLISH_ROOT=$publishPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
@@ -195,9 +194,6 @@ jobs:
             $publishRoot = ".\publish-output"
           }
 
-          $expectedProjectDir = Join-Path $publishRoot "Smart_Stay_Awake_2"
-          $expectedExe        = Join-Path $expectedProjectDir "Smart_Stay_Awake_2.exe"
-
           function Show-PublishTree {
             param([string]$root)
             if (-not (Test-Path $root)) {
@@ -212,10 +208,10 @@ jobs:
             }
           }
 
+          $expectedExe = Join-Path $publishRoot "Smart_Stay_Awake_2.exe"
           if (Test-Path $expectedExe) {
-            # Happy path: solution publish created <publishRoot>\Smart_Stay_Awake_2\Smart_Stay_Awake_2.exe
-            $BUILD_DIR = (Resolve-Path $expectedProjectDir).Path
-            $TFM_NAME  = ("explicit-output (solution -o -> {0})" -f $publishRoot)
+            $BUILD_DIR = (Resolve-Path $publishRoot).Path
+            $TFM_NAME  = ("explicit-output (project -o -> {0})" -f $publishRoot)
             "BUILD_DIR=$BUILD_DIR" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
             "TFM_NAME=$TFM_NAME"   | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
             Write-Host "✅ Found expected publish dir:" -ForegroundColor Green
@@ -334,7 +330,7 @@ jobs:
           }
 
           # Guard: no stray .pdb or .xml in staging
-          $strays = Get-ChildItem $staging -File | Where-Object { $_.Extension -in @(".pdb",".xml") }
+          $strays = @( Get-ChildItem $staging -File | Where-Object { $_.Extension -in @(".pdb",".xml") } )
           if ($strays.Count -gt 0) {
             Write-Host "Unexpected debug/docs files found in staging:" -ForegroundColor Red
             $strays | ForEach-Object { Write-Host " - $($_.Name)" -ForegroundColor Red }
