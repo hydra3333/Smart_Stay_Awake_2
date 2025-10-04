@@ -1,14 +1,13 @@
 ﻿<h1 align="center">
   <img src="./Smart_Stay_Awake_2_icon.png" width="256" alt="Smart Stay Awake icon">
   <br>Smart_Stay_Awake_2
-</h1>
 
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-lightgrey)
-![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)
 ![License](https://img.shields.io/badge/license-AGPL--3.0-green)
 ![Language](https://img.shields.io/badge/language-C%23-239120)
+![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)
 ![Status](https://img.shields.io/badge/status-Under%20Development-orange)
-
+</h1>
 
 <!--
 ![Status](https://img.shields.io/badge/status-stable-green)
