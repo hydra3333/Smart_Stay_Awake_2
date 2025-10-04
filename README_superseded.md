@@ -94,7 +94,7 @@ Smart_Stay_Awake_2.exe --for 3d4h30m15s
 Smart_Stay_Awake_2.exe --until "2025-10-04 23:59:59"
 ```
 
-### Command-line Options in mroe detail
+### Parameter formats explained
 
 #### `--for <duration>`
 
@@ -138,7 +138,9 @@ Smart_Stay_Awake_2.exe --until "2025-1-2 3:2:1"        # Relaxed format
 
 **`--for` and `--until` are mutually exclusive.** Provide only one or the other, not both.
 
-### **Interesting one-liner using powershell (better doable via `--for`)**
+---
+
+## **Interesting example one-liner using .bat and powershell (doable via `--for`)**
 
 > NOTE: a .BAT (needs to double the % signs in `for`)
 
