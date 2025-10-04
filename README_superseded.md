@@ -314,6 +314,14 @@ Visual Studio will automatically restore packages on first build. Packages inclu
 > The `solution` targets only x64 (of course).    
 > There's an inbuilt image (jpg) and and icon (jpg), both in base64 format (~3Mb), one of the AIs can help you replace them with others if you want.
 
+
+### Additional Resources
+
+- [Windows Power Management API Documentation](https://docs.microsoft.com/en-us/windows/win32/power/power-management-portal)
+- [CsWin32 GitHub Repository](https://github.com/microsoft/CsWin32)
+- [.NET 8 Documentation](https://docs.microsoft.com/en-us/dotnet/core/whats-new/dotnet-8)
+- [Windows Forms Documentation](https://docs.microsoft.com/en-us/dotnet/desktop/winforms/)
+
 ### License Summary
 
 This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.    
@@ -406,7 +414,26 @@ If you see this, a power request is active and working correctly.
 
 ## Tech stuff
 
+### Key Technologies
 
+- **.NET 8** (Windows Desktop Framework)
+- **Windows Forms** (UI framework)
+- **Visual Studio** (to build the application)
+- **CsWin32** (source-generated P/Invoke bindings)
+  - Generates type-safe Windows API calls from metadata
+  - No manual P/Invoke declarations needed
+- **Windows Power Request API**
+  - `PowerCreateRequest()`
+  - `PowerSetRequest()`
+  - `PowerClearRequest()`
+  - `CloseHandle()`
+
+### Design Patterns
+
+- **Singleton pattern** for `PowerRequestManager` (ensures only one active power request)
+- **Dispose pattern** for proper cleanup of native resources (power request handles)
+- **MVC-style separation** between UI (`MainForm`), state (`AppState`), and business logic (`PowerRequestManager`)
+- **Immutable configuration** via `AppState` to prevent accidental state corruption
 
 ---
 
