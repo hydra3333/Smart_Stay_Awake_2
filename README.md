@@ -55,6 +55,7 @@ delivering responsive feedback without performance cost.
 
 - While Smart\_Stay\_Awake\_2 runs, it requests the OS to **not sleep/hibernate**. Your **display monitor can still sleep** normally if your power plan allows it.
 - When you **quit** (or when an **auto-quit** timer fires), the app **releases** the request and your PC can sleep again.
+- If the app process is terminated, the OS automatically detects it and releases requests for that process and your PC can sleep again.
 - A small **windows system-tray icon** provides **Show Window** and **Quit**.
 
 ---
