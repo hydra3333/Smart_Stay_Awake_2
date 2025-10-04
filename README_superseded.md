@@ -6,11 +6,15 @@
 
 A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hibernation) while still allowing the **display monitor to sleep**. Built with C# in Visual Studio Community.
 
+---
+
 ## What it does
 
 - While Smart\_Stay\_Awake runs, it requests the OS to **not sleep/hibernate**. Your **display monitor can still sleep** normally if your power plan allows it.
 - When you **quit** (or when an **auto-quit** timer fires), the app **releases** the request and your PC can sleep again.
 - A small **windows system-tray icon** provides **Show Window** and **Quit**.
+
+---
 
 ## Key Features
 
@@ -129,7 +133,7 @@ python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
 ---
 
 ## Smart Auto-quit Timer and Time remaining update frequency
-- **Coundown** to Auto-quit, shows ETA for Auto-quit and time remaining countdown
+- **Coundown** to Auto-quit, shows ETA for Auto-quit and a time remaining countdown
 - **Adaptive time remaining update frequency** that balances accuracy with CPU resource usage:
 - **Smooth time boundary snapping** for a cleaner easier-to-read display
 - **Monotonic deadline tracking** to prevent timer drift
@@ -146,6 +150,7 @@ python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
 | **30 seconds to 1 minute** | Every **2 seconds** | Final approach; near real-time updates |
 | **<= 30 seconds** | Every **1 second** | Final countdown |
 
+---
 
 ## Visibility in Power Management queries
 When Smart Stay Awake 2 is running, the Windows (Admin) command `powercfg /requests` shows, for example:
@@ -155,7 +160,7 @@ SYSTEM:
 Smart Stay Awake 2: Preventing automatic sleep & hibernation (display monitor may sleep) as requested (auto-quit at 2025-10-04 15:30:00).
 ```
 
-This ensures IT administrators and Admin/Power users can see exactly what's preventing system hibernation and sleep and when it will release.
+This ensures that IT administrators and Admin/Power users can see exactly what's preventing system hibernation and sleep and when it will release.
 
 
 
@@ -165,58 +170,25 @@ This ensures IT administrators and Admin/Power users can see exactly what's prev
 
 
 
----
 
-## Download & Run (Windows)
 
-Each Release includes **three** ZIPs:
 
-### 1) Onefile ZIP — single EXE (+ optional icon files)
 
-* **What’s inside:** `Smart_Stay_Awake.exe` (and possibly `Smart_Stay_Awake_icon.*`).
-* **Extract (Explorer):** Right-click ZIP -> **Extract All…** -> open the folder.
-* **Extract (PowerShell):**
-```powershell
-Expand-Archive -Path .\Smart_Stay_Awake_<ver>_windows_onefile.zip -DestinationPath .\Smart_Stay_Awake_onefile -Force
-```
-* **Run:** double-click `Smart_Stay_Awake.exe`.
-  Optionally place `Smart_Stay_Awake_icon.*` alongside it to control the window/tray image.
 
-> Tip: Don’t run from inside the ZIP viewer. Always extract first.
 
-### 2) Onedir ZIP — full app folder (EXE + optional icon files + python runtime files in a subfolder)
 
-* **What’s inside:** Smart_Stay_Awake.exe` (and possibly `Smart_Stay_Awake_icon.*`) at the ZIP root, python runtime files in a subfolder.
-* **Important:** **extract everything** and keep the folder structure intact.
-* **Extract (Explorer):** Right-click ZIP -> **Extract All…**
-* **Extract (PowerShell):**
-```powershell
-Expand-Archive -Path .\Smart_Stay_Awake_<ver>_windows_onedir.zip -DestinationPath .\Smart_Stay_Awake_onedir -Force
-```
-* **Run:** in the extracted folder, double-click `Smart_Stay_Awake.exe`.
 
-> Tip: Don’t run from inside the ZIP viewer. Always extract first.
 
-### 3) Source ZIP — run from Python (if Python 3.13+ and pip dependencies are installed)
 
-* **What’s inside:** `Smart_Stay_Awake.py` (and optionally `Smart_Stay_Awake_icon.png`).
-* **Install dependencies (after python 3.13+ installed):**
-```cmd
-pip install wakepy --no-cache-dir --upgrade --check-build-dependencies --upgrade-strategy eager --verbose
-pip install pystray --no-cache-dir --upgrade --check-build-dependencies --upgrade-strategy eager --verbose
-pip install Pillow  --no-cache-dir --upgrade --check-build-dependencies --upgrade-strategy eager --verbose
-```
-* **Run with console (to see debug info printed to the console):**
-```cmd
-python .\Smart_Stay_Awake.py
-```
 
-* **Run with no console:**
-```cmd
-pythonw .\Smart_Stay_Awake.py
-```
 
-* NOTE: CLI options (`--for`, `--until`, `--icon`) work the same as with the EXE.
+
+
+
+
+
+
+
 
 ---
 
@@ -227,33 +199,6 @@ pythonw .\Smart_Stay_Awake.py
 * **Minimize didn’t hide to windows system-tray?** Ensure you’re on the latest release; both **“\_”** and **Minimize to System Tray** hide to the windows system-tray.
 * **ETA alignment & countdown:** the ETA shown in the window is computed from the exact target epoch (from `--until` or internally from `--for`). The countdown updates at low cadence far out (minutes), then faster as it nears the end, throttling further when the window is hidden to minimise CPU.
 * **Exit codes:** normal exit returns 0; argument validation errors use a non-zero exit.
-
----
-
-## Release Automation (GitHub Actions)
-
-* On **Release -> Published**, the workflow builds **onefile** and **onedir**, zips them, lists ZIP contents, and attaches them to the release.
-* ZIP names are derived from the **release tag** (sanitized).
-* Any `Smart_Stay_Awake_icon.*` at the repo root are copied into both deliverables and the workflow prints exactly which icon files were included.
-* The workflow also pre-builds a multi-size `Smart_Stay_Awake_icon.ico` for PyInstaller.
-
----
-
-## Security / SmartScreen
-
-Unsigned, freshly built executables can be flagged by Windows SmartScreen/Defender. If blocked:
-
-* Review the python code yourself, then the github workflow build code, to ensure it is safe
-* Click **More info -> Run anyway**, or
-* Add an exclusion in Defender, or
-* Submit a **false-positive** report to Microsoft or your antivirus provider.
-
-> `onedir` is known to cause less false positives in lesser-known antivirus products than `onefile`
-
----
-
-## Troubleshooting
-
 * **No tray icon?** Show hidden icons or allow all icons in the taskbar.
 * **Sleeps anyway?** Another power manager may override; check your power plan or OEM tools.
 * **Auto-quit didn’t trigger exactly on the second?** A tiny (±1s) drift can occur due to timer jitter; the app uses a monotonic deadline to stay accurate overall.
@@ -267,47 +212,4 @@ Unsigned, freshly built executables can be flagged by Windows SmartScreen/Defend
 </p>
 
 ---
-
-## Appendix: Build Locally (PyInstaller)
-
-> These steps are only needed if you want to produce your own EXEs. Most users can just download the Release ZIPs.
-
-### Onefile
-
-```cmd
-rmdir /s /q .\dist  2>$null
-rmdir /s /q .\build 2>$null
-del /q .\Smart_Stay_Awake.spec 2>$null
-
-# Optional: pass a multi-size .ico if you have one
-pyinstaller --clean --onefile --windowed --noconsole --name "Smart_Stay_Awake" Smart_Stay_Awake.py --icon "Smart_Stay_Awake_icon.ico"
-
-# Place optional image/icon next to the EXE (inside the app folder):
-copy /y Smart_Stay_Awake_icon.* ".\dist\"
-
-# Zip onefile contents (rooted, no top folder)
-powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -Sta -NonInteractive  -Command "Compress-Archive -Path '.\dist\*' -DestinationPath '.\Smart_Stay_Awake_onefile.zip' -Force -CompressionLevel Optimal" 
-
-```
-
-### Onedir
-
-```cmd
-rmdir /s /q .\dist  2>$null
-rmdir /s /q .\build 2>$null
-del /q .\Smart_Stay_Awake.spec 2>$null
-
-# Optional: pass a multi-size .ico if you have one
-pyinstaller --clean --onedir --windowed --noconsole --name "Smart_Stay_Awake" Smart_Stay_Awake.py --icon "Smart_Stay_Awake_icon.ico"
-
-# Place optional image/icon next to the EXE (inside the app folder):
-copy /y Smart_Stay_Awake_icon.* ".\dist\Smart_Stay_Awake\"
-
-# Zip onedir contents (rooted, no top folder)
-powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -Sta -NonInteractive -Command "Compress-Archive -Path '.\dist\Smart_Stay_Awake\*' -DestinationPath '.\Smart_Stay_Awake_onedir.zip' -Force -CompressionLevel Optimal"
-```
-
-> The official CI workflow under `.github/workflows/` automates all of this on creating a new Release.
-
-
 
