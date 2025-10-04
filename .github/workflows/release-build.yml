@@ -142,6 +142,7 @@ jobs:
       #    Globalization is kept. ReadyToRun disabled to reduce native clutter.
       #    IncludeNativeLibrariesForSelfExtract=false: avoid temp extraction;
       #    accept a handful of native DLLs next to the EXE if they appear.
+      #    We also emit MSBuild logs for forensic verification.
       # ----------------------------------------------------------------------
       - name: 🔨 Publish single-file EXE (Self-Contained, Release, x64)
         run: |
@@ -149,8 +150,10 @@ jobs:
           Set-StrictMode -Version Latest
           $ProgressPreference = 'SilentlyContinue'
           Write-Host "Publishing Smart_Stay_Awake_2 as SINGLE FILE (self-contained, win-x64)..." -ForegroundColor Yellow
+
           # Force specific output directory
           $publishPath = ".\publish-output"
+
           # The -c Release flag sometimes gets overridden by project files, 
           # but -p:Configuration=Release is a direct MSBuild property that takes precedence.
           # Changed to pubish the Projecvt rather than the solution to avoid '-o' errors
@@ -161,6 +164,7 @@ jobs:
             -r win-x64 `
             --self-contained true `
             -p:Configuration=Release `
+            -p:Optimize=true `
             -p:PublishSingleFile=true `
             -p:PublishReadyToRun=false `
             -p:InvariantGlobalization=false `
@@ -171,8 +175,71 @@ jobs:
             -p:GenerateDocumentationFile=false `
             -p:ContinuousIntegrationBuild=true `
             --no-restore `
+            -bl:publish.binlog `
+            -flp:logfile=publish.diag.log;verbosity=diagnostic `
             -o $publishPath `
             -v minimal
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Smart_Stay_Awake_2 Publish FAILED!" -ForegroundColor Red
+            exit 1
+          }
+      
+          Write-Host ""
+          Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Cyan
+          Write-Host "  Smart_Stay_Awake_2 PUBLISH OUTPUT VERIFICATION" -ForegroundColor Cyan
+          Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Cyan
+      
+          # Locate the EXE we expect in publish-output
+          $exePath = Join-Path $publishPath "Smart_Stay_Awake_2.exe"
+          if (-not (Test-Path $exePath)) {
+            Write-Host "❌ Expected EXE not found: $exePath" -ForegroundColor Red
+            Write-Host "Files in Publish output:" -ForegroundColor Yellow
+            Get-ChildItem $publishPath -Recurse -File | ForEach-Object { Write-Host "  - $($_.FullName)" -ForegroundColor Gray }
+            exit 1
+          }
+      
+          # File facts - Get EXE file info
+          $exeFile   = Get-Item $exePath
+          $exeSizeMB = "{0:N2}" -f ($exeFile.Length / 1MB)
+          $versionInfo = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($exePath)
+      
+          # Check for PDB (shouldn't exist in Release with our settings)
+          $pdbPath = [System.IO.Path]::ChangeExtension($exePath, ".pdb")
+          $hasPdb  = Test-Path $pdbPath
+      
+          Write-Host "EXE Location:  $exePath" -ForegroundColor White
+          Write-Host "File Size:     $exeSizeMB MB" -ForegroundColor White
+          Write-Host "Product:       $($versionInfo.ProductName)" -ForegroundColor White
+          Write-Host "Version:       $($versionInfo.ProductVersion)" -ForegroundColor White
+          Write-Host ("Debuggable:    {0}" -f ($(if ($versionInfo.IsDebug) {'YES (DEBUG)'} else {'No (Release)'}))) -ForegroundColor $(if ($versionInfo.IsDebug) {'Red'} else {'Green'})
+          Write-Host ("PDB Present:   {0}" -f ($(if ($hasPdb) {'YES (unexpected)'} else {'No'}))) -ForegroundColor $(if ($hasPdb) {'Yellow'} else {'Green'})
+      
+          # Hard fail if a Debug build detected
+          if ($versionInfo.IsDebug) {
+            Write-Host ""
+            Write-Host "❌ ERROR: EXE $exePath was built with Debug configuration! ... it shows Debuggable=DEBUG. Publish must be Release." -ForegroundColor Red
+            exit 1
+          }
+      
+          # Secondary guard: scan MSBuild diagnostic log for any evaluated Debug config
+          if (Test-Path "publish.diag.log") {
+            $log = Get-Content "publish.diag.log" -Raw
+            if ($log -match "(?im)^\s*Configuration\s*=\s*Debug\s*$") {
+              Write-Host "❌ MSBuild evaluated Configuration=Debug somewhere in the Publish graph." -ForegroundColor Red
+              Write-Host "   See 'publish.diag.log' / 'publish.binlog' artifacts for details." -ForegroundColor Yellow
+              Write-Host "❌ ERROR: EXE $exePath was built with Debug configuration!" -ForegroundColor Red
+              exit 1
+            }
+            Write-Host "MSBuild diagnostic log sanity check: Configuration=Release ✅" -ForegroundColor Green
+          } else {
+            Write-Host "⚠️ publish.diag.log missing (unexpected). Continuing, but please investigate this issue." -ForegroundColor Yellow
+          }
+      
+          Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Cyan
+          Write-Host "✅ Published Smart_Stay_Awake_2 RELEASE build successfully" -ForegroundColor Green
+          Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Cyan
+          Write-Host ""
+      
           # >>> Make $publishPath available to later steps
           "PUBLISH_ROOT=$publishPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
