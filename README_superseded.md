@@ -20,6 +20,15 @@ A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hib
 
 - **Prevents system sleep/hibernation** while running; auto-restores normal behavior on exit.
 - **System tray** icon with a simple menu (Show Window / Quit).
+- **Three operating modes:** keep awake indefinitely, or for a fixed duration using `--for` or `--until`
+  - **Indefinite:** Runs until you manually quit
+  - **For Duration:** Auto-quits the application after a specified time (e.g., 2 hours 90 minutes `2h90m`)
+  - **Until Timestamp:** Auto-quits the application at a specific date/time (e.g., `2025-12-31 23:59:59`)
+- **Display countdown shown:**
+  - **Auto-quit at:** local ETA
+  - **Time remaining:** `Xd HH:MM:SS` (days appear when applicable)
+  - **Time remaining update frequency:** displays current update frequency for the 'Time remaining'
+- **Low-resource-use countdown:** updates window display less often when plenty of time remains; updates faster as it nears zero; and **“snaps”** to neat time boundaries so it feels calm and rounded.
 - **Minimize behavior:** both the title-bar **“\_”** and the **Minimize to System Tray** button minimise the app to the system-tray.
 - **Close (X)** in the main window exits the app completely.
 - **Icon / image priority** (for both the window and tray):
@@ -28,15 +37,30 @@ A tiny Windows tray utility that keeps your computer **awake** (blocks sleep/hib
   3. A file named **`Smart_Stay_Awake_icon.*`** next to the EXE/script (PNG/JPG/JPEG/WEBP/BMP/GIF/ICO)
   4. A small internal fallback glyph (so it never crashes)
 - **Auto-scaling image:** in the window into a square (by edge replication): longest side <= **512 px** .
-- **Three operating modes:** keep awake indefinitely, or for a fixed duration using `--for` or `--until`
-  - **Indefinite:** Runs until you manually quit
-  - **For Duration:** Auto-quits the application after a specified time (e.g., 2 hours 90 minutes `2h90m`)
-  - **Until Timestamp:** Auto-quits the application at a specific date/time (e.g., `2025-12-31 23:59:59`)
-- **Low-resource-use countdown:** updates window display less often when plenty of time remains; updates faster as it nears zero; and **“snaps”** to neat time boundaries so it feels calm and rounded.
-- **Display countdown shown:**
-  - **Auto-quit at:** local ETA
-  - **Time remaining:** `Xd HH:MM:SS` (days appear when applicable)
-  - **Time remaining update frequency:** displays current update frequency for the 'Time remaining'
+
+---
+
+## User Interface
+- **Main window features:**
+  - Eye of Horus image display
+  - Real-time countdown display (for timed auto-quit modes)
+  - Auto-quit timestamp (local time)  (for timed auto-quit modes)
+  - Time remaining (formatted as days, hours, minutes, seconds)  (for timed auto-quit modes)
+  - Live `Time remaining update frequency` (for timed auto-quit modes)
+  - Minimize to system tray button
+  - Quit button
+- **Window behavior:**
+  - Minimize (titlebar `-` button) -> hides to system tray
+  - Close (titlebar `X` button) -> exits application completely
+  - Minimize to System Tray button -> hides to system tray
+- **System tray icon** (when minimised to the windows system tray) using right-click on the icon:
+  - Show Window
+  - Help
+  - Quit
+  
+<h3 align="left">
+  <img src="./Smart_Stay_Awake_2_main_window.jpg" width="512" alt="Smart Stay Awake main window">
+</h3>
 
 ---
 
@@ -140,48 +164,7 @@ Smart_Stay_Awake_2.exe --until "2025-1-2 3:2:1"        # Relaxed format
 
 ---
 
-## **Interesting example one-liner using .bat and powershell (doable via `--for`)**
-
-> NOTE: a .BAT (needs to double the % signs in `for`)
-
-```bat
-@echo off
-@setlocal ENABLEDELAYEDEXPANSION
-@setlocal enableextensions
-set "minutes_from_now=5"
-for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "(Get-Date).AddMinutes(!minutes_from_now!).ToString('yyyy-MM-dd HH:mm:ss')"`) do (
-    set "datetime_ahead=%%T"
-)
-python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
-```
-
----
-
-## User Interface
-- **Main window features:**
-  - Eye of Horus image display
-  - Real-time countdown display (for timed auto-quit modes)
-  - Auto-quit timestamp (local time)  (for timed auto-quit modes)
-  - Time remaining (formatted as days, hours, minutes, seconds)  (for timed auto-quit modes)
-  - Live `Time remaining update frequency` (for timed auto-quit modes)
-  - Minimize to system tray button
-  - Quit button
-- **Window behavior:**
-  - Minimize (titlebar `-` button) -> hides to system tray
-  - Close (titlebar `X` button) -> exits application completely
-  - Minimize to System Tray button -> hides to system tray
-- **System tray icon** (when minimised to the windows system tray) using right-click on the icon:
-  - Show Window
-  - Help
-  - Quit
-  
-<h3 align="left">
-  <img src="./Smart_Stay_Awake_2_main_window.jpg" width="512" alt="Smart Stay Awake main window">
-</h3>
-
----
-
-## Smart Auto-quit Timer and Time remaining update frequency
+## Smart Auto-quit timer and Time remaining update frequency
 - **Coundown** to Auto-quit, shows ETA for Auto-quit and a time remaining countdown
 - **Adaptive time remaining update frequency** that balances accuracy with CPU resource usage:
 - **Smooth time boundary snapping** for a cleaner easier-to-read display
@@ -262,6 +245,22 @@ To check your Windows version:
 
 
 
+---
+
+## **Interesting example one-liner using .bat and powershell (doable via `--for`)**
+
+> NOTE: a .BAT (needs to double the % signs in `for`)
+
+```bat
+@echo off
+@setlocal ENABLEDELAYEDEXPANSION
+@setlocal enableextensions
+set "minutes_from_now=5"
+for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "(Get-Date).AddMinutes(!minutes_from_now!).ToString('yyyy-MM-dd HH:mm:ss')"`) do (
+    set "datetime_ahead=%%T"
+)
+python ".\Smart_Stay_Awake.py" --until "!datetime_ahead!"
+```
 
 ---
 
