@@ -951,7 +951,7 @@ namespace Smart_Stay_Awake_2.UI
                 // Line 5: Third description line (BOLD to match Python, taller height + larger bottom margin)
                 var lblDesc3 = new Label
                 {
-                    Text = "Closing this app re-allows sleep & hibernation.",
+                    Text = "Closing this app re-allows sleep && hibernation.",
                     TextAlign = ContentAlignment.MiddleCenter,
                     AutoSize = false,
                     Width = contentWidth,
