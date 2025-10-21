@@ -1,25 +1,3 @@
-﻿// File: src/Smart_Stay_Awake_2/Config/EmbeddedImage.cs
-// Purpose: Optional embedded base64 PNG/JPG (internal fallback).
-// Notes:
-//   * Leave EYE_IMAGE_BASE64 empty ("") to simulate "no embedded image".
-//   * Paste ONLY the base64 payload (no data: prefix). You may keep line breaks.
-//   * Cleaner keeps only base64 alphabet characters to avoid decode errors.
-
-using System.Text.RegularExpressions;
-
-namespace Smart_Stay_Awake_2
-{
-    internal static class EmbeddedImage
-    {
-        // You can paste a huge base64 blob here (PNG/JPEG). Line breaks are fine.
-        // In the IF test below,
-        //      set to true to signal "no embedded image",
-        //      or false to use the embedded image.
-#if false
-        public static readonly string EYE_IMAGE_BASE64 = CleanBase64(@"");
-#else
-        public static readonly string EYE_IMAGE_BASE64 = CleanBase64(
-@"
 iVBORw0KGgoAAAANSUhEUgAAAgAAAAGtCAYAAABgEsxXAAEAAElEQVR4nJT9V6xuaXrfif1XDl/a+aQ6qXJ1dVd3VzfJJtnsJiWRIyqMNBppMDZGloEZB81g
 DMO+MwwIBnztG9s3vjAwAwqUSI6yRGVSpJpNdrNDdeU6VSennb+4cjB+z9pNyiNhgDkdKpx99l7fWu963+f5p8c5ev9Xet9P1fWN1EuO66ircjmeJ8cJ5DiO
 OvVyXE9938uRI6kbvq515HquJN9+r+s7uZ7s+7RtLcmR67hS16rtSvlerLbJ5DpS73hyul696w7f0+X79Pbfjr/0rXwvUe/6ct1OfSf75bqufa++7+T0jlzX
@@ -6373,21 +6351,3 @@ WncRaFnRx/PDvcrn5bNwD/Pf+V54a/PM27UI7fnmfUzhzbQR0qIQFKMpYuWKpiDMLCDJlO18/9xnDpNT
 vqO+xRUVy+Xn272MO2i55txJvK9sJcj1tHouMR0FWiqL6rJpc7jERvc8IUw5SdbDlr2Ay1gdczYsLhfu63nJkwBXD77bJoGzTQQAYDFNtnmVBYy1Ql5vUfeI
 Uj3e5dw7ngLXtYaMdzJ/n/vS7l17tzCL48cBa+O9gIYLZgVJsvbSMj0UZxkTZbNtY7GwFwrP5PL92Bny8V3D822uNAP28M5epuZca9bfPHsf0+PtvywR1N5x
 9pvYd2FBV0y6eZ64J21lbm9de0a4P+1dzJSb9yQTes48/n37Gcv1/n8BLGJuQlhrB7gAAAAASUVORK5CYII=
-");
-#endif
-
-        /// <summary>
-        /// Normalize the pasted base64:
-        /// - Remove anything not in the base64 alphabet (A–Z a–z 0–9 + / =).
-        ///   This tolerates line breaks, spaces, tabs, comments accidentally pasted, etc.
-        /// </summary>
-        private static string CleanBase64(string raw)
-        {
-            if (string.IsNullOrEmpty(raw))
-                return string.Empty;
-            // Remove all non-base64 chars (safer than whitespace-only trimming)
-            // Regex explanation: keep [A-Za-z0-9+/=], drop everything else.
-            return Regex.Replace(raw, @"[^A-Za-z0-9\+/=]", "");
-        }
-    }
-}
