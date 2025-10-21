@@ -975,7 +975,7 @@ namespace Smart_Stay_Awake_2.UI
 
                 var lblStatusHint = new Label
                 {
-                    Text = "Right-click the tray icon for options.",
+                    Text = "Right-click the system tray icon for options.",
                     TextAlign = ContentAlignment.MiddleCenter,
                     ForeColor = SystemColors.GrayText,
                     AutoSize = false,
