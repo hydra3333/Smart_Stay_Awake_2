@@ -336,7 +336,8 @@ jobs:
           if (-not (Test-Path $exePath)) { throw "Executable not found: $exePath" }
 
           # Surface what else is in publish (there can be support files)
-          $files = Get-ChildItem $buildDir -File
+          #$files = Get-ChildItem $buildDir -File
+          $files = @( Get-ChildItem $buildDir -File )
           Write-Host "Publish files:" -ForegroundColor Cyan
           $files | ForEach-Object { Write-Host " - $($_.Name)" }
 
@@ -381,7 +382,8 @@ jobs:
           Copy-Item ".\LICENSE" (Join-Path $staging "LICENSE") -Force
 
           # Companions (if any) — everything else from publish folder EXCEPT the main EXE
-          $companions = Get-ChildItem $env:BUILD_DIR -File | Where-Object { $_.Name -ne "Smart_Stay_Awake_2.exe" }
+          #$companions = Get-ChildItem $env:BUILD_DIR -File | Where-Object { $_.Name -ne "Smart_Stay_Awake_2.exe" }
+          $companions = @( Get-ChildItem $env:BUILD_DIR -File | Where-Object { $_.Name -ne "Smart_Stay_Awake_2.exe" } )
           foreach ($c in $companions) {
             Copy-Item $c.FullName (Join-Path $staging $c.Name) -Force
           }
@@ -517,7 +519,8 @@ jobs:
 
           # Did we include companions?
           $staging = ".\release-staging"
-          $extra = Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") }
+          #$extra = Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") }
+          $extra = @( Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") } )
           # Build companion summary with count
           $companionSummary = if ($extra.Count -gt 0) {
               "$($extra.Count) file(s): $($extra.Name -join ', ')"
@@ -535,6 +538,7 @@ jobs:
           Write-Host "Companions: $companionSummary"
           Write-Host "Release:   https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
           Write-Host "═══════════════════════════════════" -ForegroundColor Green
+
 
 
 
