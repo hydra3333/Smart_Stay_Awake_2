@@ -168,6 +168,7 @@ jobs:
             -p:Configuration=Release `
             -p:Optimize=true `
             -p:PublishSingleFile=true `
+            -p:PublishTrimmed=false `
             -p:PublishReadyToRun=false `
             -p:InvariantGlobalization=false `
             -p:IncludeNativeLibrariesForSelfExtract=false `
@@ -533,4 +534,5 @@ jobs:
           Write-Host "Companions: $companionSummary"
           Write-Host "Release:   https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
           Write-Host "═══════════════════════════════════" -ForegroundColor Green
+
 
