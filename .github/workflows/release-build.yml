@@ -163,12 +163,13 @@ jobs:
             -c Release `
             -r win-x64 `
             --self-contained true `
+            -p:SelfContained=true `
             -p:Configuration=Release `
             -p:Optimize=true `
             -p:PublishSingleFile=true `
-            -p:PublishReadyToRun=false `
+            -p:PublishReadyToRun=true `
             -p:InvariantGlobalization=false `
-            -p:IncludeNativeLibrariesForSelfExtract=false `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
             -p:DebugType=None `
             -p:DebugSymbols=false `
             -p:IncludeSymbols=false `
