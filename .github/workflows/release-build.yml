@@ -104,10 +104,10 @@ jobs:
           Write-Host "═══════════════════════════════" -ForegroundColor Cyan
 
       # ----------------------------------------------------------------------
-      # 4) Setup .NET 8 (+ NuGet cache)
+      # 4) Setup .NET 9 (+ NuGet cache)
       #    We cache both lock files and csproj as a fallback.
       # ----------------------------------------------------------------------
-      - name: 🔧 Setup .NET 8 SDK (with NuGet cache)
+      - name: 🔧 Setup .NET 9 SDK (with NuGet cache)
         # uses: actions/setup-dotnet@<SETUP_DOTNET_SHA_FOR_v4>  # <- PIN ME
         uses: actions/setup-dotnet@v4
         with:
@@ -124,8 +124,10 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
-          dotnet --info
-          dotnet --list-sdks
+          where dotnet
+          Write-Host "DOTNET_ROOT=$env:DOTNET_ROOT"
+          "$env:DOTNET_ROOT\dotnet.exe" --info
+          "$env:DOTNET_ROOT\dotnet.exe" --list-sdks
 
       # ----------------------------------------------------------------------
       # 6) Restore packages (solution is at repo root, so use ..\)
@@ -134,14 +136,12 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
-          dotnet restore ..\Smart_Stay_Awake_2.sln -r win-x64 --verbosity minimal
+          & "$env:DOTNET_ROOT\dotnet.exe" restore ..\Smart_Stay_Awake_2.sln -r win-x64 --verbosity minimal
 
       # ----------------------------------------------------------------------
       # 7) Publish (Release, Self-Contained, SingleFile, win-x64)
       #    We explicitly disable symbols/docs for a tight release.
       #    Globalization is kept. ReadyToRun disabled to reduce native clutter.
-      #    IncludeNativeLibrariesForSelfExtract=false: avoid temp extraction;
-      #    accept a handful of native DLLs next to the EXE if they appear.
       #    We also emit MSBuild logs for forensic verification.
       # ----------------------------------------------------------------------
       - name: 🔨 Publish single-file EXE (Self-Contained, Release, x64)
@@ -159,7 +159,7 @@ jobs:
           # Changed to pubish the Projecvt rather than the solution to avoid '-o' errors
           # For your current goal (1 single project, deterministic single EXE + known companions),
           #   'project' publish is the least surprising and keeps Step 8 simple.
-          dotnet publish .\Smart_Stay_Awake_2.csproj `
+          & "$env:DOTNET_ROOT\dotnet.exe" publish .\Smart_Stay_Awake_2.csproj `
             -c Release `
             -r win-x64 `
             --self-contained true `
