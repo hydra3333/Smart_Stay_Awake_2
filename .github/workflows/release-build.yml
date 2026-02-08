@@ -126,6 +126,8 @@ jobs:
           Set-StrictMode -Version Latest
           dotnet --info
           dotnet --list-sdks
+          Select-String -Path .\Smart_Stay_Awake_2.csproj -Pattern '<TargetFramework>' | ForEach-Object { $_.Line.Trim() }
+
 
       # ----------------------------------------------------------------------
       # 6) Restore packages (solution is at repo root, so use ..\)
@@ -531,3 +533,4 @@ jobs:
           Write-Host "Companions: $companionSummary"
           Write-Host "Release:   https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
           Write-Host "═══════════════════════════════════" -ForegroundColor Green
+
