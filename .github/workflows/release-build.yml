@@ -247,66 +247,71 @@ jobs:
           "PUBLISH_ROOT=$publishPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       # ----------------------------------------------------------------------
-      # 7.1) Publish pipeline decision dump (ResolvedFileToPublish etc.)
+      # 7.1) Probe publish decisions (Approach A)
+      #      Goal: surface the actual publish item graph MSBuild computed,
+      #      especially @(ResolvedFileToPublish), without rebuilding.
+      #
+      #      Why this exists:
+      #        - On hosted runners you can’t open publish.binlog interactively.
+      #        - This prints the same key decision list you’d inspect in MSBuild
+      #          Structured Log Viewer (FilesToPublish/ResolvedFileToPublish).
+      #
+      #      Notes:
+      #        - We do NOT rebuild: /p:NoBuild=true
+      #        - We pass the same publish properties (RID, SelfContained, etc.)
       # ----------------------------------------------------------------------
-      - name: 🧪 Publish pipeline decision dump (ResolvedFileToPublish etc.)
+      - name: 🧪 Probe publish decisions (Approach A - dump ResolvedFileToPublish)
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
 
-          $proj = ".\Smart_Stay_Awake_2.csproj"
-          if (-not (Test-Path $proj)) { throw "Project not found: $proj" }
+          # Use the publish output directory computed in Step 7
+          $publishPath = $env:PUBLISH_ROOT
+          if ([string]::IsNullOrWhiteSpace($publishPath)) {
+            $publishPath = ".\publish-output"
+          }
 
-          Write-Host "=== MSBuild version ===" -ForegroundColor Cyan
-          dotnet msbuild -version
-
-          # We inject a temporary .targets file that prints the publish pipeline items.
-          # This is the closest equivalent to what you'd inspect in the binlog viewer:
-          #   - ResolvedFileToPublish
-          #   - FileWrites (useful sometimes)
-          #   - PublishItemsOutputGroupOutputs (SDK-dependent)
-          #
-          # It is written into obj\ so it won't touch your repo and won't be committed.
-          $targetsPath = Join-Path (Resolve-Path ".\obj").Path "zz_PublishProbe.targets"
-          New-Item -ItemType Directory -Force -Path (Split-Path $targetsPath) | Out-Null
+          # Create an "after targets" file on the fly so we can hook into the
+          # publish pipeline and print the publish decision items.
+          $probeTargets = Join-Path $env:RUNNER_TEMP "ssa2.publish.probe.targets"
 
           @'
 <Project>
-  <Target Name="zz_DumpPublishItems" AfterTargets="ComputeFilesToPublish">
-    <Message Importance="High" Text="=== BEGIN: Publish decision dump ===" />
+  <Target Name="SSA2_ProbePublishDecisions" AfterTargets="ComputeFilesToPublish">
+    <Message Importance="High" Text="════════ PUBLISH DECISIONS (ComputeFilesToPublish) ════════" />
+    <Message Importance="High" Text="TFM=$(TargetFramework)  RID=$(RuntimeIdentifier)  SelfContained=$(SelfContained)  SingleFile=$(PublishSingleFile)  IncludeNativeLibrariesForSelfExtract=$(IncludeNativeLibrariesForSelfExtract)" />
+    <Message Importance="High" Text="PublishDir=$(PublishDir)" />
+    <Message Importance="High" Text="──────────────── ResolvedFileToPublish ────────────────" />
 
-    <Message Importance="High" Text="--- Properties ---" />
-    <Message Importance="High" Text="  TargetFramework=$(TargetFramework)" />
-    <Message Importance="High" Text="  RuntimeIdentifier=$(RuntimeIdentifier)" />
-    <Message Importance="High" Text="  SelfContained=$(SelfContained)" />
-    <Message Importance="High" Text="  PublishSingleFile=$(PublishSingleFile)" />
-    <Message Importance="High" Text="  IncludeNativeLibrariesForSelfExtract=$(IncludeNativeLibrariesForSelfExtract)" />
-    <Message Importance="High" Text="  IncludeAllContentForSelfExtract=$(IncludeAllContentForSelfExtract)" />
-    <Message Importance="High" Text="  EnableCompressionInSingleFile=$(EnableCompressionInSingleFile)" />
-    <Message Importance="High" Text="  PublishTrimmed=$(PublishTrimmed)" />
-    <Message Importance="High" Text="  PublishReadyToRun=$(PublishReadyToRun)" />
-    <Message Importance="High" Text="  InvariantGlobalization=$(InvariantGlobalization)" />
-    <Message Importance="High" Text="  Configuration=$(Configuration)" />
+    <!-- Print a stable, metadata-rich line per item -->
+    <Message Importance="High"
+             Text="@(ResolvedFileToPublish->'%(RelativePath) | Copy=%(CopyToPublishDirectory) | Exclude=%(ExcludeFromSingleFile) | AsmRelated=%(IsAssembly) | AssetType=%(AssetType) | From=%(OriginalItemSpec)', '%0D%0A')" />
 
-    <Message Importance="High" Text="--- Items: ResolvedFileToPublish (FileName | RelativePath | Kind | CopyToPublishDirectory) ---" />
-    <Message Importance="High" Text="  COUNT: @(ResolvedFileToPublish->Count())" />
-    <Message Importance="High" Text="  @(ResolvedFileToPublish->'%(Filename)%(Extension) | %(RelativePath) | %(Kind) | %(CopyToPublishDirectory)', '%0D%0A  ')" />
+    <Message Importance="High" Text="──────────────── Counts ───────────────────────────────" />
+    <Message Importance="High" Text="ResolvedFileToPublish count: @(ResolvedFileToPublish->Count())" />
 
-    <Message Importance="High" Text="--- Items: FileWrites (diagnostic) ---" />
-    <Message Importance="High" Text="  COUNT: @(FileWrites->Count())" Condition="'@(FileWrites)' != ''" />
-    <Message Importance="High" Text="  @(FileWrites, '%0D%0A  ')" Condition="'@(FileWrites)' != ''" />
+    <!-- Also write to a file so you can download/read it easily -->
+    <PropertyGroup>
+      <_ProbeOutFile>$(MSBuildProjectDirectory)\publish.probe.ResolvedFileToPublish.txt</_ProbeOutFile>
+    </PropertyGroup>
 
-    <Message Importance="High" Text="=== END: Publish decision dump ===" />
+    <WriteLinesToFile
+      File="$(_ProbeOutFile)"
+      Lines="@(ResolvedFileToPublish->'%(RelativePath) | Copy=%(CopyToPublishDirectory) | Exclude=%(ExcludeFromSingleFile) | AsmRelated=%(IsAssembly) | AssetType=%(AssetType) | From=%(OriginalItemSpec)')"
+      Overwrite="true"
+      Encoding="UTF-8" />
+
+    <Message Importance="High" Text="Wrote: $(_ProbeOutFile)" />
+    <Message Importance="High" Text="══════════════════════════════════════════════════════════" />
   </Target>
 </Project>
-'@ | Set-Content -Path $targetsPath -Encoding UTF8
+'@ | Set-Content -Path $probeTargets -Encoding UTF8
 
-          Write-Host "Probe targets written: $targetsPath" -ForegroundColor Yellow
-
-          # Run msbuild with the same publish-related properties you used, but only to compute publish items.
-          # /t:ComputeFilesToPublish triggers the pipeline that fills ResolvedFileToPublish.
-          dotnet msbuild $proj `
-            /t:ComputeFilesToPublish `
+          # Run MSBuild Publish target with NoBuild=true so we don't rebuild.
+          # IMPORTANT: we still call /t:Publish because ComputeFilesToPublish is in that graph.
+          dotnet msbuild .\Smart_Stay_Awake_2.csproj `
+            /t:Publish `
+            /p:NoBuild=true `
             /p:Configuration=Release `
             /p:RuntimeIdentifier=win-x64 `
             /p:SelfContained=true `
@@ -315,9 +320,29 @@ jobs:
             /p:PublishReadyToRun=false `
             /p:InvariantGlobalization=false `
             /p:IncludeNativeLibrariesForSelfExtract=false `
+            /p:DebugType=None `
+            /p:DebugSymbols=false `
+            /p:IncludeSymbols=false `
+            /p:GenerateDocumentationFile=false `
             /p:ContinuousIntegrationBuild=true `
-            /p:CustomAfterMicrosoftCommonTargets="$targetsPath" `
+            /p:PublishDir="$publishPath\" `
+            /p:CustomAfterMicrosoftCommonTargets="$probeTargets" `
             /v:minimal
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Probe step failed." -ForegroundColor Red
+            exit 1
+          }
+
+          # Show a short tail so the Actions log isn't huge
+          $probeFile = Join-Path (Get-Location) "publish.probe.ResolvedFileToPublish.txt"
+          if (Test-Path $probeFile) {
+            Write-Host ""
+            Write-Host "Probe file (last 60 lines): $probeFile" -ForegroundColor Yellow
+            Get-Content $probeFile -Tail 60 | ForEach-Object { Write-Host $_ }
+          } else {
+            Write-Host "⚠️ Probe file not found (unexpected): $probeFile" -ForegroundColor Yellow
+          }
 
       # ----------------------------------------------------------------------
       # 8) Discover/Verify publish output folder (explicit -o .\publish-output)
@@ -611,6 +636,7 @@ jobs:
           Write-Host "Companions: $companionSummary"
           Write-Host "Release:   https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
           Write-Host "═══════════════════════════════════" -ForegroundColor Green
+
 
 
 
