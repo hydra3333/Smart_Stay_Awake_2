@@ -247,6 +247,79 @@ jobs:
           "PUBLISH_ROOT=$publishPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       # ----------------------------------------------------------------------
+      # 7.1) Publish pipeline decision dump (ResolvedFileToPublish etc.)
+      # ----------------------------------------------------------------------
+      - name: 🧪 Publish pipeline decision dump (ResolvedFileToPublish etc.)
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-StrictMode -Version Latest
+
+          $proj = ".\Smart_Stay_Awake_2.csproj"
+          if (-not (Test-Path $proj)) { throw "Project not found: $proj" }
+
+          Write-Host "=== MSBuild version ===" -ForegroundColor Cyan
+          dotnet msbuild -version
+
+          # We inject a temporary .targets file that prints the publish pipeline items.
+          # This is the closest equivalent to what you'd inspect in the binlog viewer:
+          #   - ResolvedFileToPublish
+          #   - FileWrites (useful sometimes)
+          #   - PublishItemsOutputGroupOutputs (SDK-dependent)
+          #
+          # It is written into obj\ so it won't touch your repo and won't be committed.
+          $targetsPath = Join-Path (Resolve-Path ".\obj").Path "zz_PublishProbe.targets"
+          New-Item -ItemType Directory -Force -Path (Split-Path $targetsPath) | Out-Null
+
+          @'
+<Project>
+  <Target Name="zz_DumpPublishItems" AfterTargets="ComputeFilesToPublish">
+    <Message Importance="High" Text="=== BEGIN: Publish decision dump ===" />
+
+    <Message Importance="High" Text="--- Properties ---" />
+    <Message Importance="High" Text="  TargetFramework=$(TargetFramework)" />
+    <Message Importance="High" Text="  RuntimeIdentifier=$(RuntimeIdentifier)" />
+    <Message Importance="High" Text="  SelfContained=$(SelfContained)" />
+    <Message Importance="High" Text="  PublishSingleFile=$(PublishSingleFile)" />
+    <Message Importance="High" Text="  IncludeNativeLibrariesForSelfExtract=$(IncludeNativeLibrariesForSelfExtract)" />
+    <Message Importance="High" Text="  IncludeAllContentForSelfExtract=$(IncludeAllContentForSelfExtract)" />
+    <Message Importance="High" Text="  EnableCompressionInSingleFile=$(EnableCompressionInSingleFile)" />
+    <Message Importance="High" Text="  PublishTrimmed=$(PublishTrimmed)" />
+    <Message Importance="High" Text="  PublishReadyToRun=$(PublishReadyToRun)" />
+    <Message Importance="High" Text="  InvariantGlobalization=$(InvariantGlobalization)" />
+    <Message Importance="High" Text="  Configuration=$(Configuration)" />
+
+    <Message Importance="High" Text="--- Items: ResolvedFileToPublish (FileName | RelativePath | Kind | CopyToPublishDirectory) ---" />
+    <Message Importance="High" Text="  COUNT: @(ResolvedFileToPublish->Count())" />
+    <Message Importance="High" Text="  @(ResolvedFileToPublish->'%(Filename)%(Extension) | %(RelativePath) | %(Kind) | %(CopyToPublishDirectory)', '%0D%0A  ')" />
+
+    <Message Importance="High" Text="--- Items: FileWrites (diagnostic) ---" />
+    <Message Importance="High" Text="  COUNT: @(FileWrites->Count())" Condition="'@(FileWrites)' != ''" />
+    <Message Importance="High" Text="  @(FileWrites, '%0D%0A  ')" Condition="'@(FileWrites)' != ''" />
+
+    <Message Importance="High" Text="=== END: Publish decision dump ===" />
+  </Target>
+</Project>
+'@ | Set-Content -Path $targetsPath -Encoding UTF8
+
+          Write-Host "Probe targets written: $targetsPath" -ForegroundColor Yellow
+
+          # Run msbuild with the same publish-related properties you used, but only to compute publish items.
+          # /t:ComputeFilesToPublish triggers the pipeline that fills ResolvedFileToPublish.
+          dotnet msbuild $proj `
+            /t:ComputeFilesToPublish `
+            /p:Configuration=Release `
+            /p:RuntimeIdentifier=win-x64 `
+            /p:SelfContained=true `
+            /p:PublishSingleFile=true `
+            /p:PublishTrimmed=false `
+            /p:PublishReadyToRun=false `
+            /p:InvariantGlobalization=false `
+            /p:IncludeNativeLibrariesForSelfExtract=false `
+            /p:ContinuousIntegrationBuild=true `
+            /p:CustomAfterMicrosoftCommonTargets="$targetsPath" `
+            /v:minimal
+
+      # ----------------------------------------------------------------------
       # 8) Discover/Verify publish output folder (explicit -o .\publish-output)
       #    With solution publishing + -o, the SDK creates per-project subfolders:
       #      .\publish-output\<ProjectName>\Smart_Stay_Awake_2.exe
@@ -538,6 +611,7 @@ jobs:
           Write-Host "Companions: $companionSummary"
           Write-Host "Release:   https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
           Write-Host "═══════════════════════════════════" -ForegroundColor Green
+
 
 
 
