@@ -126,8 +126,8 @@ jobs:
           Set-StrictMode -Version Latest
           where dotnet
           Write-Host "DOTNET_ROOT=$env:DOTNET_ROOT"
-          "$env:DOTNET_ROOT\dotnet.exe" --info
-          "$env:DOTNET_ROOT\dotnet.exe" --list-sdks
+          & "$env:DOTNET_ROOT\dotnet.exe" --info
+          & "$env:DOTNET_ROOT\dotnet.exe" --list-sdks
 
       # ----------------------------------------------------------------------
       # 6) Restore packages (solution is at repo root, so use ..\)
