@@ -390,7 +390,8 @@ jobs:
           Write-Host "Staged files:" -ForegroundColor Cyan
           Get-ChildItem $staging -File | ForEach-Object { Write-Host " - $($_.Name)" }
 
-          $extra = Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") }
+          #$extra = Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") }
+          $extra = @( Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") } )
           if ($extra.Count -gt 0) {
             #Write-Host "Companions included:" -ForegroundColor Yellow
             Write-Host "Companions included ($($extra.Count) files):" -ForegroundColor Yellow
@@ -534,5 +535,6 @@ jobs:
           Write-Host "Companions: $companionSummary"
           Write-Host "Release:   https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
           Write-Host "═══════════════════════════════════" -ForegroundColor Green
+
 
 
