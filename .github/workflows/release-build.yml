@@ -387,7 +387,7 @@ jobs:
           Write-Host "Staged files:" -ForegroundColor Cyan
           Get-ChildItem $staging -File | ForEach-Object { Write-Host " - $($_.Name)" }
 
-          $extra = Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") }
+          $extra = @( Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") } )
           if ($extra.Count -gt 0) {
             #Write-Host "Companions included:" -ForegroundColor Yellow
             Write-Host "Companions included ($($extra.Count) files):" -ForegroundColor Yellow
@@ -513,7 +513,7 @@ jobs:
 
           # Did we include companions?
           $staging = ".\release-staging"
-          $extra = Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") }
+          $extra = @( Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") } )
           # Build companion summary with count
           $companionSummary = if ($extra.Count -gt 0) {
               "$($extra.Count) file(s): $($extra.Name -join ', ')"
