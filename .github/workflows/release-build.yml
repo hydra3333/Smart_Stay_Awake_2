@@ -61,17 +61,17 @@ jobs:
       # hardening.
       #
       # Example (replace with real SHAs once known):
-      #   actions/checkout:         <CHECKOUT_SHA_FOR_v4>
+      #   actions/checkout:         <CHECKOUT_SHA_FOR_v5>
       #   actions/setup-dotnet:     <SETUP_DOTNET_SHA_FOR_v4>
-      #   actions/upload-artifact:  <UPLOAD_ARTIFACT_SHA_FOR_v4>
+      #   actions/upload-artifact:  <UPLOAD_ARTIFACT_SHA_FOR_v6>
       #   softprops/action-gh-release: <GH_RELEASE_SHA_FOR_v2>
 
       # ----------------------------------------------------------------------
       # 1) Checkout source
       # ----------------------------------------------------------------------
       - name: 📥 Checkout repository
-        # uses: actions/checkout@<CHECKOUT_SHA_FOR_v4>  # <- PIN ME
-        uses: actions/checkout@v4
+        # uses: actions/checkout@<CHECKOUT_SHA_FOR_v5>  # <- PIN ME
+        uses: actions/checkout@v5
 
       # ----------------------------------------------------------------------
       # 2) Enable long paths (defensive; harmless) + show PS version
@@ -107,11 +107,11 @@ jobs:
       # 4) Setup .NET 8 (+ NuGet cache)
       #    We cache both lock files and csproj as a fallback.
       # ----------------------------------------------------------------------
-      - name: 🔧 Setup .NET 8 SDK (with NuGet cache)
+      - name: 🔧 Setup .NET 10 SDK (with NuGet cache)
         # uses: actions/setup-dotnet@<SETUP_DOTNET_SHA_FOR_v4>  # <- PIN ME
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
           cache: true
           cache-dependency-path: |
             **/packages.lock.json
@@ -477,8 +477,8 @@ jobs:
       # 15) Upload as workflow artifacts
       # ----------------------------------------------------------------------
       - name: ⬆️ Upload artifacts
-        # uses: actions/upload-artifact@<UPLOAD_ARTIFACT_SHA_FOR_v4>  # <- PIN ME
-        uses: actions/upload-artifact@v4
+        # uses: actions/upload-artifact@<UPLOAD_ARTIFACT_SHA_FOR_v6>  # <- PIN ME
+        uses: actions/upload-artifact@v6
         with:
           name: ssa2-${{ github.ref_name }}
           path: |
