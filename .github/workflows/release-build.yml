@@ -61,17 +61,17 @@ jobs:
       # hardening.
       #
       # Example (replace with real SHAs once known):
-      #   actions/checkout:         <CHECKOUT_SHA_FOR_v5>
+      #   actions/checkout:         <CHECKOUT_SHA_FOR_v4>
       #   actions/setup-dotnet:     <SETUP_DOTNET_SHA_FOR_v4>
-      #   actions/upload-artifact:  <UPLOAD_ARTIFACT_SHA_FOR_v6>
+      #   actions/upload-artifact:  <UPLOAD_ARTIFACT_SHA_FOR_v4>
       #   softprops/action-gh-release: <GH_RELEASE_SHA_FOR_v2>
 
       # ----------------------------------------------------------------------
       # 1) Checkout source
       # ----------------------------------------------------------------------
       - name: 📥 Checkout repository
-        # uses: actions/checkout@<CHECKOUT_SHA_FOR_v5>  # <- PIN ME
-        uses: actions/checkout@v5
+        # uses: actions/checkout@<CHECKOUT_SHA_FOR_v4>  # <- PIN ME
+        uses: actions/checkout@v4
 
       # ----------------------------------------------------------------------
       # 2) Enable long paths (defensive; harmless) + show PS version
@@ -107,11 +107,11 @@ jobs:
       # 4) Setup .NET 8 (+ NuGet cache)
       #    We cache both lock files and csproj as a fallback.
       # ----------------------------------------------------------------------
-      - name: 🔧 Setup .NET 10 SDK (with NuGet cache)
+      - name: 🔧 Setup .NET 8 SDK (with NuGet cache)
         # uses: actions/setup-dotnet@<SETUP_DOTNET_SHA_FOR_v4>  # <- PIN ME
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '8.0.x'
           cache: true
           cache-dependency-path: |
             **/packages.lock.json
@@ -126,8 +126,6 @@ jobs:
           Set-StrictMode -Version Latest
           dotnet --info
           dotnet --list-sdks
-          Select-String -Path .\Smart_Stay_Awake_2.csproj -Pattern '<TargetFramework>' | ForEach-Object { $_.Line.Trim() }
-
 
       # ----------------------------------------------------------------------
       # 6) Restore packages (solution is at repo root, so use ..\)
@@ -168,7 +166,6 @@ jobs:
             -p:Configuration=Release `
             -p:Optimize=true `
             -p:PublishSingleFile=true `
-            -p:PublishTrimmed=false `
             -p:PublishReadyToRun=false `
             -p:InvariantGlobalization=false `
             -p:IncludeNativeLibrariesForSelfExtract=false `
@@ -336,8 +333,7 @@ jobs:
           if (-not (Test-Path $exePath)) { throw "Executable not found: $exePath" }
 
           # Surface what else is in publish (there can be support files)
-          #$files = Get-ChildItem $buildDir -File
-          $files = @( Get-ChildItem $buildDir -File )
+          $files = Get-ChildItem $buildDir -File
           Write-Host "Publish files:" -ForegroundColor Cyan
           $files | ForEach-Object { Write-Host " - $($_.Name)" }
 
@@ -382,8 +378,7 @@ jobs:
           Copy-Item ".\LICENSE" (Join-Path $staging "LICENSE") -Force
 
           # Companions (if any) — everything else from publish folder EXCEPT the main EXE
-          #$companions = Get-ChildItem $env:BUILD_DIR -File | Where-Object { $_.Name -ne "Smart_Stay_Awake_2.exe" }
-          $companions = @( Get-ChildItem $env:BUILD_DIR -File | Where-Object { $_.Name -ne "Smart_Stay_Awake_2.exe" } )
+          $companions = Get-ChildItem $env:BUILD_DIR -File | Where-Object { $_.Name -ne "Smart_Stay_Awake_2.exe" }
           foreach ($c in $companions) {
             Copy-Item $c.FullName (Join-Path $staging $c.Name) -Force
           }
@@ -392,8 +387,7 @@ jobs:
           Write-Host "Staged files:" -ForegroundColor Cyan
           Get-ChildItem $staging -File | ForEach-Object { Write-Host " - $($_.Name)" }
 
-          #$extra = Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") }
-          $extra = @( Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") } )
+          $extra = Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") }
           if ($extra.Count -gt 0) {
             #Write-Host "Companions included:" -ForegroundColor Yellow
             Write-Host "Companions included ($($extra.Count) files):" -ForegroundColor Yellow
@@ -483,8 +477,8 @@ jobs:
       # 15) Upload as workflow artifacts
       # ----------------------------------------------------------------------
       - name: ⬆️ Upload artifacts
-        # uses: actions/upload-artifact@<UPLOAD_ARTIFACT_SHA_FOR_v6>  # <- PIN ME
-        uses: actions/upload-artifact@v6
+        # uses: actions/upload-artifact@<UPLOAD_ARTIFACT_SHA_FOR_v4>  # <- PIN ME
+        uses: actions/upload-artifact@v4
         with:
           name: ssa2-${{ github.ref_name }}
           path: |
@@ -519,8 +513,7 @@ jobs:
 
           # Did we include companions?
           $staging = ".\release-staging"
-          #$extra = Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") }
-          $extra = @( Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") } )
+          $extra = Get-ChildItem $staging -File | Where-Object { $_.Name -notin @("Smart_Stay_Awake_2.exe","Smart_Stay_Awake_2_icon.png","LICENSE") }
           # Build companion summary with count
           $companionSummary = if ($extra.Count -gt 0) {
               "$($extra.Count) file(s): $($extra.Name -join ', ')"
@@ -538,11 +531,3 @@ jobs:
           Write-Host "Companions: $companionSummary"
           Write-Host "Release:   https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
           Write-Host "═══════════════════════════════════" -ForegroundColor Green
-
-
-
-
-
-
-
-
