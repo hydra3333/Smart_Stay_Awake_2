@@ -271,44 +271,40 @@ jobs:
             $publishPath = ".\publish-output"
           }
 
-          # Create an "after targets" file on the fly so we can hook into the
-          # publish pipeline and print the publish decision items.
           $probeTargets = Join-Path $env:RUNNER_TEMP "ssa2.publish.probe.targets"
 
-          @'
-<Project>
-  <Target Name="SSA2_ProbePublishDecisions" AfterTargets="ComputeFilesToPublish">
-    <Message Importance="High" Text="════════ PUBLISH DECISIONS (ComputeFilesToPublish) ════════" />
-    <Message Importance="High" Text="TFM=$(TargetFramework)  RID=$(RuntimeIdentifier)  SelfContained=$(SelfContained)  SingleFile=$(PublishSingleFile)  IncludeNativeLibrariesForSelfExtract=$(IncludeNativeLibrariesForSelfExtract)" />
-    <Message Importance="High" Text="PublishDir=$(PublishDir)" />
-    <Message Importance="High" Text="──────────────── ResolvedFileToPublish ────────────────" />
+          $lines = @(
+            '<Project>'
+            '  <Target Name="SSA2_ProbePublishDecisions" AfterTargets="ComputeFilesToPublish">'
+            '    <Message Importance="High" Text="════════ PUBLISH DECISIONS (ComputeFilesToPublish) ════════" />'
+            '    <Message Importance="High" Text="TFM=$(TargetFramework)  RID=$(RuntimeIdentifier)  SelfContained=$(SelfContained)  SingleFile=$(PublishSingleFile)  IncludeNativeLibrariesForSelfExtract=$(IncludeNativeLibrariesForSelfExtract)" />'
+            '    <Message Importance="High" Text="PublishDir=$(PublishDir)" />'
+            '    <Message Importance="High" Text="──────────────── ResolvedFileToPublish ────────────────" />'
+            ''
+            '    <Message Importance="High"'
+            '             Text="@(ResolvedFileToPublish->''%(RelativePath) | Copy=%(CopyToPublishDirectory) | Exclude=%(ExcludeFromSingleFile) | AsmRelated=%(IsAssembly) | AssetType=%(AssetType) | From=%(OriginalItemSpec)'', ''%0D%0A'')" />'
+            ''
+            '    <Message Importance="High" Text="──────────────── Counts ───────────────────────────────" />'
+            '    <Message Importance="High" Text="ResolvedFileToPublish count: @(ResolvedFileToPublish->Count())" />'
+            ''
+            '    <PropertyGroup>'
+            '      <_ProbeOutFile>$(MSBuildProjectDirectory)\publish.probe.ResolvedFileToPublish.txt</_ProbeOutFile>'
+            '    </PropertyGroup>'
+            ''
+            '    <WriteLinesToFile'
+            '      File="$(_ProbeOutFile)"'
+            '      Lines="@(ResolvedFileToPublish->''%(RelativePath) | Copy=%(CopyToPublishDirectory) | Exclude=%(ExcludeFromSingleFile) | AsmRelated=%(IsAssembly) | AssetType=%(AssetType) | From=%(OriginalItemSpec)'')"'
+            '      Overwrite="true"'
+            '      Encoding="UTF-8" />'
+            ''
+            '    <Message Importance="High" Text="Wrote: $(_ProbeOutFile)" />'
+            '    <Message Importance="High" Text="══════════════════════════════════════════════════════════" />'
+            '  </Target>'
+            '</Project>'
+          )
 
-    <!-- Print a stable, metadata-rich line per item -->
-    <Message Importance="High"
-             Text="@(ResolvedFileToPublish->'%(RelativePath) | Copy=%(CopyToPublishDirectory) | Exclude=%(ExcludeFromSingleFile) | AsmRelated=%(IsAssembly) | AssetType=%(AssetType) | From=%(OriginalItemSpec)', '%0D%0A')" />
+          Set-Content -Path $probeTargets -Value $lines -Encoding UTF8
 
-    <Message Importance="High" Text="──────────────── Counts ───────────────────────────────" />
-    <Message Importance="High" Text="ResolvedFileToPublish count: @(ResolvedFileToPublish->Count())" />
-
-    <!-- Also write to a file so you can download/read it easily -->
-    <PropertyGroup>
-      <_ProbeOutFile>$(MSBuildProjectDirectory)\publish.probe.ResolvedFileToPublish.txt</_ProbeOutFile>
-    </PropertyGroup>
-
-    <WriteLinesToFile
-      File="$(_ProbeOutFile)"
-      Lines="@(ResolvedFileToPublish->'%(RelativePath) | Copy=%(CopyToPublishDirectory) | Exclude=%(ExcludeFromSingleFile) | AsmRelated=%(IsAssembly) | AssetType=%(AssetType) | From=%(OriginalItemSpec)')"
-      Overwrite="true"
-      Encoding="UTF-8" />
-
-    <Message Importance="High" Text="Wrote: $(_ProbeOutFile)" />
-    <Message Importance="High" Text="══════════════════════════════════════════════════════════" />
-  </Target>
-</Project>
-'@ | Set-Content -Path $probeTargets -Encoding UTF8
-
-          # Run MSBuild Publish target with NoBuild=true so we don't rebuild.
-          # IMPORTANT: we still call /t:Publish because ComputeFilesToPublish is in that graph.
           dotnet msbuild .\Smart_Stay_Awake_2.csproj `
             /t:Publish `
             /p:NoBuild=true `
@@ -334,7 +330,6 @@ jobs:
             exit 1
           }
 
-          # Show a short tail so the Actions log isn't huge
           $probeFile = Join-Path (Get-Location) "publish.probe.ResolvedFileToPublish.txt"
           if (Test-Path $probeFile) {
             Write-Host ""
@@ -636,6 +631,7 @@ jobs:
           Write-Host "Companions: $companionSummary"
           Write-Host "Release:   https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
           Write-Host "═══════════════════════════════════" -ForegroundColor Green
+
 
 
 
