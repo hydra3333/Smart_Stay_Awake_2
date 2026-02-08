@@ -125,6 +125,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
           where dotnet
+          Write-Host "dotnet exe:" (Get-Command dotnet).Source
           dotnet --info
           dotnet --list-sdks
           Write-Host "DOTNET_ROOT=$env:DOTNET_ROOT"
